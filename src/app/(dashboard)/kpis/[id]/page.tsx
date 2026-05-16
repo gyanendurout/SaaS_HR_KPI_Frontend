@@ -3,7 +3,12 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { kpis, type Kpi } from '@/lib/api';
+import { kpis, users, regions, type Kpi, type User, type Region } from '@/lib/api';
+
+function UnitTag({ unit }: { unit: string | null }) {
+  if (!unit) return null;
+  return <span style={{ fontSize: 11, fontWeight: 400, marginLeft: 4, color: 'var(--t4)' }}>{unit}</span>;
+}
 
 function Badge({ label, color }: { label: string; color: string }) {
   const map: Record<string, { bg: string; fg: string }> = {
@@ -30,23 +35,46 @@ export default function KpiDetailPage() {
   const router = useRouter();
   const [kpi, setKpi] = useState<Kpi | null>(null);
   const [children, setChildren] = useState<Kpi[]>([]);
+  const [owner, setOwner] = useState<User | null>(null);
+  const [region, setRegion] = useState<Region | null>(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [editForm, setEditForm] = useState<{ current_value: string; status: string }>({ current_value: '', status: '' });
+  const [editingMeta, setEditingMeta] = useState(false);
+  const [metaForm, setMetaForm] = useState<{
+    name: string; description: string; type: string; period: string;
+    update_frequency: string; target_value: string; unit: string;
+    start_date: string; end_date: string;
+  }>({ name: '', description: '', type: '', period: '', update_frequency: '', target_value: '', unit: '', start_date: '', end_date: '' });
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     const load = async () => {
       try {
-        const [kpiRes, childRes] = await Promise.all([
+        const [kpiRes, childRes, usersRes, regionsRes] = await Promise.all([
           kpis.getById(id),
           kpis.children(id),
+          users.list({ limit: 200 }),
+          regions.list(),
         ]);
         setKpi(kpiRes.data);
         setChildren(childRes.data);
+        setOwner(usersRes.data.find((u) => u.id === kpiRes.data.owner_id) ?? null);
+        setRegion(regionsRes.data.find((r) => r.id === kpiRes.data.region_id) ?? null);
         setEditForm({
           current_value: String(kpiRes.data.current_value ?? ''),
           status: kpiRes.data.status,
+        });
+        setMetaForm({
+          name: kpiRes.data.name ?? '',
+          description: kpiRes.data.description ?? '',
+          type: kpiRes.data.type ?? '',
+          period: kpiRes.data.period ?? '',
+          update_frequency: kpiRes.data.update_frequency ?? '',
+          target_value: String(kpiRes.data.target_value ?? ''),
+          unit: kpiRes.data.unit ?? '',
+          start_date: kpiRes.data.start_date ?? '',
+          end_date: kpiRes.data.end_date ?? '',
         });
       } finally {
         setLoading(false);
@@ -74,6 +102,25 @@ export default function KpiDetailPage() {
     if (!kpi || !confirm(`Cancel KPI "${kpi.name}"?`)) return;
     await kpis.cancel(id);
     router.push('/kpis');
+  };
+
+  const handleMetaUpdate = async () => {
+    if (!kpi) return;
+    setSaving(true);
+    try {
+      const { name, description, type, period, update_frequency, target_value, unit, start_date, end_date } = metaForm;
+      const res = await kpis.update(id, {
+        name, description,
+        type: type as Kpi['type'],
+        period: period as Kpi['period'],
+        update_frequency: update_frequency as Kpi['update_frequency'],
+        target_value: Number(target_value), unit, start_date, end_date,
+      });
+      setKpi(res.data);
+      setEditingMeta(false);
+    } finally {
+      setSaving(false);
+    }
   };
 
   if (loading) {
@@ -122,6 +169,13 @@ export default function KpiDetailPage() {
             style={{ border: '1px solid var(--border)', background: 'var(--card)' }}
           >
             {editing ? 'Cancel Edit' : 'Update Progress'}
+          </button>
+          <button
+            onClick={() => setEditingMeta(!editingMeta)}
+            className="px-3.5 py-2 rounded-lg text-xs font-semibold"
+            style={{ border: '1px solid var(--border)', background: 'var(--card)' }}
+          >
+            {editingMeta ? 'Cancel Edit' : 'Edit KPI'}
           </button>
           {kpi.status !== 'cancelled' && (
             <button
@@ -186,6 +240,67 @@ export default function KpiDetailPage() {
         </div>
       )}
 
+      {/* Meta edit form */}
+      {editingMeta && (
+        <div
+          className="rounded-xl p-5 mb-6 space-y-4"
+          style={{ background: 'var(--card)', border: '1px solid var(--border)' }}
+        >
+          <h2 className="font-bold text-sm" style={{ color: 'var(--near-black)' }}>Edit KPI</h2>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="col-span-2">
+              <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style={{ color: 'var(--t3)' }}>Name</label>
+              <input className="fi w-full" type="text" value={metaForm.name} onChange={(e) => setMetaForm((f) => ({ ...f, name: e.target.value }))} />
+            </div>
+            <div className="col-span-2">
+              <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style={{ color: 'var(--t3)' }}>Description</label>
+              <input className="fi w-full" type="text" value={metaForm.description} onChange={(e) => setMetaForm((f) => ({ ...f, description: e.target.value }))} />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style={{ color: 'var(--t3)' }}>Type</label>
+              <input className="fi w-full" type="text" value={metaForm.type} onChange={(e) => setMetaForm((f) => ({ ...f, type: e.target.value }))} />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style={{ color: 'var(--t3)' }}>Period</label>
+              <input className="fi w-full" type="text" value={metaForm.period} onChange={(e) => setMetaForm((f) => ({ ...f, period: e.target.value }))} />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style={{ color: 'var(--t3)' }}>Update Frequency</label>
+              <input className="fi w-full" type="text" value={metaForm.update_frequency} onChange={(e) => setMetaForm((f) => ({ ...f, update_frequency: e.target.value }))} />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style={{ color: 'var(--t3)' }}>Target Value</label>
+              <input className="fi w-full" type="number" value={metaForm.target_value} onChange={(e) => setMetaForm((f) => ({ ...f, target_value: e.target.value }))} />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style={{ color: 'var(--t3)' }}>Unit</label>
+              <input className="fi w-full" type="text" value={metaForm.unit} onChange={(e) => setMetaForm((f) => ({ ...f, unit: e.target.value }))} />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style={{ color: 'var(--t3)' }}>Start Date</label>
+              <input className="fi w-full" type="date" value={metaForm.start_date} onChange={(e) => setMetaForm((f) => ({ ...f, start_date: e.target.value }))} />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style={{ color: 'var(--t3)' }}>End Date</label>
+              <input className="fi w-full" type="date" value={metaForm.end_date} onChange={(e) => setMetaForm((f) => ({ ...f, end_date: e.target.value }))} />
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={handleMetaUpdate}
+              disabled={saving}
+              className="px-4 py-2 rounded-lg text-sm font-semibold disabled:opacity-50"
+              style={{ background: '#000', color: '#fff' }}
+            >
+              {saving ? 'Saving…' : 'Save Changes'}
+            </button>
+            <button onClick={() => setEditingMeta(false)} className="px-4 py-2 rounded-lg text-sm font-semibold" style={{ border: '1px solid var(--border)' }}>
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Progress */}
       {pct !== null && (
         <div
@@ -205,8 +320,8 @@ export default function KpiDetailPage() {
             />
           </div>
           <div className="flex justify-between mt-2 text-xs" style={{ color: 'var(--t3)' }}>
-            <span>{kpi.current_value ?? 0} {kpi.unit}</span>
-            <span>{kpi.target_value} {kpi.unit} target</span>
+            <span>{(kpi.current_value ?? 0).toLocaleString()}<UnitTag unit={kpi.unit ?? null} /></span>
+            <span>Target: {(kpi.target_value ?? 0).toLocaleString()}<UnitTag unit={kpi.unit ?? null} /></span>
           </div>
         </div>
       )}
@@ -214,6 +329,8 @@ export default function KpiDetailPage() {
       {/* Details grid */}
       <div className="grid grid-cols-2 gap-4 mb-6">
         {[
+          { label: 'Owner', value: owner?.full_name ?? '—' },
+          { label: 'Region', value: region?.name ?? '—' },
           { label: 'Type', value: kpi.type },
           { label: 'Period', value: kpi.period },
           { label: 'Update Frequency', value: kpi.update_frequency },

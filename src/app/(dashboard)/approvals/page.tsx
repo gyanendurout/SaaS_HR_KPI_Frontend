@@ -1,109 +1,301 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
-import { kpis, type Kpi } from '@/lib/api';
+import { approvals, type Approval } from '@/lib/api';
+import { useAuthStore } from '@/store/auth';
+
+type TabId = 'pending' | 'approved' | 'rejected' | 'all';
+
+const TAB_BORDER: Record<TabId, string> = {
+  pending:  '#b45309',
+  approved: '#1a7a4a',
+  rejected: '#b91c1c',
+  all:      '#4a4640',
+};
+
+const STATUS_STYLE: Record<string, { bg: string; color: string }> = {
+  pending:  { bg: 'rgba(180,83,9,.1)',    color: '#b45309' },
+  approved: { bg: 'rgba(26,122,74,.1)',   color: '#15633c' },
+  rejected: { bg: 'rgba(185,28,28,.1)',   color: '#b91c1c' },
+};
 
 export default function ApprovalsPage() {
-  const [data, setData] = useState<Kpi[]>([]);
+  const currentUser = useAuthStore((s) => s.user);
+  const [data, setData]       = useState<Approval[]>([]);
+  const [total, setTotal]     = useState(0);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<TabId>('pending');
+  const [actioning, setActioning] = useState<string | null>(null);
+  const [reviewNote, setReviewNote] = useState('');
+  const [noteTarget, setNoteTarget] = useState<{ id: string; action: 'approve' | 'reject' } | null>(null);
+  const LIMIT = 30;
 
-  useEffect(() => {
-    kpis.list({ status: 'draft', limit: 100 })
-      .then((res) => setData(res.data))
-      .finally(() => setLoading(false));
-  }, []);
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const status = activeTab === 'all' ? undefined : activeTab;
+      const res = await approvals.list({ limit: LIMIT, status });
+      setData(res.data);
+      setTotal(res.total);
+    } finally {
+      setLoading(false);
+    }
+  }, [activeTab]);
 
-  const handleActivate = async (id: string) => {
-    await kpis.update(id, { status: 'active' });
-    setData((prev) => prev.filter((k) => k.id !== id));
+  useEffect(() => { load(); }, [load]);
+
+  const handleApprove = async (id: string) => {
+    setActioning(id);
+    try {
+      await approvals.approve(id, reviewNote || undefined);
+      setNoteTarget(null);
+      setReviewNote('');
+      load();
+    } finally { setActioning(null); }
   };
 
   const handleReject = async (id: string) => {
-    if (!confirm('Cancel this KPI?')) return;
-    await kpis.cancel(id);
-    setData((prev) => prev.filter((k) => k.id !== id));
+    setActioning(id);
+    try {
+      await approvals.reject(id, reviewNote || undefined);
+      setNoteTarget(null);
+      setReviewNote('');
+      load();
+    } finally { setActioning(null); }
   };
 
+  const pendingCount = data.filter((a) => a.status === 'pending').length;
+
+  const tabs: { id: TabId; label: string; count?: number }[] = [
+    { id: 'pending',  label: 'Pending',  count: activeTab === 'pending'  ? total : undefined },
+    { id: 'approved', label: 'Approved', count: activeTab === 'approved' ? total : undefined },
+    { id: 'rejected', label: 'Rejected', count: activeTab === 'rejected' ? total : undefined },
+    { id: 'all',      label: 'All',      count: activeTab === 'all'      ? total : undefined },
+  ];
+
   return (
-    <div className="p-8">
-      <div className="mb-6">
-        <h1 className="text-2xl font-black tracking-tight" style={{ color: 'var(--near-black)' }}>Approvals</h1>
-        <p className="text-sm mt-0.5" style={{ color: 'var(--t3)' }}>
-          Draft KPIs pending activation · {data.length} pending
-        </p>
+    <div style={{ padding: '22px 26px' }}>
+      <div style={{ marginBottom: 18 }}>
+        <div style={{ fontSize: 15, fontWeight: 800, letterSpacing: '-.2px', marginBottom: 3, color: '#111110' }}>
+          Approval Inbox
+        </div>
+        <div style={{ fontSize: 12, color: '#8a8580' }}>
+          KPI approval requests — review, approve, or reject below
+        </div>
       </div>
 
+      {/* Tabs */}
+      <div style={{ display: 'flex', borderBottom: '2px solid #e2dfd8', marginBottom: 18 }}>
+        {tabs.map((t) => (
+          <button
+            key={t.id}
+            onClick={() => setActiveTab(t.id)}
+            style={{
+              padding: '9px 18px', fontSize: 13, fontWeight: activeTab === t.id ? 700 : 500,
+              cursor: 'pointer', border: 'none', background: 'none',
+              color: activeTab === t.id ? '#000' : '#4a4640', fontFamily: 'inherit',
+              borderBottom: `2.5px solid ${activeTab === t.id ? '#000' : 'transparent'}`,
+              marginBottom: -2, display: 'flex', alignItems: 'center', gap: 6, transition: 'all .14s',
+            }}
+          >
+            {t.label}
+            {t.count !== undefined && (
+              <span style={{
+                fontSize: 10.5, fontWeight: 700, padding: '2px 7px', borderRadius: 10,
+                background: activeTab === t.id ? (t.id === 'pending' ? '#b45309' : t.id === 'approved' ? '#1a7a4a' : t.id === 'rejected' ? '#b91c1c' : '#000') : '#e8e6e1',
+                color: activeTab === t.id ? '#fff' : '#8a8580',
+              }}>
+                {t.count}
+              </span>
+            )}
+          </button>
+        ))}
+      </div>
+
+      {/* Note modal */}
+      {noteTarget && (
+        <div
+          style={{ position: 'fixed', inset: 0, zIndex: 50, background: 'rgba(0,0,0,.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}
+          onClick={(e) => e.target === e.currentTarget && setNoteTarget(null)}
+        >
+          <div style={{ width: '100%', maxWidth: 440, background: '#fff', borderRadius: 16, overflow: 'hidden', boxShadow: '0 20px 60px rgba(0,0,0,.2)' }}>
+            <div style={{ padding: '18px 22px', borderBottom: '1px solid #e2dfd8', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontWeight: 800, fontSize: 14, color: noteTarget.action === 'approve' ? '#15633c' : '#b91c1c' }}>
+                {noteTarget.action === 'approve' ? '✓ Approve KPI' : '✕ Reject KPI'}
+              </span>
+              <button onClick={() => setNoteTarget(null)} style={{ fontSize: 18, color: '#8a8580', border: 'none', background: 'none', cursor: 'pointer', lineHeight: 1 }}>×</button>
+            </div>
+            <div style={{ padding: '18px 22px' }}>
+              <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#4a4640', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '.4px' }}>
+                Reviewer Note (optional)
+              </label>
+              <textarea
+                value={reviewNote}
+                onChange={(e) => setReviewNote(e.target.value)}
+                placeholder="Add a comment for the requester…"
+                rows={3}
+                style={{ width: '100%', border: '1.5px solid #e2dfd8', borderRadius: 8, padding: '9px 12px', fontFamily: 'inherit', fontSize: 13, resize: 'vertical', outline: 'none', color: '#111110', boxSizing: 'border-box' }}
+                onFocus={(e) => (e.currentTarget.style.borderColor = '#000')}
+                onBlur={(e) => (e.currentTarget.style.borderColor = '#e2dfd8')}
+              />
+            </div>
+            <div style={{ padding: '14px 22px', borderTop: '1px solid #e2dfd8', display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+              <button onClick={() => setNoteTarget(null)} style={{ padding: '8px 16px', borderRadius: 7, fontSize: 13, fontWeight: 600, border: '1px solid #e2dfd8', background: '#fff', cursor: 'pointer', fontFamily: 'inherit', color: '#4a4640' }}>
+                Cancel
+              </button>
+              <button
+                disabled={actioning === noteTarget.id}
+                onClick={() => noteTarget.action === 'approve' ? handleApprove(noteTarget.id) : handleReject(noteTarget.id)}
+                style={{
+                  padding: '8px 18px', borderRadius: 7, fontSize: 13, fontWeight: 700, border: 'none',
+                  background: noteTarget.action === 'approve' ? '#1a7a4a' : '#b91c1c',
+                  color: '#fff', cursor: actioning === noteTarget.id ? 'not-allowed' : 'pointer',
+                  opacity: actioning === noteTarget.id ? .6 : 1, fontFamily: 'inherit',
+                }}
+              >
+                {actioning === noteTarget.id ? 'Processing…' : noteTarget.action === 'approve' ? 'Confirm Approve' : 'Confirm Reject'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {loading ? (
-        <div className="flex items-center justify-center h-40">
-          <p className="text-sm" style={{ color: 'var(--t3)' }}>Loading…</p>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 160 }}>
+          <p style={{ fontSize: 13, color: '#8a8580' }}>Loading…</p>
         </div>
       ) : data.length === 0 ? (
-        <div
-          className="rounded-xl p-12 text-center"
-          style={{ border: '2px dashed var(--border)', background: 'var(--off)' }}
-        >
-          <p className="text-2xl mb-2">✓</p>
-          <p className="text-sm font-semibold" style={{ color: 'var(--t2)' }}>All caught up</p>
-          <p className="text-xs mt-1" style={{ color: 'var(--t3)' }}>No KPIs pending approval</p>
+        <div style={{ border: '2px dashed #e2dfd8', borderRadius: 14, padding: '48px 20px', textAlign: 'center', background: '#f8f7f5' }}>
+          <p style={{ fontSize: 14, fontWeight: 600, color: '#4a4640', marginBottom: 4 }}>
+            {activeTab === 'pending' ? 'All caught up — no pending approvals' : `No ${activeTab} approvals`}
+          </p>
+          <p style={{ fontSize: 12, color: '#8a8580' }}>
+            {activeTab === 'pending' ? 'Submit a KPI for approval from the KPI detail page.' : ''}
+          </p>
         </div>
       ) : (
-        <div className="space-y-3">
-          {data.map((k) => (
-            <div
-              key={k.id}
-              className="rounded-xl p-5 flex items-start justify-between gap-4"
-              style={{ background: 'var(--card)', border: '1px solid var(--border)', boxShadow: '0 1px 3px rgba(0,0,0,.04)' }}
-            >
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-xs font-mono" style={{ color: 'var(--t3)' }}>{k.kpi_number}</span>
-                  <span
-                    className="text-xs font-semibold px-2 py-0.5 rounded-full"
-                    style={{ background: 'rgba(180,83,9,.1)', color: '#b45309' }}
-                  >
-                    draft
-                  </span>
-                </div>
-                <Link href={`/kpis/${k.id}`} className="font-semibold text-sm hover:underline" style={{ color: 'var(--t1)' }}>
-                  {k.name}
-                </Link>
-                {k.description && (
-                  <p className="text-xs mt-1 truncate" style={{ color: 'var(--t3)' }}>{k.description}</p>
-                )}
-                <div className="flex flex-wrap gap-3 mt-2">
-                  <span className="text-xs capitalize" style={{ color: 'var(--t3)' }}>{k.type}</span>
-                  <span className="text-xs capitalize" style={{ color: 'var(--t3)' }}>{k.period}</span>
-                  {k.target_value && (
-                    <span className="text-xs" style={{ color: 'var(--t3)' }}>
-                      Target: {k.target_value.toLocaleString()} {k.unit}
-                    </span>
-                  )}
-                  <span className="text-xs" style={{ color: 'var(--t3)' }}>
-                    Created: {new Date(k.created_at).toLocaleDateString()}
-                  </span>
-                </div>
-              </div>
-              <div className="flex gap-2 shrink-0">
-                <button
-                  onClick={() => handleActivate(k.id)}
-                  className="px-3.5 py-2 rounded-lg text-xs font-semibold"
-                  style={{ background: 'rgba(26,122,74,.1)', color: '#1a7a4a', border: '1px solid rgba(26,122,74,.2)' }}
-                >
-                  ✓ Approve
-                </button>
-                <button
-                  onClick={() => handleReject(k.id)}
-                  className="px-3.5 py-2 rounded-lg text-xs font-semibold"
-                  style={{ background: 'rgba(185,28,28,.06)', color: '#b91c1c', border: '1px solid rgba(185,28,28,.2)' }}
-                >
-                  ✕ Reject
-                </button>
-              </div>
-            </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {data.map((a) => (
+            <ApprovalCard
+              key={a.id}
+              approval={a}
+              isAdmin={!!currentUser?.is_admin}
+              actioning={actioning === a.id}
+              onApprove={() => setNoteTarget({ id: a.id, action: 'approve' })}
+              onReject={()  => setNoteTarget({ id: a.id, action: 'reject' })}
+            />
           ))}
         </div>
       )}
+
+      {total > LIMIT && (
+        <p style={{ marginTop: 14, fontSize: 12, color: '#8a8580', textAlign: 'center' }}>
+          Showing {LIMIT} of {total} · Use filters for more
+        </p>
+      )}
+    </div>
+  );
+}
+
+function ApprovalCard({
+  approval, isAdmin, actioning, onApprove, onReject,
+}: {
+  approval: Approval;
+  isAdmin: boolean;
+  actioning: boolean;
+  onApprove: () => void;
+  onReject: () => void;
+}) {
+  const s = STATUS_STYLE[approval.status] ?? { bg: 'rgba(0,0,0,.05)', color: '#8a8580' };
+  const borderColor = TAB_BORDER[approval.status as TabId] ?? '#cdc9c1';
+
+  return (
+    <div style={{
+      background: '#fff', border: '1.5px solid #e2dfd8',
+      borderLeft: `4px solid ${borderColor}`,
+      borderRadius: 12, overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,.06)',
+    }}>
+      <div style={{ padding: '14px 18px', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16 }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+            <span style={{ fontFamily: 'monospace', fontSize: 10, fontWeight: 700, padding: '2px 6px', borderRadius: 3, background: '#e4e1db', color: '#4a4640' }}>
+              {approval.kpis?.kpi_number ?? '—'}
+            </span>
+            <span style={{ display: 'inline-flex', padding: '2.5px 8px', borderRadius: 4, fontSize: 11, fontWeight: 600, background: s.bg, color: s.color }}>
+              {approval.status}
+            </span>
+          </div>
+
+          <Link
+            href={`/kpis/${approval.kpi_id}`}
+            style={{ fontSize: 14, fontWeight: 700, color: '#111110', textDecoration: 'none', letterSpacing: '-.1px', display: 'block', marginBottom: 5 }}
+          >
+            {approval.kpis?.name ?? 'KPI'}
+          </Link>
+
+          {approval.note && (
+            <p style={{ fontSize: 12, color: '#4a4640', margin: '0 0 6px', lineHeight: 1.5, fontStyle: 'italic' }}>
+              &ldquo;{approval.note}&rdquo;
+            </p>
+          )}
+
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
+            <span style={{ fontSize: 11.5, color: '#8a8580' }}>
+              Requested by <strong style={{ color: '#4a4640' }}>{approval.requester?.full_name ?? '—'}</strong>
+            </span>
+            <span style={{ fontSize: 11.5, color: '#8a8580' }}>
+              {new Date(approval.requested_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+            </span>
+            {approval.reviewed_at && (
+              <span style={{ fontSize: 11.5, color: '#8a8580' }}>
+                Reviewed by <strong style={{ color: '#4a4640' }}>{approval.reviewer?.full_name ?? '—'}</strong>
+              </span>
+            )}
+          </div>
+
+          {approval.reviewer_note && (
+            <p style={{ fontSize: 11.5, color: '#8a8580', margin: '6px 0 0', padding: '6px 10px', background: '#f8f7f5', borderRadius: 6, borderLeft: '3px solid #e2dfd8' }}>
+              {approval.reviewer_note}
+            </p>
+          )}
+        </div>
+
+        {isAdmin && approval.status === 'pending' && (
+          <div style={{ display: 'flex', gap: 7, flexShrink: 0 }}>
+            <button
+              onClick={onApprove}
+              disabled={actioning}
+              style={{
+                padding: '7px 14px', borderRadius: 6, fontSize: 12.5, fontWeight: 600,
+                cursor: actioning ? 'not-allowed' : 'pointer',
+                background: 'rgba(26,122,74,.1)', color: '#15633c',
+                border: '1px solid rgba(26,122,74,.2)', fontFamily: 'inherit',
+                opacity: actioning ? .5 : 1, transition: 'all .14s',
+              }}
+              onMouseEnter={(e) => { if (!actioning) (e.currentTarget as HTMLElement).style.background = 'rgba(26,122,74,.18)'; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(26,122,74,.1)'; }}
+            >
+              ✓ Approve
+            </button>
+            <button
+              onClick={onReject}
+              disabled={actioning}
+              style={{
+                padding: '7px 14px', borderRadius: 6, fontSize: 12.5, fontWeight: 600,
+                cursor: actioning ? 'not-allowed' : 'pointer',
+                background: 'rgba(185,28,28,.06)', color: '#b91c1c',
+                border: '1px solid rgba(185,28,28,.2)', fontFamily: 'inherit',
+                opacity: actioning ? .5 : 1, transition: 'all .14s',
+              }}
+              onMouseEnter={(e) => { if (!actioning) (e.currentTarget as HTMLElement).style.background = 'rgba(185,28,28,.12)'; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(185,28,28,.06)'; }}
+            >
+              ✕ Reject
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

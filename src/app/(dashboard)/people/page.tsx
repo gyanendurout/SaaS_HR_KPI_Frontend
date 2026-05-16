@@ -271,7 +271,7 @@ function UserModal({
       <div className="w-full max-w-md rounded-2xl overflow-hidden" style={{ background: 'var(--card)', boxShadow: '0 20px 60px rgba(0,0,0,.2)' }}>
         <div className="flex items-center justify-between px-6 py-4" style={{ borderBottom: '1px solid var(--border)' }}>
           <h2 className="font-black text-base" style={{ color: 'var(--near-black)' }}>{mode === 'create' ? 'Add Member' : 'Edit Member'}</h2>
-          <button onClick={onClose} className="text-lg" style={{ color: 'var(--t3)' }}>×</button>
+          <button type="button" onClick={onClose} className="text-lg" style={{ color: 'var(--t3)' }}>×</button>
         </div>
         <div className="px-6 py-5 space-y-4 max-h-[70vh] overflow-y-auto">
           <div>
@@ -282,11 +282,11 @@ function UserModal({
             <>
               <div>
                 <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style={{ color: 'var(--t3)' }}>Email *</label>
-                <input className="fi w-full" type="email" value={form.email} onChange={(e) => set('email', e.target.value)} />
+                <input className="fi w-full" type="email" autoComplete="off" value={form.email} onChange={(e) => set('email', e.target.value)} />
               </div>
               <div>
                 <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style={{ color: 'var(--t3)' }}>Password *</label>
-                <input className="fi w-full" type="password" value={form.password} onChange={(e) => set('password', e.target.value)} placeholder="Min 8 chars" />
+                <input className="fi w-full" type="password" autoComplete="new-password" value={form.password} onChange={(e) => set('password', e.target.value)} placeholder="Min 8 chars" />
               </div>
             </>
           )}

@@ -89,6 +89,9 @@ export interface Region {
   id: string;
   name: string;
   code: string;
+  flag: string | null;
+  description: string | null;
+  color: string | null;
   parent_id: string | null;
 }
 
@@ -181,6 +184,7 @@ export interface Kpi {
   end_date: string | null;
   allocation_pct: number;
   status: 'draft' | 'active' | 'completed' | 'cancelled';
+  approval_status: 'draft' | 'pending' | 'approved' | 'rejected';
   region_id: string;
   owner_id: string | null;
   parent_id: string | null;
@@ -281,4 +285,129 @@ export const contributors = {
     request<{ success: boolean }>(`/api/kpis/${kpiId}/contributors/${userId}`, {
       method: 'DELETE',
     }),
+};
+
+// ─── Approvals ───────────────────────────────────────────────────────────────
+
+export interface Approval {
+  id: string;
+  kpi_id: string;
+  requested_by: string;
+  reviewed_by: string | null;
+  status: 'pending' | 'approved' | 'rejected';
+  note: string | null;
+  reviewer_note: string | null;
+  requested_at: string;
+  reviewed_at: string | null;
+  created_at: string;
+  kpis?: { id: string; kpi_number: string; name: string; status: string };
+  requester?: { id: string; full_name: string; employee_code: string; designation: string | null };
+  reviewer?: { id: string; full_name: string; employee_code: string; designation: string | null } | null;
+}
+
+export interface ApprovalsListParams {
+  page?: number;
+  limit?: number;
+  status?: string;
+  kpi_id?: string;
+  requested_by?: string;
+}
+
+export const approvals = {
+  list: (params: ApprovalsListParams = {}) => {
+    const q = new URLSearchParams();
+    if (params.page)         q.set('page', String(params.page));
+    if (params.limit)        q.set('limit', String(params.limit));
+    if (params.status)       q.set('status', params.status);
+    if (params.kpi_id)       q.set('kpi_id', params.kpi_id);
+    if (params.requested_by) q.set('requested_by', params.requested_by);
+    return request<{ success: boolean; data: Approval[]; total: number; page: number; limit: number }>(
+      `/api/approvals?${q}`
+    );
+  },
+
+  getById: (id: string) =>
+    request<{ success: boolean; data: Approval }>(`/api/approvals/${id}`),
+
+  request: (kpi_id: string, note?: string) =>
+    request<{ success: boolean; data: Approval }>('/api/approvals', {
+      method: 'POST',
+      body: JSON.stringify({ kpi_id, note }),
+    }),
+
+  approve: (id: string, reviewer_note?: string) =>
+    request<{ success: boolean; data: Approval }>(`/api/approvals/${id}/approve`, {
+      method: 'PUT',
+      body: JSON.stringify({ reviewer_note }),
+    }),
+
+  reject: (id: string, reviewer_note?: string) =>
+    request<{ success: boolean; data: Approval }>(`/api/approvals/${id}/reject`, {
+      method: 'PUT',
+      body: JSON.stringify({ reviewer_note }),
+    }),
+
+  pendingCount: () =>
+    request<{ success: boolean; data: { count: number } }>('/api/approvals/count/pending'),
+};
+
+// ─── Notifications ────────────────────────────────────────────────────────────
+
+export interface Notification {
+  id: string;
+  user_id: string;
+  type: string;
+  title: string;
+  body: string | null;
+  link_type: string | null;
+  link_id: string | null;
+  is_read: boolean;
+  created_at: string;
+}
+
+export const notifications = {
+  list: (params: { page?: number; limit?: number; unread_only?: boolean } = {}) => {
+    const q = new URLSearchParams();
+    if (params.page)        q.set('page', String(params.page));
+    if (params.limit)       q.set('limit', String(params.limit));
+    if (params.unread_only) q.set('unread_only', 'true');
+    return request<{ success: boolean; data: Notification[]; total: number }>(
+      `/api/notifications?${q}`
+    );
+  },
+
+  unreadCount: () =>
+    request<{ success: boolean; data: { count: number } }>('/api/notifications/count/unread'),
+
+  markRead: (id: string) =>
+    request<{ success: boolean }>(`/api/notifications/${id}/read`, { method: 'PUT' }),
+
+  markAllRead: () =>
+    request<{ success: boolean }>('/api/notifications/read-all', { method: 'PUT' }),
+};
+
+// ─── Audit ────────────────────────────────────────────────────────────────────
+
+export interface AuditEntry {
+  id: string;
+  action: string;
+  entity_type: string;
+  entity_id: string | null;
+  ip_address: string | null;
+  created_at: string;
+  actor?: { id: string; full_name: string; employee_code: string } | null;
+}
+
+export const audit = {
+  list: (params: { page?: number; limit?: number; entity_type?: string; actor_id?: string; action?: string } = {}) => {
+    const q = new URLSearchParams();
+    if (params.page)        q.set('page', String(params.page));
+    if (params.limit)       q.set('limit', String(params.limit));
+    if (params.entity_type) q.set('entity_type', params.entity_type);
+    if (params.actor_id)    q.set('actor_id', params.actor_id);
+    if (params.action)      q.set('action', params.action);
+    return request<{ success: boolean; data: AuditEntry[]; total: number }>(
+      `/api/audit?${q}`
+    );
+  },
 };

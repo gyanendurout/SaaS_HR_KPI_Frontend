@@ -5,6 +5,15 @@ import { useRouter } from 'next/navigation';
 import { auth } from '@/lib/api';
 import { useAuthStore } from '@/store/auth';
 
+const JoolaLogo = () => (
+  <svg viewBox="0 0 20 20" fill="none" style={{ width: 24, height: 24 }}>
+    <polygon points="10,2 2,7 2,15 10,18 18,15 18,7" fill="black" />
+    <polygon points="10,2 2,7 10,10.5 18,7" fill="rgba(255,255,255,.9)" />
+    <polygon points="2,7 2,15 10,18 10,10.5" fill="rgba(255,255,255,.5)" />
+    <polygon points="18,7 18,15 10,18 10,10.5" fill="rgba(255,255,255,.7)" />
+  </svg>
+);
+
 export default function LoginPage() {
   const router = useRouter();
   const setAuth = useAuthStore((s) => s.setAuth);
@@ -29,99 +38,220 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg)' }}>
-      <div className="w-full max-w-sm">
+    <div
+      style={{
+        position: 'fixed',
+        inset: 0,
+        background: '#000',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexDirection: 'column',
+        zIndex: 9999,
+      }}
+    >
+      <div
+        style={{
+          background: '#fff',
+          borderRadius: 16,
+          padding: '40px 44px',
+          width: 420,
+          maxWidth: '96vw',
+          boxShadow: '0 40px 120px rgba(0,0,0,.6)',
+          position: 'relative',
+        }}
+      >
         {/* Logo */}
-        <div className="flex items-center gap-2 mb-10 justify-center">
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            justifyContent: 'center',
+            marginBottom: 28,
+          }}
+        >
           <div
-            className="flex items-center justify-center font-black text-sm tracking-widest"
-            style={{ width: 36, height: 36, background: '#000', color: '#fff', borderRadius: 6 }}
+            style={{
+              width: 40,
+              height: 40,
+              background: '#000',
+              borderRadius: 4,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+            }}
           >
-            J
+            <JoolaLogo />
           </div>
-          <span className="font-black text-xl tracking-tight" style={{ color: 'var(--near-black)' }}>
-            JOOLA<span className="font-light ml-1">Track</span>
+          <span
+            style={{
+              fontSize: 22,
+              fontWeight: 900,
+              textTransform: 'uppercase',
+              letterSpacing: '.5px',
+              color: '#000',
+            }}
+          >
+            JOOLA
+            <span style={{ color: '#999', fontWeight: 400, fontSize: 16 }}> Track</span>
           </span>
         </div>
 
-        <div
-          className="rounded-2xl p-8"
-          style={{ background: 'var(--card)', border: '1px solid var(--border)', boxShadow: '0 4px 16px rgba(0,0,0,.08)' }}
+        {/* Title */}
+        <h1
+          style={{
+            fontSize: 20,
+            fontWeight: 800,
+            textAlign: 'center',
+            marginBottom: 5,
+            letterSpacing: '-.3px',
+            color: '#111110',
+          }}
         >
-          <h1 className="font-black text-2xl tracking-tight mb-1" style={{ color: 'var(--near-black)' }}>
-            Sign in
-          </h1>
-          <p className="text-sm mb-7" style={{ color: 'var(--t3)' }}>
-            KPI Lifecycle Management Platform
-          </p>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style={{ color: 'var(--t3)' }}>
-                Email
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                placeholder="you@joola.in"
-                className="w-full rounded-lg px-3.5 py-2.5 text-sm outline-none transition-all"
-                style={{
-                  border: '1.5px solid var(--border)',
-                  background: 'var(--off)',
-                  color: 'var(--t1)',
-                }}
-                onFocus={(e) => (e.target.style.borderColor = '#000')}
-                onBlur={(e) => (e.target.style.borderColor = 'var(--border)')}
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style={{ color: 'var(--t3)' }}>
-                Password
-              </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                placeholder="••••••••"
-                className="w-full rounded-lg px-3.5 py-2.5 text-sm outline-none transition-all"
-                style={{
-                  border: '1.5px solid var(--border)',
-                  background: 'var(--off)',
-                  color: 'var(--t1)',
-                }}
-                onFocus={(e) => (e.target.style.borderColor = '#000')}
-                onBlur={(e) => (e.target.style.borderColor = 'var(--border)')}
-              />
-            </div>
-
-            {error && (
-              <div
-                className="text-xs px-3.5 py-2.5 rounded-lg"
-                style={{ background: 'rgba(185,28,28,.08)', color: 'var(--red)', border: '1px solid rgba(185,28,28,.2)' }}
-              >
-                {error}
-              </div>
-            )}
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-2.5 rounded-lg font-semibold text-sm transition-opacity"
-              style={{ background: 'var(--black)', color: '#fff', opacity: loading ? 0.6 : 1 }}
-            >
-              {loading ? 'Signing in…' : 'Sign in'}
-            </button>
-          </form>
-        </div>
-
-        <p className="text-center text-xs mt-6" style={{ color: 'var(--t4)' }}>
-          © {new Date().getFullYear()} JOOLA Track · joola.in
+          Sign in to JOOLA Track
+        </h1>
+        <p
+          style={{
+            fontSize: 12.5,
+            color: '#8a8580',
+            textAlign: 'center',
+            marginBottom: 22,
+          }}
+        >
+          KPI Lifecycle Management Platform
         </p>
+
+        <form onSubmit={handleSubmit}>
+          {/* Email */}
+          <div style={{ marginBottom: 13 }}>
+            <label
+              style={{
+                display: 'block',
+                fontSize: 11,
+                fontWeight: 700,
+                color: '#4a4640',
+                marginBottom: 5,
+                textTransform: 'uppercase',
+                letterSpacing: '.4px',
+              }}
+            >
+              Email
+            </label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              placeholder="you@joola.in"
+              style={{
+                width: '100%',
+                background: '#f8f7f5',
+                border: '1.5px solid #e2dfd8',
+                borderRadius: 6,
+                padding: '9px 12px',
+                color: '#111110',
+                fontFamily: 'inherit',
+                fontSize: 13,
+                outline: 'none',
+                transition: 'border-color .14s',
+                boxSizing: 'border-box',
+              }}
+              onFocus={(e) => (e.target.style.borderColor = '#000')}
+              onBlur={(e) => (e.target.style.borderColor = '#e2dfd8')}
+            />
+          </div>
+
+          {/* Password */}
+          <div style={{ marginBottom: 13 }}>
+            <label
+              style={{
+                display: 'block',
+                fontSize: 11,
+                fontWeight: 700,
+                color: '#4a4640',
+                marginBottom: 5,
+                textTransform: 'uppercase',
+                letterSpacing: '.4px',
+              }}
+            >
+              Password
+            </label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              placeholder="••••••••"
+              style={{
+                width: '100%',
+                background: '#f8f7f5',
+                border: '1.5px solid #e2dfd8',
+                borderRadius: 6,
+                padding: '9px 12px',
+                color: '#111110',
+                fontFamily: 'inherit',
+                fontSize: 13,
+                outline: 'none',
+                transition: 'border-color .14s',
+                boxSizing: 'border-box',
+              }}
+              onFocus={(e) => (e.target.style.borderColor = '#000')}
+              onBlur={(e) => (e.target.style.borderColor = '#e2dfd8')}
+            />
+          </div>
+
+          {error && (
+            <div
+              style={{
+                fontSize: 12,
+                padding: '9px 12px',
+                borderRadius: 7,
+                background: 'rgba(185,28,28,.08)',
+                color: '#b91c1c',
+                border: '1px solid rgba(185,28,28,.2)',
+                marginBottom: 13,
+              }}
+            >
+              {error}
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading}
+            style={{
+              width: '100%',
+              background: '#000',
+              color: '#fff',
+              border: '1px solid #000',
+              borderRadius: 8,
+              padding: '11px 14px',
+              fontSize: 14,
+              fontWeight: 600,
+              fontFamily: 'inherit',
+              cursor: loading ? 'not-allowed' : 'pointer',
+              opacity: loading ? 0.6 : 1,
+              transition: 'opacity .15s',
+              marginTop: 4,
+            }}
+          >
+            {loading ? 'Signing in…' : 'Sign in →'}
+          </button>
+        </form>
       </div>
+
+      <p
+        style={{
+          color: '#555',
+          fontSize: 11.5,
+          marginTop: 22,
+          textAlign: 'center',
+        }}
+      >
+        JOOLA Track · Enterprise KPI Platform
+      </p>
     </div>
   );
 }
