@@ -53,22 +53,23 @@ function Topbar() {
   const handleExport = async () => {
     setExporting(true);
     try {
+      const toCsv = (rows: (string | number | null | undefined)[][]) =>
+        rows.map((r) => r.map((c) => `"${String(c ?? '').replace(/"/g, '""')}"`).join(',')).join('\n');
+
       if (pathname === '/people') {
         const res = await users.list({ limit: 1000 });
-        const rows = res.data;
-        const header = ['Employee Code', 'Full Name', 'Email', 'Designation', 'Department', 'Status'];
-        const csv = [header.join(','), ...rows.map((u) =>
-          [u.employee_code, `"${u.full_name}"`, u.email, u.designation ?? '', u.department ?? '', u.status].join(',')
-        )].join('\n');
-        downloadCsv(csv, 'employees-export.csv');
+        const rows: (string | number | null | undefined)[][] = [
+          ['Employee Code', 'Full Name', 'Email', 'Designation', 'Department', 'Status'],
+          ...res.data.map((u) => [u.employee_code, u.full_name, u.email, u.designation ?? '', u.department ?? '', u.status]),
+        ];
+        downloadCsv(toCsv(rows), 'employees-export.csv');
       } else if (pathname.startsWith('/kpis') || pathname === '/dashboard') {
         const res = await kpis.list({ limit: 1000 });
-        const rows = res.data;
-        const header = ['KPI Number', 'Name', 'Type', 'Period', 'Target', 'Current', 'Unit', 'Status', 'Start Date', 'End Date'];
-        const csv = [header.join(','), ...rows.map((k) =>
-          [k.kpi_number, `"${k.name}"`, k.type, k.period, k.target_value ?? '', k.current_value ?? '', k.unit ?? '', k.status, k.start_date ?? '', k.end_date ?? ''].join(',')
-        )].join('\n');
-        downloadCsv(csv, 'kpis-export.csv');
+        const rows: (string | number | null | undefined)[][] = [
+          ['KPI Number', 'Name', 'Type', 'Period', 'Target', 'Current', 'Unit', 'Status', 'Start Date', 'End Date'],
+          ...res.data.map((k) => [k.kpi_number, k.name, k.type, k.period, k.target_value ?? '', k.current_value ?? '', k.unit ?? '', k.status, k.start_date ?? '', k.end_date ?? '']),
+        ];
+        downloadCsv(toCsv(rows), 'kpis-export.csv');
       } else {
         router.push('/reports');
       }

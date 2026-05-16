@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
-import { kpis, cascade, regions, type Kpi, type Region, type CascadeSummary } from '@/lib/api';
+import { kpis, cascade, type Kpi, type CascadeSummary } from '@/lib/api';
 
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, { bg: string; color: string }> = {
@@ -25,18 +25,16 @@ export default function CascadePage() {
   const [rootKpis, setRootKpis] = useState<Kpi[]>([]);
   const [selectedId, setSelectedId] = useState<string>('');
   const [summary, setSummary] = useState<CascadeSummary | null>(null);
-  const [regionList, setRegionList] = useState<Region[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingSummary, setLoadingSummary] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
 
   useEffect(() => {
-    Promise.all([kpis.list({ limit: 100, status: 'active' }), regions.list()])
-      .then(([kRes, rRes]) => {
+    kpis.list({ limit: 100, status: 'active' })
+      .then((kRes) => {
         const topLevel = kRes.data.filter((k) => !k.parent_id);
         setRootKpis(topLevel);
         if (topLevel.length > 0) setSelectedId(topLevel[0].id);
-        setRegionList(rRes.data);
       }).finally(() => setLoading(false));
   }, []);
 
@@ -200,7 +198,6 @@ export default function CascadePage() {
         <AddChildModal
           parent={summary.parent}
           remainingPct={summary.remaining_pct}
-          regions={regionList}
           onClose={() => setShowCreate(false)}
           onSaved={() => { setShowCreate(false); loadSummary(selectedId); }}
         />
@@ -259,7 +256,7 @@ function KpiTreeNode({ kpi, level, selectedId, onSelect, levelColor }: { kpi: Kp
   );
 }
 
-function AddChildModal({ parent, remainingPct, regions: regionList, onClose, onSaved }: { parent: Kpi; remainingPct: number; regions: Region[]; onClose: () => void; onSaved: () => void }) {
+function AddChildModal({ parent, remainingPct, onClose, onSaved }: { parent: Kpi; remainingPct: number; onClose: () => void; onSaved: () => void }) {
   const [form, setForm] = useState({ name: '', type: 'quantitative', period: 'quarterly', update_frequency: 'monthly', target_value: '', unit: parent.unit ?? '', allocation_pct: String(Math.min(remainingPct, 50)) });
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);

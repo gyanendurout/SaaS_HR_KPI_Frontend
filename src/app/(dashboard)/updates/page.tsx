@@ -13,8 +13,11 @@ export default function UpdatesPage() {
   const [form, setForm] = useState<{ current_value: string; status: string }>({ current_value: '', status: 'active' });
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
+  // Snapshot "now" once after mount so render stays pure and comparisons are stable.
+  const [now, setNow] = useState<number>(0);
 
   useEffect(() => {
+    setNow(Date.now());
     if (!currentUser) return;
     Promise.all([users.kpis(currentUser.id), users.list({ limit: 100 })])
       .then(([kpisRes, usersRes]) => {
@@ -24,7 +27,8 @@ export default function UpdatesPage() {
   }, [currentUser]);
 
   const ownerName = (ownerId: string | null) => allUsers.find((u) => u.id === ownerId)?.full_name ?? '—';
-  const dueKpis = myKpis.filter((k) => k.next_due_date && new Date(k.next_due_date) <= new Date(Date.now() + 7 * 86400000));
+  const soonCutoff = now + 7 * 86400000;
+  const dueKpis = myKpis.filter((k) => k.next_due_date && new Date(k.next_due_date).getTime() <= soonCutoff);
 
   const handleOpenUpdate = (k: Kpi) => {
     setUpdating(k.id);
@@ -78,8 +82,9 @@ export default function UpdatesPage() {
               </thead>
               <tbody>
                 {myKpis.map((k) => {
-                  const isDue = k.next_due_date && new Date(k.next_due_date) <= new Date(Date.now() + 7 * 86400000);
-                  const isOverdue = k.next_due_date && new Date(k.next_due_date) < new Date();
+                  const due = k.next_due_date ? new Date(k.next_due_date).getTime() : null;
+                  const isDue = due !== null && due <= soonCutoff;
+                  const isOverdue = due !== null && due < now;
                   const isUpdating = updating === k.id;
                   return (
                     <Fragment key={k.id}>

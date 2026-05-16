@@ -49,27 +49,23 @@ export default function DashboardPage() {
   useEffect(() => {
     const load = async () => {
       try {
-        const [kpisRes, usersRes, approvalsRes] = await Promise.all([
+        const [kpisRes, usersRes, approvalsRes] = await Promise.allSettled([
           kpis.list({ limit: 200 }),
           users.list({ limit: 100 }),
           approvals.list({ status: 'pending', limit: 5 }),
         ]);
-        setAllKpis(kpisRes.data);
-        setAllUsers(usersRes.data);
-        setPendingApprovals(approvalsRes.data);
+        if (kpisRes.status === 'fulfilled') setAllKpis(kpisRes.value.data);
+        else console.error('[dashboard] kpis.list failed:', kpisRes.reason);
+        if (usersRes.status === 'fulfilled') setAllUsers(usersRes.value.data);
+        else console.error('[dashboard] users.list failed:', usersRes.reason);
+        if (approvalsRes.status === 'fulfilled') setPendingApprovals(approvalsRes.value.data);
+        else console.error('[dashboard] approvals.list failed:', approvalsRes.reason);
       } finally {
         setLoading(false);
       }
     };
     load();
   }, []);
-
-  const filtered = regionTab === 'all'
-    ? allKpis
-    : allKpis.filter((k) => {
-        const region = allUsers.find((u) => u.id === k.owner_id)?.region_id;
-        return k.kpi_number.includes(regionTab) || regionTab === 'all';
-      });
 
   const byStatus = (s: string) => allKpis.filter((k) => k.status === s).length;
   const ownerName = (ownerId: string | null) => allUsers.find((u) => u.id === ownerId)?.full_name ?? '—';

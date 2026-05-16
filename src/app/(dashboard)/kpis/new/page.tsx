@@ -90,7 +90,7 @@ export default function NewKpiPage() {
       <div style={{ padding: '22px 26px' }}>
         <div style={{ marginBottom: 24 }}>
           <div style={{ fontSize: 15, fontWeight: 800, letterSpacing: '-.2px', marginBottom: 3, color: '#111110' }}>Add New KPI</div>
-          <div style={{ fontSize: 12, color: '#8a8580' }}>Choose how you'd like to create your KPI</div>
+          <div style={{ fontSize: 12, color: '#8a8580' }}>Choose how you&apos;d like to create your KPI</div>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 14, maxWidth: 700 }}>

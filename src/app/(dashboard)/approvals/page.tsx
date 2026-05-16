@@ -65,8 +65,6 @@ export default function ApprovalsPage() {
     } finally { setActioning(null); }
   };
 
-  const pendingCount = data.filter((a) => a.status === 'pending').length;
-
   const tabs: { id: TabId; label: string; count?: number }[] = [
     { id: 'pending',  label: 'Pending',  count: activeTab === 'pending'  ? total : undefined },
     { id: 'approved', label: 'Approved', count: activeTab === 'approved' ? total : undefined },

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth';
-import { auth, approvals, notifications } from '@/lib/api';
+import { auth, approvals } from '@/lib/api';
 
 const NAV_SECTIONS = [
   {
@@ -45,11 +45,9 @@ export default function Sidebar() {
   const { user, clearAuth } = useAuthStore();
   const [confirmLogout, setConfirmLogout] = useState(false);
   const [pendingCount, setPendingCount] = useState(0);
-  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     approvals.pendingCount().then((r) => setPendingCount(r.data.count)).catch(() => {});
-    notifications.unreadCount().then((r) => setUnreadCount(r.data.count)).catch(() => {});
   }, []);
 
   const handleLogout = async () => {

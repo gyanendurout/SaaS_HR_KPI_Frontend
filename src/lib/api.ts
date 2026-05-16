@@ -89,10 +89,6 @@ export interface Region {
   id: string;
   name: string;
   code: string;
-  flag: string | null;
-  description: string | null;
-  color: string | null;
-  parent_id: string | null;
 }
 
 export const regions = {

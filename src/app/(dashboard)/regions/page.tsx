@@ -36,9 +36,6 @@ export default function RegionsPage() {
 
   const getRegionColor = (idx: number) => REGION_COLORS[idx % REGION_COLORS.length];
 
-  const parentRegions = allRegions.filter((r) => !r.parent_id);
-  const childRegions = (parentId: string) => allRegions.filter((r) => r.parent_id === parentId);
-
   const selectedKpis = selectedRegion ? allKpis.filter((k) => k.region_id === selectedRegion.id) : [];
   const selectedUsers = selectedRegion ? allUsers.filter((u) => u.region_id === selectedRegion.id) : [];
 
@@ -77,11 +74,10 @@ export default function RegionsPage() {
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {(parentRegions.length > 0 ? parentRegions : allRegions).map((region, idx) => {
+              {allRegions.map((region, idx) => {
                 const stats = regionStats(region);
                 const color = getRegionColor(idx);
                 const isSelected = selectedRegion?.id === region.id;
-                const children = childRegions(region.id);
                 return (
                   <div key={region.id}>
                     <div
@@ -92,12 +88,7 @@ export default function RegionsPage() {
                           <div style={{ fontSize: 13.5, fontWeight: 700, color: '#111110', letterSpacing: '-.1px', marginBottom: 2 }}>{region.name}</div>
                           <div style={{ fontSize: 11, fontWeight: 600, color: '#8a8580', letterSpacing: '.5px', fontFamily: 'monospace' }}>{region.code}</div>
                         </div>
-                        <div style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
-                          {children.length > 0 && (
-                            <span style={{ fontSize: 10.5, fontWeight: 600, padding: '2px 7px', borderRadius: 4, background: '#f0efec', color: '#8a8580' }}>{children.length} sub-regions</span>
-                          )}
-                          <span style={{ fontSize: 11, color: isSelected ? color : '#8a8580', fontWeight: 700 }}>{isSelected ? '▲' : '▼'}</span>
-                        </div>
+                        <span style={{ fontSize: 11, color: isSelected ? color : '#8a8580', fontWeight: 700 }}>{isSelected ? '▲' : '▼'}</span>
                       </div>
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6 }}>
                         {[
@@ -113,29 +104,6 @@ export default function RegionsPage() {
                         ))}
                       </div>
                     </div>
-                    {/* Sub-regions */}
-                    {children.length > 0 && (
-                      <div style={{ marginLeft: 20, marginTop: 6, display: 'flex', flexDirection: 'column', gap: 6 }}>
-                        {children.map((child, ci) => {
-                          const cStats = regionStats(child);
-                          const cColor = getRegionColor(idx + ci + 1);
-                          const cSelected = selectedRegion?.id === child.id;
-                          return (
-                            <div key={child.id} onClick={() => setSelectedRegion(cSelected ? null : child)}
-                              style={{ background: '#fff', border: `1.5px solid ${cSelected ? cColor : '#e2dfd8'}`, borderLeft: `3px solid ${cColor}`, borderRadius: 8, padding: '10px 14px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
-                              <div>
-                                <span style={{ fontSize: 12.5, fontWeight: 600, color: '#111110' }}>{child.name}</span>
-                                <span style={{ fontSize: 10.5, color: '#8a8580', marginLeft: 8, fontFamily: 'monospace' }}>{child.code}</span>
-                              </div>
-                              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                                <span style={{ fontSize: 11.5, color: '#4a4640', fontWeight: 600 }}>{cStats.total} KPIs</span>
-                                <span style={{ fontSize: 11.5, color: '#8a8580' }}>{cStats.users} people</span>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
                   </div>
                 );
               })}
