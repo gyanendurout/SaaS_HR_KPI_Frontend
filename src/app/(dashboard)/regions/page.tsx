@@ -10,6 +10,11 @@ export default function RegionsPage() {
   const [loading, setLoading] = useState(true);
   const [selectedRegion, setSelectedRegion] = useState<Region | null>(null);
 
+  const [modalOpen, setModalOpen] = useState(false);
+  const [form, setForm] = useState({ name: '', code: '' });
+  const [saving, setSaving] = useState(false);
+  const [formError, setFormError] = useState('');
+
   useEffect(() => {
     Promise.all([regions.list(), kpis.list({ limit: 200 }), users.list({ limit: 200 })])
       .then(([rRes, kRes, uRes]) => {
@@ -32,6 +37,21 @@ export default function RegionsPage() {
     };
   };
 
+  const handleCreate = async () => {
+    if (!form.name.trim() || !form.code.trim()) { setFormError('Name and code are required.'); return; }
+    setSaving(true); setFormError('');
+    try {
+      const res = await regions.create({ name: form.name.trim(), code: form.code.trim() });
+      setAllRegions((prev) => [...prev, res.data].sort((a, b) => a.name.localeCompare(b.name)));
+      setForm({ name: '', code: '' });
+      setModalOpen(false);
+    } catch (e: unknown) {
+      setFormError(e instanceof Error ? e.message : 'Failed to create region.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const REGION_COLORS = ['#1a7a4a', '#1854a8', '#b45309', '#7c3aed', '#b91c1c', '#0e7490', '#92400e'];
 
   const getRegionColor = (idx: number) => REGION_COLORS[idx % REGION_COLORS.length];
@@ -44,9 +64,14 @@ export default function RegionsPage() {
   return (
     <div style={{ padding: '22px 26px' }}>
       {/* Header */}
-      <div style={{ marginBottom: 20 }}>
-        <div style={{ fontSize: 15, fontWeight: 800, letterSpacing: '-.2px', marginBottom: 3, color: '#111110' }}>Regions & Workspaces</div>
-        <div style={{ fontSize: 12, color: '#8a8580' }}>KPI performance by region — {allRegions.length} region{allRegions.length !== 1 ? 's' : ''} · {allKpis.filter((k) => k.status !== 'cancelled').length} active KPIs total</div>
+      <div style={{ marginBottom: 20, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+        <div>
+          <div style={{ fontSize: 15, fontWeight: 800, letterSpacing: '-.2px', marginBottom: 3, color: '#111110' }}>Regions & Workspaces</div>
+          <div style={{ fontSize: 12, color: '#8a8580' }}>KPI performance by region — {allRegions.length} region{allRegions.length !== 1 ? 's' : ''} · {allKpis.filter((k) => k.status !== 'cancelled').length} active KPIs total</div>
+        </div>
+        <button type="button" className="btn btn-black" onClick={() => { setForm({ name: '', code: '' }); setFormError(''); setModalOpen(true); }}>
+          + New Region
+        </button>
       </div>
 
       {/* Summary stats */}
@@ -168,6 +193,54 @@ export default function RegionsPage() {
           </div>
         )}
       </div>
+      {/* Add Region Modal */}
+      {modalOpen && (
+        <div className="modal-bg" onClick={() => setModalOpen(false)}>
+          <div className="modal" style={{ width: 420 }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+              <h2 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: '#111110' }}>New Region</h2>
+              <button type="button" onClick={() => setModalOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#8a8580', fontSize: 18, lineHeight: 1, padding: 4, fontFamily: 'inherit' }}>×</button>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div>
+                <label className="flabel">Region Name</label>
+                <input
+                  className="fi w-full"
+                  type="text"
+                  placeholder="e.g. South Asia"
+                  value={form.name}
+                  onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+                />
+              </div>
+              <div>
+                <label className="flabel">Region Code</label>
+                <input
+                  className="fi w-full"
+                  type="text"
+                  placeholder="e.g. SA (auto-uppercased)"
+                  value={form.code}
+                  onChange={(e) => setForm((f) => ({ ...f, code: e.target.value }))}
+                  maxLength={10}
+                />
+              </div>
+
+              {formError && (
+                <div style={{ padding: '9px 12px', background: 'rgba(185,28,28,.07)', border: '1px solid rgba(185,28,28,.2)', borderRadius: 7, fontSize: 12.5, color: '#b91c1c' }}>
+                  {formError}
+                </div>
+              )}
+
+              <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 4 }}>
+                <button type="button" className="btn btn-outline" onClick={() => setModalOpen(false)}>Cancel</button>
+                <button type="button" className="btn btn-black" onClick={handleCreate} disabled={saving}>
+                  {saving ? 'Creating…' : 'Create Region'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

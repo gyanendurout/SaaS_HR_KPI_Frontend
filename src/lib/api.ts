@@ -97,6 +97,12 @@ export const regions = {
 
   getById: (id: string) =>
     request<{ success: boolean; data: Region }>(`/api/regions/${id}`),
+
+  create: (body: { name: string; code: string }) =>
+    request<{ success: boolean; data: Region }>('/api/regions', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
 };
 
 // ─── Users ───────────────────────────────────────────────────────────────────

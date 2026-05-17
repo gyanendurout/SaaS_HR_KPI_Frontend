@@ -17,14 +17,14 @@ export default function AssignmentsPage() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    Promise.all([
+    Promise.allSettled([
       kpis.list({ limit: 200 }),
       users.list({ limit: 200 }),
       regions.list(),
     ]).then(([kRes, uRes, rRes]) => {
-      setAllKpis(kRes.data);
-      setAllUsers(uRes.data);
-      setAllRegions(rRes.data);
+      if (kRes.status === 'fulfilled') setAllKpis(kRes.value.data);
+      if (uRes.status === 'fulfilled') setAllUsers(uRes.value.data);
+      if (rRes.status === 'fulfilled') setAllRegions(rRes.value.data);
     }).finally(() => setLoading(false));
   }, []);
 

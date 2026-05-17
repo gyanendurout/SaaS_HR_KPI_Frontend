@@ -32,9 +32,9 @@ export default function NewKpiPage() {
   const [allRegions, setAllRegions] = useState<Region[]>([]);
 
   useEffect(() => {
-    Promise.all([users.list({ limit: 200 }), regions.list()]).then(([uRes, rRes]) => {
-      setAllUsers(uRes.data);
-      setAllRegions(rRes.data);
+    Promise.allSettled([users.list({ limit: 200 }), regions.list()]).then(([uRes, rRes]) => {
+      if (uRes.status === 'fulfilled') setAllUsers(uRes.value.data);
+      if (rRes.status === 'fulfilled') setAllRegions(rRes.value.data);
     });
   }, []);
 
