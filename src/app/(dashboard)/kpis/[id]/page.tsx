@@ -163,14 +163,14 @@ export default function KpiDetailPage() {
           {kpi.description && <p className="mt-2 text-sm" style={{ color: 'var(--t3)' }}>{kpi.description}</p>}
         </div>
         <div className="flex items-center gap-2">
-          <button
+          <button type="button"
             onClick={() => setEditing(!editing)}
             className="px-3.5 py-2 rounded-lg text-xs font-semibold"
             style={{ border: '1px solid var(--border)', background: 'var(--card)' }}
           >
             {editing ? 'Cancel Edit' : 'Update Progress'}
           </button>
-          <button
+          <button type="button"
             onClick={() => setEditingMeta(!editingMeta)}
             className="px-3.5 py-2 rounded-lg text-xs font-semibold"
             style={{ border: '1px solid var(--border)', background: 'var(--card)' }}
@@ -178,7 +178,7 @@ export default function KpiDetailPage() {
             {editingMeta ? 'Cancel Edit' : 'Edit KPI'}
           </button>
           {kpi.status !== 'cancelled' && (
-            <button
+            <button type="button"
               onClick={handleCancel}
               className="px-3.5 py-2 rounded-lg text-xs font-semibold"
               style={{ border: '1px solid rgba(185,28,28,.3)', color: 'var(--red)', background: 'rgba(185,28,28,.05)' }}
@@ -225,7 +225,7 @@ export default function KpiDetailPage() {
             </div>
           </div>
           <div className="flex gap-2">
-            <button
+            <button type="button"
               onClick={handleUpdate}
               disabled={saving}
               className="px-4 py-2 rounded-lg text-sm font-semibold disabled:opacity-50"
@@ -233,7 +233,7 @@ export default function KpiDetailPage() {
             >
               {saving ? 'Saving…' : 'Save Update'}
             </button>
-            <button onClick={() => setEditing(false)} className="px-4 py-2 rounded-lg text-sm font-semibold" style={{ border: '1px solid var(--border)' }}>
+            <button type="button" onClick={() => setEditing(false)} className="px-4 py-2 rounded-lg text-sm font-semibold" style={{ border: '1px solid var(--border)' }}>
               Cancel
             </button>
           </div>
@@ -258,15 +258,26 @@ export default function KpiDetailPage() {
             </div>
             <div>
               <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style={{ color: 'var(--t3)' }}>Type</label>
-              <input className="fi w-full" type="text" value={metaForm.type} onChange={(e) => setMetaForm((f) => ({ ...f, type: e.target.value }))} />
+              <select className="fi w-full" value={metaForm.type} onChange={(e) => setMetaForm((f) => ({ ...f, type: e.target.value }))}>
+                <option value="quantitative">Quantitative</option>
+                <option value="qualitative">Qualitative</option>
+              </select>
             </div>
             <div>
               <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style={{ color: 'var(--t3)' }}>Period</label>
-              <input className="fi w-full" type="text" value={metaForm.period} onChange={(e) => setMetaForm((f) => ({ ...f, period: e.target.value }))} />
+              <select className="fi w-full" value={metaForm.period} onChange={(e) => setMetaForm((f) => ({ ...f, period: e.target.value }))}>
+                <option value="monthly">Monthly</option>
+                <option value="quarterly">Quarterly</option>
+                <option value="annual">Annual</option>
+              </select>
             </div>
             <div>
               <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style={{ color: 'var(--t3)' }}>Update Frequency</label>
-              <input className="fi w-full" type="text" value={metaForm.update_frequency} onChange={(e) => setMetaForm((f) => ({ ...f, update_frequency: e.target.value }))} />
+              <select className="fi w-full" value={metaForm.update_frequency} onChange={(e) => setMetaForm((f) => ({ ...f, update_frequency: e.target.value }))}>
+                <option value="weekly">Weekly</option>
+                <option value="monthly">Monthly</option>
+                <option value="quarterly">Quarterly</option>
+              </select>
             </div>
             <div>
               <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style={{ color: 'var(--t3)' }}>Target Value</label>
@@ -286,15 +297,10 @@ export default function KpiDetailPage() {
             </div>
           </div>
           <div className="flex gap-2">
-            <button
-              onClick={handleMetaUpdate}
-              disabled={saving}
-              className="px-4 py-2 rounded-lg text-sm font-semibold disabled:opacity-50"
-              style={{ background: '#000', color: '#fff' }}
-            >
+            <button type="button" onClick={handleMetaUpdate} disabled={saving} className="btn btn-black">
               {saving ? 'Saving…' : 'Save Changes'}
             </button>
-            <button onClick={() => setEditingMeta(false)} className="px-4 py-2 rounded-lg text-sm font-semibold" style={{ border: '1px solid var(--border)' }}>
+            <button type="button" onClick={() => setEditingMeta(false)} className="btn btn-outline">
               Cancel
             </button>
           </div>

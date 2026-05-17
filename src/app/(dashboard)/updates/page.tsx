@@ -117,13 +117,13 @@ export default function UpdatesPage() {
                         </td>
                         <td style={{ padding: '11px 14px' }}>
                           {!isUpdating ? (
-                            <button onClick={() => handleOpenUpdate(k)} style={{ fontSize: 11.5, padding: '5px 11px', borderRadius: 5, border: '1px solid #e2dfd8', background: '#f8f7f5', cursor: 'pointer', color: '#4a4640', fontFamily: 'inherit', fontWeight: 600, transition: 'all .13s' }}
+                            <button type="button" onClick={() => handleOpenUpdate(k)} style={{ fontSize: 11.5, padding: '5px 11px', borderRadius: 5, border: '1px solid #e2dfd8', background: '#f8f7f5', cursor: 'pointer', color: '#4a4640', fontFamily: 'inherit', fontWeight: 600, transition: 'all .13s' }}
                               onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = '#000'; (e.currentTarget as HTMLElement).style.background = '#fff'; }}
                               onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = '#e2dfd8'; (e.currentTarget as HTMLElement).style.background = '#f8f7f5'; }}>
                               Log Update
                             </button>
                           ) : (
-                            <button onClick={() => setUpdating(null)} style={{ fontSize: 11.5, padding: '5px 11px', borderRadius: 5, border: '1px solid #e2dfd8', background: '#fff', cursor: 'pointer', color: '#8a8580', fontFamily: 'inherit' }}>Cancel</button>
+                            <button type="button" onClick={() => setUpdating(null)} style={{ fontSize: 11.5, padding: '5px 11px', borderRadius: 5, border: '1px solid #e2dfd8', background: '#fff', cursor: 'pointer', color: '#8a8580', fontFamily: 'inherit' }}>Cancel</button>
                           )}
                         </td>
                       </tr>
@@ -157,10 +157,10 @@ export default function UpdatesPage() {
                                 </select>
                               </div>
                               <div style={{ display: 'flex', gap: 8 }}>
-                                <button onClick={() => handleSave(k.id)} disabled={saving} style={{ padding: '8px 16px', borderRadius: 6, fontSize: 12.5, fontWeight: 600, cursor: saving ? 'not-allowed' : 'pointer', background: '#000', color: '#fff', border: '1px solid #000', fontFamily: 'inherit', opacity: saving ? .6 : 1 }}>
+                                <button type="button" onClick={() => handleSave(k.id)} disabled={saving} style={{ padding: '8px 16px', borderRadius: 6, fontSize: 12.5, fontWeight: 600, cursor: saving ? 'not-allowed' : 'pointer', background: '#000', color: '#fff', border: '1px solid #000', fontFamily: 'inherit', opacity: saving ? .6 : 1 }}>
                                   {saving ? 'Saving…' : 'Save Update'}
                                 </button>
-                                <button onClick={() => setUpdating(null)} style={{ padding: '8px 16px', borderRadius: 6, fontSize: 12.5, fontWeight: 500, cursor: 'pointer', background: '#fff', border: '1px solid #cdc9c1', color: '#4a4640', fontFamily: 'inherit' }}>Cancel</button>
+                                <button type="button" onClick={() => setUpdating(null)} style={{ padding: '8px 16px', borderRadius: 6, fontSize: 12.5, fontWeight: 500, cursor: 'pointer', background: '#fff', border: '1px solid #cdc9c1', color: '#4a4640', fontFamily: 'inherit' }}>Cancel</button>
                               </div>
                             </div>
                           </td>

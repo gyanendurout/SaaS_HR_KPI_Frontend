@@ -53,7 +53,7 @@ export default function PeoplePage() {
           <p className="text-sm mt-0.5" style={{ color: 'var(--t3)' }}>{total} members</p>
         </div>
         {currentUser?.is_admin && (
-          <button
+          <button type="button"
             onClick={() => setShowCreate(true)}
             className="px-4 py-2 rounded-lg text-sm font-semibold hover:opacity-80"
             style={{ background: '#000', color: '#fff' }}
@@ -128,7 +128,7 @@ export default function PeoplePage() {
                 </div>
                 {currentUser?.is_admin && (
                   <div className="flex gap-1.5">
-                    <button
+                    <button type="button"
                       onClick={() => setEditUser(u)}
                       className="text-xs px-2.5 py-1 rounded-lg"
                       style={{ border: '1px solid var(--border)', color: 'var(--t2)' }}
@@ -136,7 +136,7 @@ export default function PeoplePage() {
                       Edit
                     </button>
                     {u.status === 'active' && u.id !== currentUser.id && (
-                      <button
+                      <button type="button"
                         onClick={async () => {
                           if (!confirm(`Deactivate ${u.full_name}?`)) return;
                           await users.deactivate(u.id);
@@ -163,10 +163,10 @@ export default function PeoplePage() {
             Showing {(page - 1) * LIMIT + 1}–{Math.min(page * LIMIT, total)} of {total}
           </p>
           <div className="flex gap-2">
-            <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}
+            <button type="button" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}
               className="px-3 py-1.5 rounded-lg text-xs font-semibold disabled:opacity-40"
               style={{ border: '1px solid var(--border)', background: 'var(--card)' }}>← Prev</button>
-            <button onClick={() => setPage((p) => p + 1)} disabled={page * LIMIT >= total}
+            <button type="button" onClick={() => setPage((p) => p + 1)} disabled={page * LIMIT >= total}
               className="px-3 py-1.5 rounded-lg text-xs font-semibold disabled:opacity-40"
               style={{ border: '1px solid var(--border)', background: 'var(--card)' }}>Next →</button>
           </div>
@@ -329,8 +329,8 @@ function UserModal({
           {error && <p className="text-xs" style={{ color: 'var(--red)' }}>{error}</p>}
         </div>
         <div className="flex items-center justify-end gap-3 px-6 py-4" style={{ borderTop: '1px solid var(--border)' }}>
-          <button onClick={onClose} className="px-4 py-2 rounded-lg text-sm font-semibold" style={{ border: '1px solid var(--border)' }}>Cancel</button>
-          <button onClick={handleSave} disabled={saving} className="px-4 py-2 rounded-lg text-sm font-semibold disabled:opacity-50" style={{ background: '#000', color: '#fff' }}>
+          <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg text-sm font-semibold" style={{ border: '1px solid var(--border)' }}>Cancel</button>
+          <button type="button" onClick={handleSave} disabled={saving} className="px-4 py-2 rounded-lg text-sm font-semibold disabled:opacity-50" style={{ background: '#000', color: '#fff' }}>
             {saving ? 'Saving…' : mode === 'create' ? 'Add Member' : 'Save Changes'}
           </button>
         </div>

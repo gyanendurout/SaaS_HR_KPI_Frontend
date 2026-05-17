@@ -66,7 +66,7 @@ export default function CascadePage() {
             <div style={{ fontSize: 12, color: '#8a8580', marginTop: 2 }}>Parent → Child hierarchy with KPI numbers</div>
           </div>
           {selectedId && summary && summary.remaining_pct > 0 && (
-            <button
+            <button type="button"
               onClick={() => setShowCreate(true)}
               style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '6px 12px', borderRadius: 6, fontSize: 12.5, fontFamily: 'inherit', fontWeight: 600, cursor: 'pointer', background: '#000', color: '#fff', border: 'none', transition: 'opacity .15s' }}
               onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.opacity = '.85')}
@@ -176,7 +176,7 @@ export default function CascadePage() {
                             <span style={{ fontSize: 10.5, color: '#8a8580', fontWeight: 600 }}>{pct}%</span>
                           </div>
                         )}
-                        <button
+                        <button type="button"
                           onClick={async () => {
                             if (!confirm(`Remove "${child.name}" from cascade?`)) return;
                             await cascade.remove(selectedId, child.id);
@@ -231,14 +231,16 @@ function KpiTreeNode({ kpi, level, selectedId, onSelect, levelColor }: { kpi: Kp
         onClick={() => { onSelect(kpi.id); setExpanded((e) => !e); }}
         style={{
           display: 'flex', alignItems: 'center', gap: 9, padding: '10px 13px',
-          border: `1.5px solid ${isSelected ? '#000' : '#e2dfd8'}`,
+          borderTop: `1.5px solid ${isSelected ? '#000' : '#e2dfd8'}`,
+          borderRight: `1.5px solid ${isSelected ? '#000' : '#e2dfd8'}`,
+          borderBottom: `1.5px solid ${isSelected ? '#000' : '#e2dfd8'}`,
           borderLeft: `4px solid ${borderColor}`,
           borderRadius: 9, background: isSelected ? '#f0efec' : '#fff',
           cursor: 'pointer', transition: 'all .14s', marginBottom: 4,
           boxShadow: isSelected ? '0 0 0 3px rgba(0,0,0,.06)' : '0 1px 3px rgba(0,0,0,.06)',
         }}
-        onMouseEnter={(e) => { if (!isSelected) (e.currentTarget as HTMLElement).style.borderColor = '#cdc9c1'; }}
-        onMouseLeave={(e) => { if (!isSelected) (e.currentTarget as HTMLElement).style.borderColor = '#e2dfd8'; }}
+        onMouseEnter={(e) => { if (!isSelected) { const el = e.currentTarget as HTMLElement; el.style.borderTopColor = '#cdc9c1'; el.style.borderRightColor = '#cdc9c1'; el.style.borderBottomColor = '#cdc9c1'; } }}
+        onMouseLeave={(e) => { if (!isSelected) { const el = e.currentTarget as HTMLElement; el.style.borderTopColor = '#e2dfd8'; el.style.borderRightColor = '#e2dfd8'; el.style.borderBottomColor = '#e2dfd8'; } }}
       >
         <span style={{ fontFamily: 'monospace', fontSize: 9.5, fontWeight: 700, padding: '2px 6px', borderRadius: 3, background: borderColor === '#000' ? '#000' : borderColor + '20', color: borderColor === '#000' ? '#fff' : borderColor, flexShrink: 0 }}>{kpi.kpi_number}</span>
         <span style={{ fontSize: 13, fontWeight: 700, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', letterSpacing: '-.1px', color: '#111110' }}>{kpi.name}</span>
@@ -284,7 +286,7 @@ function AddChildModal({ parent, remainingPct, onClose, onSaved }: { parent: Kpi
             <div style={{ fontSize: 18, fontWeight: 800, letterSpacing: '-.3px' }}>Add Child KPI</div>
             <div style={{ fontSize: 12, color: '#8a8580', marginTop: 2 }}>Under: {parent.kpi_number} · {remainingPct}% available</div>
           </div>
-          <button onClick={onClose} style={{ background: '#f0efec', border: '1px solid #e2dfd8', width: 28, height: 28, borderRadius: 6, cursor: 'pointer', color: '#4a4640', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
+          <button type="button" onClick={onClose} style={{ background: '#f0efec', border: '1px solid #e2dfd8', width: 28, height: 28, borderRadius: 6, cursor: 'pointer', color: '#4a4640', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
         </div>
         <div style={{ padding: '20px 24px' }}>
           <div style={{ marginBottom: 13 }}><label style={labelStyle}>Name *</label><input style={inputStyle} value={form.name} onChange={(e) => set('name', e.target.value)} placeholder="Child KPI name" onFocus={(e) => (e.target.style.borderColor = '#000')} onBlur={(e) => (e.target.style.borderColor = '#e2dfd8')} /></div>
@@ -299,8 +301,8 @@ function AddChildModal({ parent, remainingPct, onClose, onSaved }: { parent: Kpi
           {error && <div style={{ fontSize: 12, padding: '9px 12px', borderRadius: 7, background: 'rgba(185,28,28,.08)', color: '#b91c1c', border: '1px solid rgba(185,28,28,.2)' }}>{error}</div>}
         </div>
         <div style={{ padding: '13px 24px', borderTop: '1px solid #e2dfd8', display: 'flex', justifyContent: 'flex-end', gap: 7 }}>
-          <button onClick={onClose} style={{ padding: '8px 16px', borderRadius: 6, fontSize: 13, fontWeight: 500, cursor: 'pointer', background: '#fff', border: '1px solid #cdc9c1', color: '#4a4640', fontFamily: 'inherit' }}>Cancel</button>
-          <button onClick={handleSave} disabled={saving} style={{ padding: '8px 16px', borderRadius: 6, fontSize: 13, fontWeight: 600, cursor: saving ? 'not-allowed' : 'pointer', background: '#000', color: '#fff', border: '1px solid #000', fontFamily: 'inherit', opacity: saving ? .6 : 1 }}>
+          <button type="button" onClick={onClose} style={{ padding: '8px 16px', borderRadius: 6, fontSize: 13, fontWeight: 500, cursor: 'pointer', background: '#fff', border: '1px solid #cdc9c1', color: '#4a4640', fontFamily: 'inherit' }}>Cancel</button>
+          <button type="button" onClick={handleSave} disabled={saving} style={{ padding: '8px 16px', borderRadius: 6, fontSize: 13, fontWeight: 600, cursor: saving ? 'not-allowed' : 'pointer', background: '#000', color: '#fff', border: '1px solid #000', fontFamily: 'inherit', opacity: saving ? .6 : 1 }}>
             {saving ? 'Saving…' : 'Add Child KPI'}
           </button>
         </div>

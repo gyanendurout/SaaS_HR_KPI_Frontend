@@ -100,7 +100,7 @@ export default function AssignmentsPage() {
           {allRegions.map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}
         </select>
         {(search || filterStatus || filterRegion) && (
-          <button onClick={() => { setSearch(''); setFilterStatus(''); setFilterRegion(''); }} style={{ padding: '8px 12px', borderRadius: 7, fontSize: 12, cursor: 'pointer', background: '#fff', border: '1px solid #e2dfd8', color: '#8a8580', fontFamily: 'inherit' }}>Clear</button>
+          <button type="button" onClick={() => { setSearch(''); setFilterStatus(''); setFilterRegion(''); }} style={{ padding: '8px 12px', borderRadius: 7, fontSize: 12, cursor: 'pointer', background: '#fff', border: '1px solid #e2dfd8', color: '#8a8580', fontFamily: 'inherit' }}>Clear</button>
         )}
         <span style={{ marginLeft: 'auto', fontSize: 12, color: '#8a8580' }}>{filtered.length} KPI{filtered.length !== 1 ? 's' : ''}</span>
       </div>
@@ -156,13 +156,13 @@ export default function AssignmentsPage() {
                         </td>
                         <td style={{ padding: '10px 14px' }}>
                           {!isAssigning ? (
-                            <button
+                            <button type="button"
                               onClick={() => handleOpenAssign(k)}
                               style={{ fontSize: 11.5, padding: '5px 11px', borderRadius: 5, border: `1px solid ${isUnassigned ? 'rgba(185,28,28,.3)' : '#e2dfd8'}`, background: isUnassigned ? 'rgba(185,28,28,.06)' : '#f8f7f5', cursor: 'pointer', color: isUnassigned ? '#b91c1c' : '#4a4640', fontFamily: 'inherit', fontWeight: 600 }}>
                               {isUnassigned ? 'Assign' : 'Reassign'}
                             </button>
                           ) : (
-                            <button onClick={() => setAssigning(null)} style={{ fontSize: 11.5, padding: '5px 11px', borderRadius: 5, border: '1px solid #e2dfd8', background: '#fff', cursor: 'pointer', color: '#8a8580', fontFamily: 'inherit' }}>Cancel</button>
+                            <button type="button" onClick={() => setAssigning(null)} style={{ fontSize: 11.5, padding: '5px 11px', borderRadius: 5, border: '1px solid #e2dfd8', background: '#fff', cursor: 'pointer', color: '#8a8580', fontFamily: 'inherit' }}>Cancel</button>
                           )}
                         </td>
                       </tr>
@@ -183,10 +183,10 @@ export default function AssignmentsPage() {
                                 </select>
                               </div>
                               <div style={{ display: 'flex', gap: 8 }}>
-                                <button onClick={() => handleSaveAssign(k.id)} disabled={saving} style={{ padding: '8px 16px', borderRadius: 6, fontSize: 12.5, fontWeight: 600, cursor: saving ? 'not-allowed' : 'pointer', background: '#000', color: '#fff', border: '1px solid #000', fontFamily: 'inherit', opacity: saving ? .6 : 1 }}>
+                                <button type="button" onClick={() => handleSaveAssign(k.id)} disabled={saving} style={{ padding: '8px 16px', borderRadius: 6, fontSize: 12.5, fontWeight: 600, cursor: saving ? 'not-allowed' : 'pointer', background: '#000', color: '#fff', border: '1px solid #000', fontFamily: 'inherit', opacity: saving ? .6 : 1 }}>
                                   {saving ? 'Saving…' : 'Confirm Assignment'}
                                 </button>
-                                <button onClick={() => setAssigning(null)} style={{ padding: '8px 16px', borderRadius: 6, fontSize: 12.5, cursor: 'pointer', background: '#fff', border: '1px solid #cdc9c1', color: '#4a4640', fontFamily: 'inherit' }}>Cancel</button>
+                                <button type="button" onClick={() => setAssigning(null)} style={{ padding: '8px 16px', borderRadius: 6, fontSize: 12.5, cursor: 'pointer', background: '#fff', border: '1px solid #cdc9c1', color: '#4a4640', fontFamily: 'inherit' }}>Cancel</button>
                               </div>
                             </div>
                           </td>

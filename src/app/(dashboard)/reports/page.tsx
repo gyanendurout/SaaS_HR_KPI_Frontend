@@ -131,7 +131,7 @@ export default function ReportsPage() {
               </div>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 14 }}>
                 <span style={{ fontSize: 12, color: '#8a8580' }}><strong style={{ color: '#111110' }}>{card.count}</strong> {card.unit}</span>
-                <button
+                <button type="button"
                   onClick={() => exportCsv(card.id)}
                   disabled={exporting === card.id}
                   style={{ padding: '7px 14px', borderRadius: 7, fontSize: 12, fontWeight: 600, cursor: exporting === card.id ? 'not-allowed' : 'pointer', background: card.color, color: '#fff', border: 'none', fontFamily: 'inherit', opacity: exporting === card.id ? .6 : 1, transition: 'opacity .13s' }}>

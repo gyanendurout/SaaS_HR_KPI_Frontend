@@ -114,30 +114,22 @@ function Topbar() {
           type="button"
           onClick={handleExport}
           disabled={exporting}
-          style={{
-            display: 'inline-flex', alignItems: 'center', gap: 5,
-            padding: '6px 12px', borderRadius: 6, fontSize: 12.5,
-            fontFamily: 'inherit', fontWeight: 500, cursor: exporting ? 'not-allowed' : 'pointer',
-            border: '1px solid #cdc9c1', background: '#fff', color: '#4a4640',
-            boxShadow: '0 1px 3px rgba(0,0,0,.08)', transition: 'all .15s',
-            opacity: exporting ? 0.6 : 1,
-          }}
-          onMouseEnter={(e) => { if (!exporting) (e.currentTarget as HTMLElement).style.background = '#eeece8'; }}
-          onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = '#fff')}
+          className="btn btn-outline btn-sm"
+          style={{ gap: 6 }}
         >
-          {exporting ? '…' : '↓'} Export
+          {exporting ? '…' : (
+            <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="6" y1="1" x2="6" y2="8"/><polyline points="3,5.5 6,8.5 9,5.5"/><line x1="2" y1="10" x2="10" y2="10"/>
+            </svg>
+          )}
+          Export
         </button>
 
         {/* Notification bell */}
         <button
-          style={{
-            width: 34, height: 34, borderRadius: 7, background: '#f8f7f5',
-            border: '1px solid #e2dfd8', display: 'flex', alignItems: 'center',
-            justifyContent: 'center', cursor: 'pointer', position: 'relative',
-            color: '#4a4640', transition: 'background .14s',
-          }}
-          onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = '#eeece8')}
-          onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = '#f8f7f5')}
+          type="button"
+          aria-label="Notifications"
+          className="icon-btn"
         >
           <BellIcon />
           <span
@@ -155,7 +147,10 @@ function Topbar() {
             display: 'flex', alignItems: 'center', gap: 8,
             padding: '5px 10px 5px 6px', background: '#f8f7f5',
             border: '1px solid #e2dfd8', borderRadius: 8, cursor: 'default',
+            transition: 'background .14s, border-color .14s',
           }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = '#eeece8'; }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = '#f8f7f5'; }}
         >
           <div
             style={{
@@ -183,7 +178,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <Sidebar />
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#f5f4f1' }}>
           <Topbar />
-          <main style={{ flex: 1, overflowY: 'auto' }}>
+          <main style={{ flex: 1, overflowY: 'auto' }} className="page-anim">
             {children}
           </main>
         </div>

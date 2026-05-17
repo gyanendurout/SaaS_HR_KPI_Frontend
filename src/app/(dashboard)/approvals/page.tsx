@@ -29,15 +29,26 @@ export default function ApprovalsPage() {
   const [actioning, setActioning] = useState<string | null>(null);
   const [reviewNote, setReviewNote] = useState('');
   const [noteTarget, setNoteTarget] = useState<{ id: string; action: 'approve' | 'reject' } | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const LIMIT = 30;
 
   const load = useCallback(async () => {
     setLoading(true);
+    setLoadError(null);
     try {
       const status = activeTab === 'all' ? undefined : activeTab;
       const res = await approvals.list({ limit: LIMIT, status });
       setData(res.data);
       setTotal(res.total);
+    } catch (e: unknown) {
+      setData([]);
+      setTotal(0);
+      const msg = e instanceof Error ? e.message : String(e);
+      if (msg.includes('schema cache') || msg.includes('does not exist')) {
+        setLoadError('schema_missing');
+      } else {
+        setLoadError(msg);
+      }
     } finally {
       setLoading(false);
     }
@@ -86,7 +97,7 @@ export default function ApprovalsPage() {
       {/* Tabs */}
       <div style={{ display: 'flex', borderBottom: '2px solid #e2dfd8', marginBottom: 18 }}>
         {tabs.map((t) => (
-          <button
+          <button type="button"
             key={t.id}
             onClick={() => setActiveTab(t.id)}
             style={{
@@ -122,7 +133,7 @@ export default function ApprovalsPage() {
               <span style={{ fontWeight: 800, fontSize: 14, color: noteTarget.action === 'approve' ? '#15633c' : '#b91c1c' }}>
                 {noteTarget.action === 'approve' ? '✓ Approve KPI' : '✕ Reject KPI'}
               </span>
-              <button onClick={() => setNoteTarget(null)} style={{ fontSize: 18, color: '#8a8580', border: 'none', background: 'none', cursor: 'pointer', lineHeight: 1 }}>×</button>
+              <button type="button" onClick={() => setNoteTarget(null)} style={{ fontSize: 18, color: '#8a8580', border: 'none', background: 'none', cursor: 'pointer', lineHeight: 1 }}>×</button>
             </div>
             <div style={{ padding: '18px 22px' }}>
               <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#4a4640', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '.4px' }}>
@@ -139,10 +150,10 @@ export default function ApprovalsPage() {
               />
             </div>
             <div style={{ padding: '14px 22px', borderTop: '1px solid #e2dfd8', display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-              <button onClick={() => setNoteTarget(null)} style={{ padding: '8px 16px', borderRadius: 7, fontSize: 13, fontWeight: 600, border: '1px solid #e2dfd8', background: '#fff', cursor: 'pointer', fontFamily: 'inherit', color: '#4a4640' }}>
+              <button type="button" onClick={() => setNoteTarget(null)} style={{ padding: '8px 16px', borderRadius: 7, fontSize: 13, fontWeight: 600, border: '1px solid #e2dfd8', background: '#fff', cursor: 'pointer', fontFamily: 'inherit', color: '#4a4640' }}>
                 Cancel
               </button>
-              <button
+              <button type="button"
                 disabled={actioning === noteTarget.id}
                 onClick={() => noteTarget.action === 'approve' ? handleApprove(noteTarget.id) : handleReject(noteTarget.id)}
                 style={{
@@ -162,6 +173,23 @@ export default function ApprovalsPage() {
       {loading ? (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 160 }}>
           <p style={{ fontSize: 13, color: '#8a8580' }}>Loading…</p>
+        </div>
+      ) : loadError === 'schema_missing' ? (
+        <div style={{ border: '1px solid rgba(180,83,9,.25)', borderLeft: '4px solid #b45309', borderRadius: 12, padding: '20px 22px', background: 'rgba(180,83,9,.04)' }}>
+          <p style={{ fontSize: 13, fontWeight: 700, color: '#b45309', marginBottom: 6 }}>
+            Database migration required
+          </p>
+          <p style={{ fontSize: 12.5, color: '#4a4640', marginBottom: 12, lineHeight: 1.6 }}>
+            The <code style={{ background: '#f0efec', padding: '1px 5px', borderRadius: 3, fontSize: 11.5, fontFamily: 'monospace' }}>approvals</code> table doesn&apos;t exist yet.
+            Run migration <strong>004_approvals_notifications_audit.sql</strong> in your Supabase SQL editor to enable this feature.
+          </p>
+          <p style={{ fontSize: 11.5, color: '#8a8580', fontFamily: 'monospace', background: '#f8f7f5', padding: '8px 12px', borderRadius: 6, border: '1px solid #e2dfd8', margin: 0 }}>
+            joola-track-api/database/004_approvals_notifications_audit.sql
+          </p>
+        </div>
+      ) : loadError ? (
+        <div style={{ border: '1px solid rgba(185,28,28,.2)', borderRadius: 12, padding: '16px 18px', background: 'rgba(185,28,28,.04)', fontSize: 12.5, color: '#b91c1c' }}>
+          Failed to load approvals: {loadError}
         </div>
       ) : data.length === 0 ? (
         <div style={{ border: '2px dashed #e2dfd8', borderRadius: 14, padding: '48px 20px', textAlign: 'center', background: '#f8f7f5' }}>
@@ -210,7 +238,8 @@ function ApprovalCard({
 
   return (
     <div style={{
-      background: '#fff', border: '1.5px solid #e2dfd8',
+      background: '#fff',
+      borderTop: '1.5px solid #e2dfd8', borderRight: '1.5px solid #e2dfd8', borderBottom: '1.5px solid #e2dfd8',
       borderLeft: `4px solid ${borderColor}`,
       borderRadius: 12, overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,.06)',
     }}>
@@ -261,7 +290,7 @@ function ApprovalCard({
 
         {isAdmin && approval.status === 'pending' && (
           <div style={{ display: 'flex', gap: 7, flexShrink: 0 }}>
-            <button
+            <button type="button"
               onClick={onApprove}
               disabled={actioning}
               style={{
@@ -276,7 +305,7 @@ function ApprovalCard({
             >
               ✓ Approve
             </button>
-            <button
+            <button type="button"
               onClick={onReject}
               disabled={actioning}
               style={{

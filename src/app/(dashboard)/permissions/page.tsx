@@ -141,7 +141,7 @@ export default function PermissionsPage() {
                       {isSelf ? (
                         <span style={{ fontSize: 11.5, color: '#c4c0b8' }}>Cannot edit self</span>
                       ) : (
-                        <button
+                        <button type="button"
                           onClick={() => handleToggleAdmin(user)}
                           disabled={isSaving}
                           style={{ fontSize: 11.5, padding: '5px 12px', borderRadius: 5, border: `1px solid ${user.is_admin ? 'rgba(185,28,28,.25)' : 'rgba(24,84,168,.25)'}`, background: user.is_admin ? 'rgba(185,28,28,.06)' : 'rgba(24,84,168,.06)', cursor: isSaving ? 'not-allowed' : 'pointer', color: user.is_admin ? '#b91c1c' : '#1854a8', fontFamily: 'inherit', fontWeight: 600, opacity: isSaving ? .5 : 1, transition: 'all .13s' }}>

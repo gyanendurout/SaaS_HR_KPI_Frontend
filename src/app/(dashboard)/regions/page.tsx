@@ -82,7 +82,7 @@ export default function RegionsPage() {
                   <div key={region.id}>
                     <div
                       onClick={() => setSelectedRegion(isSelected ? null : region)}
-                      style={{ background: '#fff', border: `1.5px solid ${isSelected ? color : '#e2dfd8'}`, borderLeft: `4px solid ${color}`, borderRadius: 12, padding: '14px 16px', cursor: 'pointer', boxShadow: isSelected ? `0 0 0 2px ${color}30` : '0 1px 3px rgba(0,0,0,.06)', transition: 'all .14s' }}>
+                      style={{ background: '#fff', borderTop: `1.5px solid ${isSelected ? color : '#e2dfd8'}`, borderRight: `1.5px solid ${isSelected ? color : '#e2dfd8'}`, borderBottom: `1.5px solid ${isSelected ? color : '#e2dfd8'}`, borderLeft: `4px solid ${color}`, borderRadius: 12, padding: '14px 16px', cursor: 'pointer', boxShadow: isSelected ? `0 0 0 2px ${color}30` : '0 1px 3px rgba(0,0,0,.06)', transition: 'all .14s' }}>
                       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 10 }}>
                         <div>
                           <div style={{ fontSize: 13.5, fontWeight: 700, color: '#111110', letterSpacing: '-.1px', marginBottom: 2 }}>{region.name}</div>
@@ -119,7 +119,7 @@ export default function RegionsPage() {
                 <div style={{ fontSize: 13.5, fontWeight: 700, color: '#111110' }}>{selectedRegion.name}</div>
                 <div style={{ fontSize: 11, color: '#8a8580', fontFamily: 'monospace', marginTop: 2 }}>{selectedRegion.code}</div>
               </div>
-              <button onClick={() => setSelectedRegion(null)} style={{ padding: '4px 10px', borderRadius: 5, border: '1px solid #e2dfd8', background: '#f8f7f5', cursor: 'pointer', color: '#8a8580', fontSize: 12, fontFamily: 'inherit' }}>Close</button>
+              <button type="button" onClick={() => setSelectedRegion(null)} style={{ padding: '4px 10px', borderRadius: 5, border: '1px solid #e2dfd8', background: '#f8f7f5', cursor: 'pointer', color: '#8a8580', fontSize: 12, fontFamily: 'inherit' }}>Close</button>
             </div>
 
             {/* KPIs in region */}

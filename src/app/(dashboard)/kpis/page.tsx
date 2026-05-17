@@ -119,7 +119,7 @@ export default function KpisPage() {
         {/* Tab bar */}
         <div style={{ display: 'flex', borderBottom: '2px solid #e2dfd8', marginBottom: 0, background: '#fff', borderTop: 'none' }}>
           {tabs.map((t) => (
-            <button
+            <button type="button"
               key={t.id}
               onClick={() => setActiveTab(t.id)}
               style={{
@@ -169,7 +169,7 @@ export default function KpisPage() {
             {regionList.map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}
           </select>
           <div style={{ marginLeft: 'auto' }}>
-            <button
+            <button type="button"
               onClick={() => setShowCreate(true)}
               style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '8px 14px', borderRadius: 6, fontSize: 12.5, fontFamily: 'inherit', fontWeight: 600, cursor: 'pointer', background: '#000', color: '#fff', border: '1px solid #000', transition: 'opacity .15s' }}
               onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.opacity = '.85')}
@@ -201,7 +201,7 @@ export default function KpisPage() {
                 const pct = progress(k);
                 const owner = allUsers.find((u) => u.id === k.owner_id);
                 return (
-                  <tr key={k.id} style={{ borderBottom: '1px solid #e2dfd8', transition: 'background .1s', cursor: 'default' }}
+                  <tr key={k.id} style={{ borderBottom: '1px solid #e2dfd8', transition: 'background .1s', cursor: 'pointer' }}
                     onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = '#f8f7f5')}
                     onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = 'transparent')}>
                     <td style={{ padding: '11px 14px' }}>
@@ -241,9 +241,9 @@ export default function KpisPage() {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
             <p style={{ fontSize: 12, color: '#8a8580' }}>Showing {(page - 1) * LIMIT + 1}–{Math.min(page * LIMIT, total)} of {total}</p>
             <div style={{ display: 'flex', gap: 8 }}>
-              <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}
+              <button type="button" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}
                 style={{ padding: '6px 12px', borderRadius: 6, fontSize: 12, fontWeight: 600, border: '1px solid #e2dfd8', background: '#fff', cursor: 'pointer', opacity: page === 1 ? .4 : 1 }}>← Prev</button>
-              <button onClick={() => setPage((p) => p + 1)} disabled={page * LIMIT >= total}
+              <button type="button" onClick={() => setPage((p) => p + 1)} disabled={page * LIMIT >= total}
                 style={{ padding: '6px 12px', borderRadius: 6, fontSize: 12, fontWeight: 600, border: '1px solid #e2dfd8', background: '#fff', cursor: 'pointer', opacity: page * LIMIT >= total ? .4 : 1 }}>Next →</button>
             </div>
           </div>
@@ -284,7 +284,7 @@ function CreateKpiModal({ regions: regionList, onClose, onSaved }: { regions: Re
             <div style={{ fontSize: 18, fontWeight: 800, letterSpacing: '-.3px' }}>New KPI</div>
             <div style={{ fontSize: 12, color: '#8a8580', marginTop: 2 }}>Fill in the details to create a new KPI</div>
           </div>
-          <button onClick={onClose} style={{ background: '#f0efec', border: '1px solid #e2dfd8', width: 28, height: 28, borderRadius: 6, cursor: 'pointer', color: '#4a4640', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
+          <button type="button" onClick={onClose} style={{ background: '#f0efec', border: '1px solid #e2dfd8', width: 28, height: 28, borderRadius: 6, cursor: 'pointer', color: '#4a4640', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
         </div>
         <div style={{ padding: '20px 24px', maxHeight: '60vh', overflowY: 'auto' }}>
           {[
@@ -334,8 +334,8 @@ function CreateKpiModal({ regions: regionList, onClose, onSaved }: { regions: Re
           {error && <div style={{ fontSize: 12, padding: '9px 12px', borderRadius: 7, background: 'rgba(185,28,28,.08)', color: '#b91c1c', border: '1px solid rgba(185,28,28,.2)' }}>{error}</div>}
         </div>
         <div style={{ padding: '13px 24px', borderTop: '1px solid #e2dfd8', display: 'flex', justifyContent: 'flex-end', gap: 7, background: '#fff', borderRadius: '0 0 18px 18px' }}>
-          <button onClick={onClose} style={{ padding: '8px 16px', borderRadius: 6, fontSize: 13, fontWeight: 500, cursor: 'pointer', background: '#fff', border: '1px solid #cdc9c1', color: '#4a4640', fontFamily: 'inherit' }}>Cancel</button>
-          <button onClick={handleSave} disabled={saving} style={{ padding: '8px 16px', borderRadius: 6, fontSize: 13, fontWeight: 600, cursor: saving ? 'not-allowed' : 'pointer', background: '#000', color: '#fff', border: '1px solid #000', fontFamily: 'inherit', opacity: saving ? .6 : 1 }}>
+          <button type="button" onClick={onClose} style={{ padding: '8px 16px', borderRadius: 6, fontSize: 13, fontWeight: 500, cursor: 'pointer', background: '#fff', border: '1px solid #cdc9c1', color: '#4a4640', fontFamily: 'inherit' }}>Cancel</button>
+          <button type="button" onClick={handleSave} disabled={saving} style={{ padding: '8px 16px', borderRadius: 6, fontSize: 13, fontWeight: 600, cursor: saving ? 'not-allowed' : 'pointer', background: '#000', color: '#fff', border: '1px solid #000', fontFamily: 'inherit', opacity: saving ? .6 : 1 }}>
             {saving ? 'Creating…' : 'Create KPI'}
           </button>
         </div>
