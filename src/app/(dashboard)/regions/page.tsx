@@ -69,7 +69,21 @@ export default function RegionsPage() {
           <div style={{ fontSize: 15, fontWeight: 800, letterSpacing: '-.2px', marginBottom: 3, color: '#111110' }}>Regions & Workspaces</div>
           <div style={{ fontSize: 12, color: '#8a8580' }}>KPI performance by region — {allRegions.length} region{allRegions.length !== 1 ? 's' : ''} · {allKpis.filter((k) => k.status !== 'cancelled').length} active KPIs total</div>
         </div>
-        <button type="button" className="btn btn-black" onClick={() => { setForm({ name: '', code: '' }); setFormError(''); setModalOpen(true); }}>
+        <button
+          type="button"
+          className="btn btn-black"
+          onClick={() => {
+            setForm({ name: '', code: '' });
+            setFormError('');
+            setModalOpen(true);
+          }}
+          style={{
+            padding: '12px 22px',
+            fontSize: 15,
+            borderRadius: 8,
+            fontWeight: 600,
+          }}
+        >
           + New Region
         </button>
       </div>
@@ -196,7 +210,7 @@ export default function RegionsPage() {
       {/* Add Region Modal */}
       {modalOpen && (
         <div className="modal-bg" onClick={() => setModalOpen(false)}>
-          <div className="modal" style={{ width: 420 }} onClick={(e) => e.stopPropagation()}>
+          <div className="modal" style={{ width: 420, padding: 24 }} onClick={(e) => e.stopPropagation()}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
               <h2 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: '#111110' }}>New Region</h2>
               <button type="button" onClick={() => setModalOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#8a8580', fontSize: 18, lineHeight: 1, padding: 4, fontFamily: 'inherit' }}>×</button>
@@ -232,10 +246,33 @@ export default function RegionsPage() {
               )}
 
               <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 4 }}>
-                <button type="button" className="btn btn-outline" onClick={() => setModalOpen(false)}>Cancel</button>
-                <button type="button" className="btn btn-black" onClick={handleCreate} disabled={saving}>
+                <button
+                  type="button"
+                  className="btn btn-outline"
+                  onClick={() => setModalOpen(false)}
+                  style={{
+                    padding: '12px 20px',
+                    fontSize: 12,
+                    borderRadius: 8,
+                  }}
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="button"
+                  className="btn btn-black"
+                  onClick={handleCreate}
+                  disabled={saving}
+                  style={{
+                    padding: '12px 22px',
+                    fontSize: 12,
+                    borderRadius: 8,
+                  }}
+                >
                   {saving ? 'Creating…' : 'Create Region'}
                 </button>
+
               </div>
             </div>
           </div>
