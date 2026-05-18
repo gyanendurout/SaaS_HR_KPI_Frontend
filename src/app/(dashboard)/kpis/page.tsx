@@ -227,7 +227,26 @@ export default function KpisPage() {
                       {k.next_due_date ? new Date(k.next_due_date).toLocaleDateString() : '—'}
                     </td>
                     <td style={{ padding: '11px 14px' }}>
-                      <Link href={`/kpis/${k.id}`} style={{ display: 'inline-flex', padding: '5px 12px', borderRadius: 5, fontSize: 12, fontWeight: 600, background: '#f0efec', color: '#4a4640', border: '1px solid #e2dfd8', textDecoration: 'none' }}>View</Link>
+                      <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                        <Link href={`/kpis/${k.id}`} style={{ display: 'inline-flex', padding: '5px 12px', borderRadius: 5, fontSize: 12, fontWeight: 600, background: '#f0efec', color: '#4a4640', border: '1px solid #e2dfd8', textDecoration: 'none' }}>View</Link>
+                        {k.status !== 'cancelled' && (currentUser?.is_admin || k.owner_id === currentUser?.id) && (
+                          <button type="button"
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              if (!confirm(`Cancel KPI "${k.name}"? This cannot be undone.`)) return;
+                              try {
+                                await kpis.cancel(k.id);
+                                load();
+                              } catch (err: unknown) {
+                                alert(err instanceof Error ? err.message : 'Failed to cancel KPI');
+                              }
+                            }}
+                            style={{ display: 'inline-flex', padding: '5px 12px', borderRadius: 5, fontSize: 12, fontWeight: 600, background: 'rgba(185,28,28,.08)', color: '#b91c1c', border: '1px solid rgba(185,28,28,.25)', cursor: 'pointer', fontFamily: 'inherit' }}
+                          >
+                            Delete
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 );

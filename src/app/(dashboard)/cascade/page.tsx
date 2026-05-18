@@ -28,6 +28,7 @@ export default function CascadePage() {
   const [loading, setLoading] = useState(true);
   const [loadingSummary, setLoadingSummary] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
+  const [treeVersion, setTreeVersion] = useState(0);
 
   useEffect(() => {
     kpis.list({ limit: 100, status: 'active' })
@@ -91,6 +92,7 @@ export default function CascadePage() {
                 selectedId={selectedId}
                 onSelect={setSelectedId}
                 levelColor={levelColor}
+                refreshKey={treeVersion}
               />
             ))}
           </div>
@@ -198,37 +200,42 @@ export default function CascadePage() {
         <AddChildModal
           parent={summary.parent}
           remainingPct={summary.remaining_pct}
+          existingChildIds={summary.children.map((c) => c.id)}
           onClose={() => setShowCreate(false)}
-          onSaved={() => { setShowCreate(false); loadSummary(selectedId); }}
+          onSaved={() => { setShowCreate(false); loadSummary(selectedId); setTreeVersion((v) => v + 1); }}
         />
       )}
     </div>
   );
 }
 
-function KpiTreeNode({ kpi, level, selectedId, onSelect, levelColor }: { kpi: Kpi; level: number; selectedId: string; onSelect: (id: string) => void; levelColor: (l: number) => string }) {
+function KpiTreeNode({ kpi, level, selectedId, onSelect, levelColor, refreshKey = 0 }: { kpi: Kpi; level: number; selectedId: string; onSelect: (id: string) => void; levelColor: (l: number) => string; refreshKey?: number }) {
   const [children, setChildren] = useState<Kpi[]>([]);
   const [expanded, setExpanded] = useState(level === 0);
-  const [loaded, setLoaded] = useState(false);
   const isSelected = kpi.id === selectedId;
 
   const loadChildren = useCallback(async () => {
-    if (loaded) return;
     try {
       const res = await kpis.children(kpi.id);
       setChildren(res.data);
-      setLoaded(true);
-    } catch { setLoaded(true); }
-  }, [kpi.id, loaded]);
+    } catch { /* ignore */ }
+  }, [kpi.id]);
 
+  // Load children when expanded
   useEffect(() => { if (expanded) loadChildren(); }, [expanded, loadChildren]);
+
+  // When selected, expand and reload
+  useEffect(() => { if (isSelected) { setExpanded(true); loadChildren(); } }, [isSelected, loadChildren]);
+
+  // When a child is added (refreshKey bumps), force reload
+  useEffect(() => { if (refreshKey > 0) { setExpanded(true); loadChildren(); } }, [refreshKey, loadChildren]);
 
   const borderColor = levelColor(level);
 
   return (
     <div>
       <div
-        onClick={() => { onSelect(kpi.id); setExpanded((e) => !e); }}
+        onClick={() => onSelect(kpi.id)}
         style={{
           display: 'flex', alignItems: 'center', gap: 9, padding: '10px 13px',
           borderTop: `1.5px solid ${isSelected ? '#000' : '#e2dfd8'}`,
@@ -245,12 +252,15 @@ function KpiTreeNode({ kpi, level, selectedId, onSelect, levelColor }: { kpi: Kp
         <span style={{ fontFamily: 'monospace', fontSize: 9.5, fontWeight: 700, padding: '2px 6px', borderRadius: 3, background: borderColor === '#000' ? '#000' : borderColor + '20', color: borderColor === '#000' ? '#fff' : borderColor, flexShrink: 0 }}>{kpi.kpi_number}</span>
         <span style={{ fontSize: 13, fontWeight: 700, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', letterSpacing: '-.1px', color: '#111110' }}>{kpi.name}</span>
         {kpi.allocation_pct < 100 && <span style={{ fontSize: 11, color: '#8a8580', flexShrink: 0 }}>{kpi.allocation_pct}%</span>}
-        <span style={{ fontSize: 11, color: '#8a8580', flexShrink: 0 }}>{expanded ? '▾' : '▸'}</span>
+        <span
+          onClick={(e) => { e.stopPropagation(); setExpanded((v) => !v); }}
+          style={{ fontSize: 11, color: '#8a8580', flexShrink: 0, padding: '2px 4px', borderRadius: 3, cursor: 'pointer' }}
+        >{expanded ? '▾' : '▸'}</span>
       </div>
       {expanded && children.length > 0 && (
         <div style={{ paddingLeft: 20, borderLeft: '2px solid #e2dfd8', marginLeft: 13, marginTop: 4, marginBottom: 4 }}>
           {children.map((c) => (
-            <KpiTreeNode key={c.id} kpi={c} level={level + 1} selectedId={selectedId} onSelect={onSelect} levelColor={levelColor} />
+            <KpiTreeNode key={c.id} kpi={c} level={level + 1} selectedId={selectedId} onSelect={onSelect} levelColor={levelColor} refreshKey={refreshKey} />
           ))}
         </div>
       )}
@@ -258,7 +268,13 @@ function KpiTreeNode({ kpi, level, selectedId, onSelect, levelColor }: { kpi: Kp
   );
 }
 
-function AddChildModal({ parent, remainingPct, onClose, onSaved }: { parent: Kpi; remainingPct: number; onClose: () => void; onSaved: () => void }) {
+function AddChildModal({ parent, remainingPct, onClose, onSaved }: {
+  parent: Kpi;
+  remainingPct: number;
+  existingChildIds?: string[];
+  onClose: () => void;
+  onSaved: () => void;
+}) {
   const [form, setForm] = useState({ name: '', type: 'quantitative', period: 'quarterly', update_frequency: 'monthly', target_value: '', unit: parent.unit ?? '', allocation_pct: String(Math.min(remainingPct, 50)) });
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
@@ -289,7 +305,7 @@ function AddChildModal({ parent, remainingPct, onClose, onSaved }: { parent: Kpi
           <button type="button" onClick={onClose} style={{ background: '#f0efec', border: '1px solid #e2dfd8', width: 28, height: 28, borderRadius: 6, cursor: 'pointer', color: '#4a4640', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
         </div>
         <div style={{ padding: '20px 24px' }}>
-          <div style={{ marginBottom: 13 }}><label style={labelStyle}>Name *</label><input style={inputStyle} value={form.name} onChange={(e) => set('name', e.target.value)} placeholder="Child KPI name" onFocus={(e) => (e.target.style.borderColor = '#000')} onBlur={(e) => (e.target.style.borderColor = '#e2dfd8')} /></div>
+          <div style={{ marginBottom: 13 }}><label style={labelStyle}>Name *</label><input style={inputStyle} value={form.name} onChange={(e) => set('name', e.target.value)} placeholder="Child KPI name" autoFocus onFocus={(e) => (e.target.style.borderColor = '#000')} onBlur={(e) => (e.target.style.borderColor = '#e2dfd8')} /></div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 13 }}>
             <div><label style={labelStyle}>Allocation % *</label><input type="number" min="1" max={remainingPct} style={inputStyle} value={form.allocation_pct} onChange={(e) => set('allocation_pct', e.target.value)} onFocus={(e) => (e.target.style.borderColor = '#000')} onBlur={(e) => (e.target.style.borderColor = '#e2dfd8')} /></div>
             <div><label style={labelStyle}>Target Value</label><input type="number" style={inputStyle} value={form.target_value} onChange={(e) => set('target_value', e.target.value)} placeholder="e.g. 300000" onFocus={(e) => (e.target.style.borderColor = '#000')} onBlur={(e) => (e.target.style.borderColor = '#e2dfd8')} /></div>
@@ -303,7 +319,7 @@ function AddChildModal({ parent, remainingPct, onClose, onSaved }: { parent: Kpi
         <div style={{ padding: '13px 24px', borderTop: '1px solid #e2dfd8', display: 'flex', justifyContent: 'flex-end', gap: 7 }}>
           <button type="button" onClick={onClose} style={{ padding: '8px 16px', borderRadius: 6, fontSize: 13, fontWeight: 500, cursor: 'pointer', background: '#fff', border: '1px solid #cdc9c1', color: '#4a4640', fontFamily: 'inherit' }}>Cancel</button>
           <button type="button" onClick={handleSave} disabled={saving} style={{ padding: '8px 16px', borderRadius: 6, fontSize: 13, fontWeight: 600, cursor: saving ? 'not-allowed' : 'pointer', background: '#000', color: '#fff', border: '1px solid #000', fontFamily: 'inherit', opacity: saving ? .6 : 1 }}>
-            {saving ? 'Saving…' : 'Add Child KPI'}
+            {saving ? 'Creating…' : 'Add Child KPI'}
           </button>
         </div>
       </div>

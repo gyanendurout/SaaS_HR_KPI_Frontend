@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { kpis, users, regions, type Kpi, type User, type Region } from '@/lib/api';
@@ -48,50 +48,49 @@ export default function KpiDetailPage() {
   }>({ name: '', description: '', type: '', period: '', update_frequency: '', target_value: '', unit: '', start_date: '', end_date: '' });
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const [kpiRes, childRes, usersRes, regionsRes] = await Promise.all([
-          kpis.getById(id),
-          kpis.children(id),
-          users.list({ limit: 200 }),
-          regions.list(),
-        ]);
-        setKpi(kpiRes.data);
-        setChildren(childRes.data);
-        setOwner(usersRes.data.find((u) => u.id === kpiRes.data.owner_id) ?? null);
-        setRegion(regionsRes.data.find((r) => r.id === kpiRes.data.region_id) ?? null);
-        setEditForm({
-          current_value: String(kpiRes.data.current_value ?? ''),
-          status: kpiRes.data.status,
-        });
-        setMetaForm({
-          name: kpiRes.data.name ?? '',
-          description: kpiRes.data.description ?? '',
-          type: kpiRes.data.type ?? '',
-          period: kpiRes.data.period ?? '',
-          update_frequency: kpiRes.data.update_frequency ?? '',
-          target_value: String(kpiRes.data.target_value ?? ''),
-          unit: kpiRes.data.unit ?? '',
-          start_date: kpiRes.data.start_date ?? '',
-          end_date: kpiRes.data.end_date ?? '',
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
+  const load = useCallback(async () => {
+    try {
+      const [kpiRes, childRes, usersRes, regionsRes] = await Promise.all([
+        kpis.getById(id),
+        kpis.children(id),
+        users.list({ limit: 200 }),
+        regions.list(),
+      ]);
+      setKpi(kpiRes.data);
+      setChildren(childRes.data);
+      setOwner(usersRes.data.find((u) => u.id === kpiRes.data.owner_id) ?? null);
+      setRegion(regionsRes.data.find((r) => r.id === kpiRes.data.region_id) ?? null);
+      setEditForm({
+        current_value: String(kpiRes.data.current_value ?? ''),
+        status: kpiRes.data.status,
+      });
+      setMetaForm({
+        name: kpiRes.data.name ?? '',
+        description: kpiRes.data.description ?? '',
+        type: kpiRes.data.type ?? '',
+        period: kpiRes.data.period ?? '',
+        update_frequency: kpiRes.data.update_frequency ?? '',
+        target_value: String(kpiRes.data.target_value ?? ''),
+        unit: kpiRes.data.unit ?? '',
+        start_date: kpiRes.data.start_date ?? '',
+        end_date: kpiRes.data.end_date ?? '',
+      });
+    } finally {
+      setLoading(false);
+    }
   }, [id]);
+
+  useEffect(() => { load(); }, [load]);
 
   const handleUpdate = async () => {
     if (!kpi) return;
     setSaving(true);
     try {
-      const res = await kpis.update(id, {
+      await kpis.update(id, {
         current_value: editForm.current_value ? Number(editForm.current_value) : undefined,
         status: editForm.status as Kpi['status'],
       });
-      setKpi(res.data);
+      await load();
       setEditing(false);
     } finally {
       setSaving(false);
@@ -109,14 +108,17 @@ export default function KpiDetailPage() {
     setSaving(true);
     try {
       const { name, description, type, period, update_frequency, target_value, unit, start_date, end_date } = metaForm;
-      const res = await kpis.update(id, {
+      await kpis.update(id, {
         name, description,
         type: type as Kpi['type'],
         period: period as Kpi['period'],
         update_frequency: update_frequency as Kpi['update_frequency'],
-        target_value: Number(target_value), unit, start_date, end_date,
+        target_value: target_value ? Number(target_value) : undefined,
+        unit: unit || undefined,
+        start_date: start_date || undefined,
+        end_date: end_date || undefined,
       });
-      setKpi(res.data);
+      await load();
       setEditingMeta(false);
     } finally {
       setSaving(false);

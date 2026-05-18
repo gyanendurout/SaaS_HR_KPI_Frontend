@@ -103,6 +103,11 @@ export const regions = {
       method: 'POST',
       body: JSON.stringify(body),
     }),
+
+  delete: (id: string) =>
+    request<{ success: boolean }>(`/api/regions/${id}`, {
+      method: 'DELETE',
+    }),
 };
 
 // ─── Users ───────────────────────────────────────────────────────────────────
@@ -159,6 +164,11 @@ export const users = {
 
   deactivate: (id: string) =>
     request<{ success: boolean; data: User }>(`/api/users/${id}`, {
+      method: 'DELETE',
+    }),
+
+  delete: (id: string) =>
+    request<{ success: boolean }>(`/api/users/${id}/permanent`, {
       method: 'DELETE',
     }),
 
@@ -265,6 +275,12 @@ export const cascade = {
   remove: (parentId: string, childId: string) =>
     request<{ success: boolean }>(`/api/kpis/${parentId}/cascade/${childId}`, {
       method: 'DELETE',
+    }),
+
+  link: (parentId: string, childId: string, allocationPct: number) =>
+    request<{ success: boolean; data: Kpi }>(`/api/kpis/${parentId}/cascade/${childId}`, {
+      method: 'PUT',
+      body: JSON.stringify({ allocation_pct: allocationPct }),
     }),
 };
 

@@ -148,6 +148,23 @@ export default function PeoplePage() {
                         Deactivate
                       </button>
                     )}
+                    {u.id !== currentUser.id && (
+                      <button type="button"
+                        onClick={async () => {
+                          if (!confirm(`Permanently delete ${u.full_name}? This removes their account and cannot be undone.`)) return;
+                          try {
+                            await users.delete(u.id);
+                            load();
+                          } catch (err: unknown) {
+                            alert(err instanceof Error ? err.message : 'Failed to delete user');
+                          }
+                        }}
+                        className="text-xs px-2.5 py-1 rounded-lg"
+                        style={{ color: '#7f1d1d', background: 'rgba(185,28,28,.12)', border: '1px solid rgba(185,28,28,.3)' }}
+                      >
+                        Delete
+                      </button>
+                    )}
                   </div>
                 )}
               </div>
