@@ -25,6 +25,7 @@ function getPageMeta(pathname: string): { title: string; bc?: string } {
   if (pathname === '/templates') return { title: 'KPI Templates', bc: 'KPI Management' };
   if (pathname === '/assignments') return { title: 'KPI Assignment', bc: 'KPI Management' };
   if (pathname === '/cascade') return { title: 'Cascade KPIs', bc: 'KPI Management' };
+  if (pathname === '/kpi-org') return { title: 'KPI Organisation Chart', bc: 'KPI Management' };
   if (pathname === '/updates') return { title: 'KPI Progress Updates', bc: 'KPI Management' };
   if (pathname === '/approvals') return { title: 'Approval Inbox' };
   if (pathname === '/regions') return { title: 'Region Workspaces' };

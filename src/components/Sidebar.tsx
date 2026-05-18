@@ -18,6 +18,7 @@ const NAV_SECTIONS = [
     items: [
       { href: '/kpis',        label: 'My KPIs',    icon: '◎' },
       { href: '/cascade',     label: 'Cascade',    icon: '⌥' },
+      { href: '/kpi-org',     label: 'KPI Org',    icon: '⊹' },
       { href: '/updates',     label: 'Updates',    icon: '↑' },
       { href: '/assignments', label: 'Assignments', icon: '⊞' },
     ],

@@ -268,31 +268,47 @@ function KpiTreeNode({ kpi, level, selectedId, onSelect, levelColor, refreshKey 
   );
 }
 
-function AddChildModal({ parent, remainingPct, onClose, onSaved }: {
+function AddChildModal({ parent, remainingPct, existingChildIds = [], onClose, onSaved }: {
   parent: Kpi;
   remainingPct: number;
   existingChildIds?: string[];
   onClose: () => void;
   onSaved: () => void;
 }) {
-  const [form, setForm] = useState({ name: '', type: 'quantitative', period: 'quarterly', update_frequency: 'monthly', target_value: '', unit: parent.unit ?? '', allocation_pct: String(Math.min(remainingPct, 50)) });
+  const [allKpis, setAllKpis] = useState<Kpi[]>([]);
+  const [selectedId, setSelectedId] = useState('');
+  const [alloc, setAlloc] = useState(String(Math.min(remainingPct, 50)));
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
-  const set = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }));
+  const [loadingList, setLoadingList] = useState(true);
+
+  useEffect(() => {
+    kpis.list({ limit: 200 }).then((res) => {
+      const eligible = res.data.filter(
+        (k) => k.id !== parent.id && !existingChildIds.includes(k.id) && k.status !== 'cancelled'
+      );
+      setAllKpis(eligible);
+      if (eligible.length > 0) setSelectedId(eligible[0].id);
+    }).finally(() => setLoadingList(false));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const selected = allKpis.find((k) => k.id === selectedId);
 
   const handleSave = async () => {
-    if (!form.name) { setError('Name is required'); return; }
-    const alloc = Number(form.allocation_pct);
-    if (alloc <= 0 || alloc > remainingPct) { setError(`Allocation must be 1–${remainingPct}%`); return; }
+    if (!selectedId) { setError('Select a KPI'); return; }
+    const num = Number(alloc);
+    if (num <= 0 || num > remainingPct) { setError(`Allocation must be 1–${remainingPct}%`); return; }
     setSaving(true); setError('');
     try {
-      await cascade.create(parent.id, { name: form.name, type: form.type as 'quantitative' | 'qualitative', period: form.period as 'monthly' | 'quarterly' | 'annual', update_frequency: form.update_frequency as 'weekly' | 'monthly' | 'quarterly', target_value: form.target_value ? Number(form.target_value) : undefined, unit: form.unit || undefined, allocation_pct: alloc, region_id: parent.region_id });
+      await cascade.link(parent.id, selectedId, num);
       onSaved();
-    } catch (err: unknown) { setError(err instanceof Error ? err.message : 'Failed'); } finally { setSaving(false); }
+    } catch (err: unknown) { setError(err instanceof Error ? err.message : 'Failed'); }
+    finally { setSaving(false); }
   };
 
-  const inputStyle = { width: '100%', background: '#fff', border: '1.5px solid #e2dfd8', borderRadius: 6, padding: '9px 12px', color: '#111110', fontFamily: 'inherit', fontSize: 13, outline: 'none', boxSizing: 'border-box' as const };
-  const labelStyle = { display: 'block' as const, fontSize: 11, fontWeight: 700 as const, color: '#4a4640', marginBottom: 5, textTransform: 'uppercase' as const, letterSpacing: '.4px' };
+  const inp = { width: '100%', background: '#fff', border: '1.5px solid #e2dfd8', borderRadius: 6, padding: '9px 12px', color: '#111110', fontFamily: 'inherit', fontSize: 13, outline: 'none', boxSizing: 'border-box' as const };
+  const lbl = { display: 'block' as const, fontSize: 11, fontWeight: 700 as const, color: '#4a4640', marginBottom: 5, textTransform: 'uppercase' as const, letterSpacing: '.4px' };
 
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 500, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16, background: 'rgba(0,0,0,.5)', backdropFilter: 'blur(3px)' }} onClick={(e) => e.target === e.currentTarget && onClose()}>
@@ -304,22 +320,52 @@ function AddChildModal({ parent, remainingPct, onClose, onSaved }: {
           </div>
           <button type="button" onClick={onClose} style={{ background: '#f0efec', border: '1px solid #e2dfd8', width: 28, height: 28, borderRadius: 6, cursor: 'pointer', color: '#4a4640', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
         </div>
+
         <div style={{ padding: '20px 24px' }}>
-          <div style={{ marginBottom: 13 }}><label style={labelStyle}>Name *</label><input style={inputStyle} value={form.name} onChange={(e) => set('name', e.target.value)} placeholder="Child KPI name" autoFocus onFocus={(e) => (e.target.style.borderColor = '#000')} onBlur={(e) => (e.target.style.borderColor = '#e2dfd8')} /></div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 13 }}>
-            <div><label style={labelStyle}>Allocation % *</label><input type="number" min="1" max={remainingPct} style={inputStyle} value={form.allocation_pct} onChange={(e) => set('allocation_pct', e.target.value)} onFocus={(e) => (e.target.style.borderColor = '#000')} onBlur={(e) => (e.target.style.borderColor = '#e2dfd8')} /></div>
-            <div><label style={labelStyle}>Target Value</label><input type="number" style={inputStyle} value={form.target_value} onChange={(e) => set('target_value', e.target.value)} placeholder="e.g. 300000" onFocus={(e) => (e.target.style.borderColor = '#000')} onBlur={(e) => (e.target.style.borderColor = '#e2dfd8')} /></div>
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 13 }}>
-            <div><label style={labelStyle}>Type</label><select style={{ ...inputStyle }} value={form.type} onChange={(e) => set('type', e.target.value)}><option value="quantitative">Quantitative</option><option value="qualitative">Qualitative</option></select></div>
-            <div><label style={labelStyle}>Period</label><select style={{ ...inputStyle }} value={form.period} onChange={(e) => set('period', e.target.value)}><option value="monthly">Monthly</option><option value="quarterly">Quarterly</option><option value="annual">Annual</option></select></div>
-          </div>
-          {error && <div style={{ fontSize: 12, padding: '9px 12px', borderRadius: 7, background: 'rgba(185,28,28,.08)', color: '#b91c1c', border: '1px solid rgba(185,28,28,.2)' }}>{error}</div>}
+          {loadingList ? (
+            <p style={{ fontSize: 13, color: '#8a8580', textAlign: 'center', padding: '16px 0' }}>Loading KPIs…</p>
+          ) : allKpis.length === 0 ? (
+            <p style={{ fontSize: 13, color: '#8a8580', textAlign: 'center', padding: '16px 0' }}>No eligible KPIs available to link.</p>
+          ) : (
+            <>
+              <div style={{ marginBottom: 13 }}>
+                <label style={lbl}>Select KPI *</label>
+                <select style={inp} value={selectedId} onChange={(e) => setSelectedId(e.target.value)}>
+                  {allKpis.map((k) => (
+                    <option key={k.id} value={k.id}>{k.kpi_number} — {k.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              {selected && (
+                <div style={{ marginBottom: 13, padding: '10px 12px', background: '#f8f7f5', borderRadius: 8, border: '1px solid #e2dfd8', fontSize: 12, color: '#4a4640', display: 'flex', flexWrap: 'wrap' as const, gap: '4px 16px' }}>
+                  <span><b>Type:</b> {selected.type}</span>
+                  <span><b>Period:</b> {selected.period}</span>
+                  <span><b>Status:</b> {selected.status}</span>
+                  {selected.target_value != null && (
+                    <span><b>Target:</b> {selected.target_value.toLocaleString()}{selected.unit ? ` ${selected.unit}` : ''}</span>
+                  )}
+                </div>
+              )}
+
+              <div style={{ marginBottom: 6 }}>
+                <label style={lbl}>Allocation % *</label>
+                <input type="number" min="1" max={remainingPct} style={inp} value={alloc}
+                  onChange={(e) => setAlloc(e.target.value)}
+                  onFocus={(e) => (e.target.style.borderColor = '#000')}
+                  onBlur={(e) => (e.target.style.borderColor = '#e2dfd8')} />
+                <div style={{ fontSize: 11, color: '#8a8580', marginTop: 4 }}>Max {remainingPct}% available</div>
+              </div>
+            </>
+          )}
+          {error && <div style={{ marginTop: 10, fontSize: 12, padding: '9px 12px', borderRadius: 7, background: 'rgba(185,28,28,.08)', color: '#b91c1c', border: '1px solid rgba(185,28,28,.2)' }}>{error}</div>}
         </div>
+
         <div style={{ padding: '13px 24px', borderTop: '1px solid #e2dfd8', display: 'flex', justifyContent: 'flex-end', gap: 7 }}>
           <button type="button" onClick={onClose} style={{ padding: '8px 16px', borderRadius: 6, fontSize: 13, fontWeight: 500, cursor: 'pointer', background: '#fff', border: '1px solid #cdc9c1', color: '#4a4640', fontFamily: 'inherit' }}>Cancel</button>
-          <button type="button" onClick={handleSave} disabled={saving} style={{ padding: '8px 16px', borderRadius: 6, fontSize: 13, fontWeight: 600, cursor: saving ? 'not-allowed' : 'pointer', background: '#000', color: '#fff', border: '1px solid #000', fontFamily: 'inherit', opacity: saving ? .6 : 1 }}>
-            {saving ? 'Creating…' : 'Add Child KPI'}
+          <button type="button" onClick={handleSave} disabled={saving || allKpis.length === 0}
+            style={{ padding: '8px 16px', borderRadius: 6, fontSize: 13, fontWeight: 600, cursor: saving ? 'not-allowed' : 'pointer', background: '#000', color: '#fff', border: '1px solid #000', fontFamily: 'inherit', opacity: (saving || allKpis.length === 0) ? .6 : 1 }}>
+            {saving ? 'Linking…' : 'Link KPI'}
           </button>
         </div>
       </div>
