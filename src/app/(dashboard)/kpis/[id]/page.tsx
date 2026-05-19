@@ -35,6 +35,7 @@ export default function KpiDetailPage() {
   const router = useRouter();
   const [kpi, setKpi] = useState<Kpi | null>(null);
   const [children, setChildren] = useState<Kpi[]>([]);
+  const [allUsers, setAllUsers] = useState<User[]>([]);
   const [owner, setOwner] = useState<User | null>(null);
   const [region, setRegion] = useState<Region | null>(null);
   const [loading, setLoading] = useState(true);
@@ -44,8 +45,8 @@ export default function KpiDetailPage() {
   const [metaForm, setMetaForm] = useState<{
     name: string; description: string; type: string; period: string;
     update_frequency: string; target_value: string; unit: string;
-    start_date: string; end_date: string;
-  }>({ name: '', description: '', type: '', period: '', update_frequency: '', target_value: '', unit: '', start_date: '', end_date: '' });
+    start_date: string; end_date: string; owner_id: string;
+  }>({ name: '', description: '', type: '', period: '', update_frequency: '', target_value: '', unit: '', start_date: '', end_date: '', owner_id: '' });
   const [saving, setSaving] = useState(false);
 
   const load = useCallback(async () => {
@@ -58,6 +59,7 @@ export default function KpiDetailPage() {
       ]);
       setKpi(kpiRes.data);
       setChildren(childRes.data);
+      setAllUsers(usersRes.data);
       setOwner(usersRes.data.find((u) => u.id === kpiRes.data.owner_id) ?? null);
       setRegion(regionsRes.data.find((r) => r.id === kpiRes.data.region_id) ?? null);
       setEditForm({
@@ -74,6 +76,7 @@ export default function KpiDetailPage() {
         unit: kpiRes.data.unit ?? '',
         start_date: kpiRes.data.start_date ?? '',
         end_date: kpiRes.data.end_date ?? '',
+        owner_id: kpiRes.data.owner_id ?? '',
       });
     } finally {
       setLoading(false);
@@ -107,7 +110,7 @@ export default function KpiDetailPage() {
     if (!kpi) return;
     setSaving(true);
     try {
-      const { name, description, type, period, update_frequency, target_value, unit, start_date, end_date } = metaForm;
+      const { name, description, type, period, update_frequency, target_value, unit, start_date, end_date, owner_id } = metaForm;
       await kpis.update(id, {
         name, description,
         type: type as Kpi['type'],
@@ -117,6 +120,7 @@ export default function KpiDetailPage() {
         unit: unit || undefined,
         start_date: start_date || undefined,
         end_date: end_date || undefined,
+        owner_id: owner_id || undefined,
       });
       await load();
       setEditingMeta(false);
@@ -296,6 +300,15 @@ export default function KpiDetailPage() {
             <div>
               <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style={{ color: 'var(--t3)' }}>End Date</label>
               <input className="fi w-full" type="date" value={metaForm.end_date} onChange={(e) => setMetaForm((f) => ({ ...f, end_date: e.target.value }))} />
+            </div>
+            <div className="col-span-2">
+              <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style={{ color: 'var(--t3)' }}>Assign To (Owner)</label>
+              <select className="fi w-full" value={metaForm.owner_id} onChange={(e) => setMetaForm((f) => ({ ...f, owner_id: e.target.value }))}>
+                <option value="">— No owner —</option>
+                {allUsers.map((u) => (
+                  <option key={u.id} value={u.id}>{u.full_name}{u.designation ? ` — ${u.designation}` : ''}</option>
+                ))}
+              </select>
             </div>
           </div>
           <div className="flex gap-2">

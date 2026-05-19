@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { kpis, users, regions, approvals, type Kpi, type User, type Region } from '@/lib/api';
 import { useAuthStore } from '@/store/auth';
@@ -100,7 +101,7 @@ function AssignModal({
     } finally { setSaving(false); }
   };
 
-  return (
+  return createPortal(
     <div className="modal-bg" onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div className="modal" style={{ maxWidth: 560, borderRadius: 14, overflow: 'hidden' }}>
 
@@ -214,7 +215,8 @@ function AssignModal({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
