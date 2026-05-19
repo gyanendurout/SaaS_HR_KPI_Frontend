@@ -164,6 +164,7 @@ export default function PeoplePage() {
                         Deactivate
                       </button>
                     )}
+                  {/* / remove delete for temporary  */}
                     {/* {u.id !== currentUser.id && (
                       <button type="button"
                         onClick={async () => {

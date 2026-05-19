@@ -454,13 +454,13 @@ export default function NewKpiPage() {
                       <FieldInput field={field} value={fieldValues[field.id] ?? ''} onChange={(v) => setField(field.id, v)} allRegions={allRegions} />
                     </div>
                   ))}
-                  <div>
+                  {/* <div>
                     <label className="flabel">Parent KPI (cascade from)</label>
                     <select className="fi" value={parentId} onChange={(e) => setParentId(e.target.value)}>
                       <option value="">None — top-level KPI</option>
                       {allKpis.map((k) => <option key={k.id} value={k.id}>{k.kpi_number} — {k.name}</option>)}
                     </select>
-                  </div>
+                  </div> */}
                   <div>
                     <label className="flabel">Assign To</label>
                     <select className="fi" value={ownerId} onChange={(e) => setOwnerId(e.target.value)}>
