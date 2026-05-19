@@ -2,7 +2,15 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { kpis, users, type Kpi, type User } from '@/lib/api';
+import { kpis, users, regions, type Kpi, type User, type Region } from '@/lib/api';
+import { useAuthStore } from '@/store/auth';
+
+// ─── Constants ────────────────────────────────────────────────────────────────
+
+const LINE_COLOR = '#d4d0c8';
+const CONNECTOR_Y = 46;  // height of h-connector container → centers 2px line at y=23
+const H_GAP = 32;        // horizontal connector width
+const V_GAP = 24;        // vertical gap between sibling nodes
 
 const STATUS_STYLE: Record<string, { bg: string; color: string }> = {
   active:    { bg: 'rgba(26,122,74,.12)',  color: '#15633c' },
@@ -11,15 +19,11 @@ const STATUS_STYLE: Record<string, { bg: string; color: string }> = {
   cancelled: { bg: 'rgba(185,28,28,.12)',  color: '#b91c1c' },
 };
 
-const AVATAR_COLORS = ['#1a7a4a', '#1854a8', '#6b21a8', '#b45309', '#0e7490', '#be185d', '#000'];
+const AVATAR_COLORS = ['#1a7a4a', '#1854a8', '#6b21a8', '#b45309', '#0e7490', '#be185d', '#111'];
 
-function avatarColor(name: string) {
-  return AVATAR_COLORS[name.charCodeAt(0) % AVATAR_COLORS.length];
-}
+// ─── Data helpers ─────────────────────────────────────────────────────────────
 
-interface KpiNode extends Kpi {
-  children: KpiNode[];
-}
+interface KpiNode extends Kpi { children: KpiNode[] }
 
 function buildTree(all: Kpi[]): KpiNode[] {
   const map = new Map<string, KpiNode>();
@@ -35,72 +39,123 @@ function buildTree(all: Kpi[]): KpiNode[] {
   return roots;
 }
 
+function countNodes(nodes: KpiNode[]): number {
+  return nodes.reduce((sum, n) => sum + 1 + countNodes(n.children), 0);
+}
+
+function avatarColor(name: string): string {
+  return AVATAR_COLORS[name.charCodeAt(0) % AVATAR_COLORS.length];
+}
+
+// ─── KPI Card ─────────────────────────────────────────────────────────────────
+
 function KpiCard({ node, userMap }: { node: KpiNode; userMap: Map<string, User> }) {
   const owner = node.owner_id ? userMap.get(node.owner_id) : null;
   const s = STATUS_STYLE[node.status] ?? { bg: 'rgba(0,0,0,.06)', color: '#8a8580' };
-  const pct = node.target_value ? Math.min(100, Math.round(((node.current_value ?? 0) / node.target_value) * 100)) : null;
+  const pct = node.target_value
+    ? Math.min(100, Math.round(((node.current_value ?? 0) / node.target_value) * 100))
+    : null;
+  const progressColor = pct === null ? '' : pct >= 100 ? '#1a7a4a' : pct >= 50 ? '#1854a8' : '#b45309';
 
   return (
-    <Link href={`/kpis/${node.id}`} style={{ textDecoration: 'none' }}>
-      <div style={{
-        background: '#fff',
-        border: '1.5px solid #e2dfd8',
-        borderRadius: 12,
-        padding: '12px 14px',
-        width: 200,
-        boxShadow: '0 2px 8px rgba(0,0,0,.07)',
-        cursor: 'pointer',
-        transition: 'box-shadow .15s, border-color .15s',
-      }}
-        onMouseEnter={(e) => { const el = e.currentTarget as HTMLElement; el.style.boxShadow = '0 4px 16px rgba(0,0,0,.14)'; el.style.borderColor = '#cdc9c1'; }}
-        onMouseLeave={(e) => { const el = e.currentTarget as HTMLElement; el.style.boxShadow = '0 2px 8px rgba(0,0,0,.07)'; el.style.borderColor = '#e2dfd8'; }}
+    <Link href={`/kpis/${node.id}`} style={{ textDecoration: 'none', display: 'block' }}>
+      <div
+        style={{
+          background: '#fff',
+          border: '1.5px solid #e2dfd8',
+          borderRadius: 12,
+          padding: '11px 13px',
+          width: 210,
+          boxShadow: '0 2px 8px rgba(0,0,0,.06)',
+          cursor: 'pointer',
+          transition: 'box-shadow .15s, border-color .15s, transform .15s',
+        }}
+        onMouseEnter={(e) => {
+          const el = e.currentTarget as HTMLElement;
+          el.style.boxShadow = '0 6px 20px rgba(0,0,0,.12)';
+          el.style.borderColor = '#bbb8b0';
+          el.style.transform = 'translateY(-1px)';
+        }}
+        onMouseLeave={(e) => {
+          const el = e.currentTarget as HTMLElement;
+          el.style.boxShadow = '0 2px 8px rgba(0,0,0,.06)';
+          el.style.borderColor = '#e2dfd8';
+          el.style.transform = 'none';
+        }}
       >
         {/* KPI number + status */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 7 }}>
-          <span style={{ fontFamily: 'monospace', fontSize: 9.5, fontWeight: 700, padding: '2px 6px', borderRadius: 3, background: '#111110', color: '#fff' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+          <span style={{
+            fontFamily: 'monospace', fontSize: 9, fontWeight: 700,
+            padding: '2px 5px', borderRadius: 3, background: '#111110', color: '#fff',
+            letterSpacing: '.3px',
+          }}>
             {node.kpi_number}
           </span>
-          <span style={{ fontSize: 9.5, fontWeight: 700, padding: '2px 6px', borderRadius: 10, background: s.bg, color: s.color }}>
+          <span style={{
+            fontSize: 9, fontWeight: 700, padding: '2px 6px', borderRadius: 10,
+            background: s.bg, color: s.color, textTransform: 'capitalize',
+          }}>
             {node.status}
           </span>
         </div>
 
         {/* Name */}
-        <div style={{ fontSize: 12.5, fontWeight: 700, color: '#111110', lineHeight: 1.3, marginBottom: 8, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>
+        <div style={{
+          fontSize: 12, fontWeight: 700, color: '#111110', lineHeight: 1.35,
+          marginBottom: 7, overflow: 'hidden', display: '-webkit-box',
+          WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const,
+          minHeight: 32,
+        }}>
           {node.name}
         </div>
 
         {/* Progress bar */}
         {pct !== null && (
-          <div style={{ marginBottom: 8 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: '#8a8580', marginBottom: 3 }}>
+          <div style={{ marginBottom: 7 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9.5, color: '#8a8580', marginBottom: 3 }}>
               <span>Progress</span>
-              <span style={{ fontWeight: 700, color: pct >= 100 ? '#1a7a4a' : pct >= 50 ? '#1854a8' : '#b45309' }}>{pct}%</span>
+              <span style={{ fontWeight: 700, color: progressColor }}>{pct}%</span>
             </div>
-            <div style={{ height: 4, background: '#e4e1db', borderRadius: 2, overflow: 'hidden' }}>
-              <div style={{ height: '100%', width: `${pct}%`, background: pct >= 100 ? '#1a7a4a' : pct >= 50 ? '#1854a8' : '#b45309', borderRadius: 2 }} />
+            <div style={{ height: 3, background: '#e4e1db', borderRadius: 2, overflow: 'hidden' }}>
+              <div style={{ height: '100%', width: `${pct}%`, background: progressColor, borderRadius: 2, transition: 'width .3s ease' }} />
             </div>
           </div>
         )}
 
         {/* Owner */}
-        {owner ? (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, paddingTop: 7, borderTop: '1px solid #e2dfd8' }}>
-            <div style={{ width: 20, height: 20, borderRadius: '50%', background: avatarColor(owner.full_name), display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 8, fontWeight: 800, flexShrink: 0 }}>
-              {owner.full_name.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase()}
+        <div style={{ paddingTop: 7, borderTop: '1px solid #eee' }}>
+          {owner ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <div style={{
+                width: 18, height: 18, borderRadius: '50%',
+                background: avatarColor(owner.full_name),
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: '#fff', fontSize: 7.5, fontWeight: 800, flexShrink: 0,
+              }}>
+                {owner.full_name.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase()}
+              </div>
+              <span style={{
+                fontSize: 10.5, color: '#4a4640', fontWeight: 600,
+                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+              }}>
+                {owner.full_name}
+              </span>
             </div>
-            <span style={{ fontSize: 11, color: '#4a4640', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{owner.full_name}</span>
-          </div>
-        ) : (
-          <div style={{ paddingTop: 7, borderTop: '1px solid #e2dfd8' }}>
-            <span style={{ fontSize: 10.5, color: '#b4b0a8', fontStyle: 'italic' }}>Unassigned</span>
-          </div>
-        )}
+          ) : (
+            <span style={{ fontSize: 10, color: '#c4c0b8', fontStyle: 'italic' }}>Unassigned</span>
+          )}
+        </div>
 
-        {/* Allocation */}
-        {node.parent_id && (
-          <div style={{ marginTop: 5, fontSize: 10, color: '#8a8580' }}>
-            {node.allocation_pct}% allocation
+        {/* Allocation badge (children only) */}
+        {node.parent_id && node.allocation_pct > 0 && (
+          <div style={{ marginTop: 5 }}>
+            <span style={{
+              fontSize: 9, color: '#8a8580', background: '#f0ede8',
+              padding: '1px 5px', borderRadius: 4,
+            }}>
+              {node.allocation_pct}% allocation
+            </span>
           </div>
         )}
       </div>
@@ -108,194 +163,267 @@ function KpiCard({ node, userMap }: { node: KpiNode; userMap: Map<string, User> 
   );
 }
 
-function TreeColumn({ nodes, userMap, depth }: { nodes: KpiNode[]; userMap: Map<string, User>; depth: number }) {
-  if (nodes.length === 0) return null;
+// ─── Tree connector + node ─────────────────────────────────────────────────────
+
+function TreeNode({ node, userMap }: { node: KpiNode; userMap: Map<string, User> }) {
+  if (node.children.length === 0) {
+    return <KpiCard node={node} userMap={userMap} />;
+  }
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 24, alignItems: 'flex-start' }}>
-      {nodes.map((node) => (
-        <div key={node.id} style={{ display: 'flex', alignItems: 'flex-start', gap: 0 }}>
-          {/* Connector line from parent */}
-          {depth > 0 && (
-            <div style={{ display: 'flex', alignItems: 'center', height: 46, marginRight: 0 }}>
-              <div style={{ width: 32, height: 2, background: '#d4d0c8', flexShrink: 0 }} />
-            </div>
-          )}
+    <div style={{ display: 'flex', alignItems: 'flex-start' }}>
+      <KpiCard node={node} userMap={userMap} />
 
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 16 }}>
-            <KpiCard node={node} userMap={userMap} />
-          </div>
-
-          {/* Children column */}
-          {node.children.length > 0 && (
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 0, marginLeft: 0 }}>
-              {/* Horizontal connector */}
-              <div style={{ display: 'flex', alignItems: 'center', height: 46 }}>
-                <div style={{ width: 32, height: 2, background: '#d4d0c8', flexShrink: 0 }} />
-              </div>
-              {/* Vertical bracket + children */}
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                {node.children.length > 1 && (
-                  <div style={{ position: 'relative' }}>
-                    <div style={{
-                      position: 'absolute', left: 0, top: 22,
-                      width: 2, background: '#d4d0c8',
-                      height: `calc(100% - 44px)`,
-                    }} />
-                  </div>
-                )}
-                <TreeColumn nodes={node.children} userMap={userMap} depth={depth + 1} />
-              </div>
-            </div>
-          )}
+      <div style={{ display: 'flex', alignItems: 'flex-start', flexShrink: 0 }}>
+        {/* H-line: parent card → branch */}
+        <div style={{ display: 'flex', alignItems: 'center', height: CONNECTOR_Y, flexShrink: 0 }}>
+          <div style={{ width: H_GAP, height: 2, background: LINE_COLOR }} />
         </div>
-      ))}
+
+        {/* Children column — uses marginBottom (not gap) so absolute v-segments can bridge gaps */}
+        <div style={{ display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
+          {node.children.map((child, idx) => {
+            const isFirst = idx === 0;
+            const isLast = idx === node.children.length - 1;
+            const isOnly = node.children.length === 1;
+            return (
+              <div
+                key={child.id}
+                style={{ display: 'flex', alignItems: 'flex-start', marginBottom: isLast ? 0 : V_GAP }}
+              >
+                {/*
+                  Connector box: stretches to full row height.
+                  V-segments use absolute positioning:
+                  - "above" segment: top=0 → CONNECTOR_Y/2 (for non-first rows)
+                  - "below" segment: CONNECTOR_Y/2 → extends -V_GAP below to bridge the gap (for non-last rows)
+                  This ensures v-line is continuous across the marginBottom gap.
+                */}
+                <div style={{ position: 'relative', width: H_GAP, alignSelf: 'stretch', flexShrink: 0 }}>
+                  {/* V-segment above midpoint */}
+                  {!isOnly && !isFirst && (
+                    <div style={{
+                      position: 'absolute', left: 0, top: 0,
+                      height: CONNECTOR_Y / 2, width: 2, background: LINE_COLOR,
+                    }} />
+                  )}
+                  {/* V-segment below midpoint — extends into the margin gap to connect to next sibling */}
+                  {!isOnly && !isLast && (
+                    <div style={{
+                      position: 'absolute', left: 0, top: CONNECTOR_Y / 2,
+                      bottom: -V_GAP, width: 2, background: LINE_COLOR,
+                    }} />
+                  )}
+                  {/* H-line at midpoint */}
+                  <div style={{
+                    position: 'absolute', left: 0, top: CONNECTOR_Y / 2 - 1,
+                    width: H_GAP, height: 2, background: LINE_COLOR,
+                  }} />
+                </div>
+
+                <TreeNode node={child} userMap={userMap} />
+              </div>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }
 
+// ─── Skeleton ─────────────────────────────────────────────────────────────────
+
+function Skeleton() {
+  return (
+    <div style={{ padding: '22px 26px' }}>
+      <div style={{ marginBottom: 20 }}>
+        <div style={{ width: 200, height: 17, background: '#e4e1db', borderRadius: 4, marginBottom: 7 }} />
+        <div style={{ width: 260, height: 12, background: '#e4e1db', borderRadius: 4 }} />
+      </div>
+      <div style={{ display: 'flex', gap: 10, marginBottom: 24 }}>
+        {[240, 140, 130].map((w, i) => (
+          <div key={i} style={{ width: w, height: 36, background: '#e4e1db', borderRadius: 7 }} />
+        ))}
+      </div>
+      <div style={{ display: 'flex', gap: 48, alignItems: 'flex-start' }}>
+        {[0, 1, 2].map((i) => (
+          <div key={i} style={{ width: 210, height: 115, background: '#e4e1db', borderRadius: 12 }} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
+
+const SELECT_STYLE = {
+  background: '#fff',
+  border: '1.5px solid #e2dfd8',
+  borderRadius: 7,
+  padding: '8px 12px',
+  color: '#4a4640',
+  fontFamily: 'inherit',
+  fontSize: 13,
+  outline: 'none',
+  cursor: 'pointer',
+} as const;
+
 export default function KpiOrgPage() {
-  const [tree, setTree] = useState<KpiNode[]>([]);
-  const [userMap, setUserMap] = useState<Map<string, User>>(new Map());
-  const [loading, setLoading] = useState(true);
+  const currentUser = useAuthStore((s) => s.user);
+  const isAdmin     = currentUser?.is_admin ?? false;
+
+  const [tree, setTree]           = useState<KpiNode[]>([]);
+  const [userMap, setUserMap]     = useState<Map<string, User>>(new Map());
+  const [regionMap, setRegionMap] = useState<Map<string, Region>>(new Map());
+  const [regionList, setRegionList] = useState<Region[]>([]);
+  const [loading, setLoading]     = useState(true);
   const [filterStatus, setFilterStatus] = useState('');
-  const [search, setSearch] = useState('');
+  const [filterRegion, setFilterRegion] = useState('');
+  const [search, setSearch]       = useState('');
 
   useEffect(() => {
-    Promise.all([kpis.list({ limit: 500 }), users.list({ limit: 500 })])
-      .then(([kRes, uRes]) => {
-        const map = new Map<string, User>();
-        uRes.data.forEach((u) => map.set(u.id, u));
-        setUserMap(map);
-        const filtered = kRes.data.filter((k) => k.status !== 'cancelled');
-        setTree(buildTree(filtered));
+    Promise.all([
+      kpis.list({ limit: 500, owner_id: isAdmin ? undefined : (currentUser?.id ?? undefined) }),
+      users.list({ limit: 500 }),
+      regions.list(),
+    ])
+      .then(([kRes, uRes, rRes]) => {
+        const uMap = new Map<string, User>();
+        uRes.data.forEach((u) => uMap.set(u.id, u));
+        setUserMap(uMap);
+
+        const rMap = new Map<string, Region>();
+        rRes.data.forEach((r) => rMap.set(r.id, r));
+        setRegionMap(rMap);
+        setRegionList(rRes.data);
+
+        const active = kRes.data.filter((k) => k.status !== 'cancelled');
+        setTree(buildTree(active));
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [isAdmin, currentUser?.id]);
 
-  const filterTree = (nodes: KpiNode[], q: string, status: string): KpiNode[] => {
-    return nodes
-      .map((n) => ({
-        ...n,
-        children: filterTree(n.children, q, status),
-      }))
+  const filterTree = (nodes: KpiNode[], q: string, status: string, regionId: string): KpiNode[] =>
+    nodes
+      .map((n) => ({ ...n, children: filterTree(n.children, q, status, regionId) }))
       .filter((n) => {
-        const matchQ = !q || n.name.toLowerCase().includes(q.toLowerCase()) || n.kpi_number.toLowerCase().includes(q.toLowerCase());
-        const matchS = !status || n.status === status;
-        return (matchQ && matchS) || n.children.length > 0;
+        const matchQ  = !q        || n.name.toLowerCase().includes(q.toLowerCase()) || n.kpi_number.toLowerCase().includes(q.toLowerCase());
+        const matchS  = !status   || n.status === status;
+        const matchR  = !regionId || n.region_id === regionId;
+        return (matchQ && matchS && matchR) || n.children.length > 0;
       });
-  };
 
-  const displayed = filterTree(tree, search, filterStatus);
+  const displayed   = filterTree(tree, search, filterStatus, filterRegion);
+  const totalKpis   = countNodes(tree);
+  const rootCount   = tree.length;
+  const activeCount = [filterStatus, filterRegion, search].filter(Boolean).length;
 
-  const totalKpis = tree.reduce(function count(sum: number, n: KpiNode): number { return sum + 1 + n.children.reduce(count, 0); }, 0);
-
-  if (loading) {
-    return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 256, color: '#8a8580', fontSize: 13 }}>Loading…</div>;
-  }
+  if (loading) return <Skeleton />;
 
   return (
     <div style={{ padding: '22px 26px', minHeight: '100%' }}>
+
       {/* Header */}
-      <div style={{ marginBottom: 20 }}>
-        <div style={{ fontSize: 15, fontWeight: 800, letterSpacing: '-.2px', color: '#111110', marginBottom: 3 }}>KPI Organisation Chart</div>
-        <div style={{ fontSize: 12, color: '#8a8580' }}>{totalKpis} KPIs · cascade hierarchy with owner assignments</div>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 20 }}>
+        <div>
+          <div style={{ fontSize: 15, fontWeight: 800, letterSpacing: '-.2px', color: '#111110', marginBottom: 3 }}>
+            {isAdmin ? 'KPI Organisation Chart' : 'My KPI Organisation Chart'}
+          </div>
+          <div style={{ fontSize: 12, color: '#8a8580' }}>
+            {rootCount} root {rootCount === 1 ? 'tree' : 'trees'} · {totalKpis} {isAdmin ? 'total' : 'my'} KPIs · cascade hierarchy
+          </div>
+        </div>
       </div>
 
       {/* Filters */}
-      <div style={{ display: 'flex', gap: 10, marginBottom: 24, flexWrap: 'wrap' }}>
-        <input
-          placeholder="Search KPI name or number…"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          style={{ background: '#fff', border: '1.5px solid #e2dfd8', borderRadius: 7, padding: '8px 12px', color: '#111110', fontFamily: 'inherit', fontSize: 13, outline: 'none', width: 240 }}
-          onFocus={(e) => (e.target.style.borderColor = '#000')}
-          onBlur={(e) => (e.target.style.borderColor = '#e2dfd8')}
-        />
-        <select
-          value={filterStatus}
-          onChange={(e) => setFilterStatus(e.target.value)}
-          style={{ background: '#fff', border: '1.5px solid #e2dfd8', borderRadius: 7, padding: '8px 12px', color: '#4a4640', fontFamily: 'inherit', fontSize: 13, outline: 'none' }}
-        >
+      <div style={{ display: 'flex', gap: 10, marginBottom: 28, flexWrap: 'wrap', alignItems: 'center' }}>
+        <div style={{ position: 'relative' }}>
+          <input
+            placeholder="Search by name or number…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            style={{
+              ...SELECT_STYLE,
+              color: '#111110',
+              width: 230,
+              paddingLeft: 32,
+            }}
+            onFocus={(e) => (e.target.style.borderColor = '#111')}
+            onBlur={(e) => (e.target.style.borderColor = '#e2dfd8')}
+          />
+          <svg
+            viewBox="0 0 14 14" fill="none" stroke="#aaa" strokeWidth="1.5"
+            style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', width: 13, height: 13, pointerEvents: 'none' }}
+          >
+            <circle cx="6" cy="6" r="4.5" /><line x1="9.5" y1="9.5" x2="13" y2="13" />
+          </svg>
+        </div>
+
+        <select value={filterRegion} onChange={(e) => setFilterRegion(e.target.value)} style={SELECT_STYLE}>
+          <option value="">All Regions</option>
+          {regionList.map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}
+        </select>
+
+        <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} style={SELECT_STYLE}>
           <option value="">All Statuses</option>
           <option value="active">Active</option>
           <option value="draft">Draft</option>
           <option value="completed">Completed</option>
         </select>
+
+        {activeCount > 0 && (
+          <button
+            type="button"
+            onClick={() => { setSearch(''); setFilterRegion(''); setFilterStatus(''); }}
+            style={{
+              fontSize: 11.5, color: '#b91c1c', background: 'rgba(185,28,28,.06)',
+              border: '1px solid rgba(185,28,28,.18)', borderRadius: 6, padding: '5px 10px',
+              cursor: 'pointer', fontFamily: 'inherit', fontWeight: 600,
+            }}
+          >
+            Clear {activeCount} filter{activeCount > 1 ? 's' : ''}
+          </button>
+        )}
       </div>
 
-      {/* Tree */}
+      {/* Tree canvas */}
       {displayed.length === 0 ? (
-        <div style={{ border: '2px dashed #e2dfd8', borderRadius: 14, padding: '48px 20px', textAlign: 'center', background: '#f8f7f5' }}>
-          <p style={{ fontSize: 14, fontWeight: 600, color: '#4a4640' }}>No KPIs found</p>
+        <div style={{
+          border: '2px dashed #e2dfd8', borderRadius: 14,
+          padding: '52px 20px', textAlign: 'center', background: '#f8f7f5',
+        }}>
+          <div style={{ fontSize: 28, marginBottom: 10, opacity: .35 }}>⊹</div>
+          <p style={{ fontSize: 13, fontWeight: 600, color: '#4a4640', margin: 0 }}>No KPIs match your filters</p>
+          <p style={{ fontSize: 12, color: '#b4b0a8', marginTop: 5 }}>Try broadening your search or clearing filters</p>
         </div>
       ) : (
-        <div style={{ overflowX: 'auto', paddingBottom: 32 }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 48, alignItems: 'flex-start', minWidth: 'max-content' }}>
-            {displayed.map((root) => (
-              <div key={root.id}>
-                {/* Root label */}
-                <div style={{ fontSize: 10, fontWeight: 700, color: '#8a8580', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 10 }}>
-                  Root KPI
+        <div style={{ overflowX: 'auto', paddingBottom: 40 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 52, alignItems: 'flex-start', minWidth: 'max-content', paddingRight: 40 }}>
+            {displayed.map((root) => {
+              const region = regionMap.get(root.region_id);
+              return (
+                <div key={root.id}>
+                  {/* Section label: shows region + root indicator */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+                    {region && (
+                      <span style={{
+                        fontSize: 9, fontWeight: 700, padding: '2px 6px', borderRadius: 4,
+                        background: '#111110', color: '#fff', fontFamily: 'monospace', letterSpacing: '.5px',
+                      }}>
+                        {region.code}
+                      </span>
+                    )}
+                    <span style={{
+                      fontSize: 9.5, fontWeight: 700, color: '#8a8580',
+                      textTransform: 'uppercase', letterSpacing: '1px',
+                    }}>
+                      {region?.name ?? 'Root KPI'} · Root
+                    </span>
+                  </div>
+
+                  <TreeNode node={root} userMap={userMap} />
                 </div>
-                <div style={{ display: 'flex', alignItems: 'flex-start' }}>
-                  <KpiCard node={root} userMap={userMap} />
-                  {root.children.length > 0 && (
-                    <div style={{ display: 'flex', alignItems: 'flex-start' }}>
-                      {/* H-line to branch */}
-                      <div style={{ display: 'flex', alignItems: 'center', height: 46 }}>
-                        <div style={{ width: 32, height: 2, background: '#d4d0c8' }} />
-                      </div>
-                      {/* Vertical bracket */}
-                      <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: 24 }}>
-                        {root.children.length > 1 && (
-                          <div style={{
-                            position: 'absolute', left: 0, top: 22,
-                            width: 2, background: '#d4d0c8',
-                            height: `calc(100% - 44px)`,
-                          }} />
-                        )}
-                        {root.children.map((child) => (
-                          <div key={child.id} style={{ display: 'flex', alignItems: 'flex-start' }}>
-                            {/* H-line to child */}
-                            <div style={{ display: 'flex', alignItems: 'center', height: 46 }}>
-                              <div style={{ width: 32, height: 2, background: '#d4d0c8' }} />
-                            </div>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                              <KpiCard node={child} userMap={userMap} />
-                            </div>
-                            {/* Level 2 children */}
-                            {child.children.length > 0 && (
-                              <div style={{ display: 'flex', alignItems: 'flex-start' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', height: 46 }}>
-                                  <div style={{ width: 32, height: 2, background: '#d4d0c8' }} />
-                                </div>
-                                <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: 24 }}>
-                                  {child.children.length > 1 && (
-                                    <div style={{
-                                      position: 'absolute', left: 0, top: 22,
-                                      width: 2, background: '#d4d0c8',
-                                      height: `calc(100% - 44px)`,
-                                    }} />
-                                  )}
-                                  {child.children.map((grandchild) => (
-                                    <div key={grandchild.id} style={{ display: 'flex', alignItems: 'flex-start' }}>
-                                      <div style={{ display: 'flex', alignItems: 'center', height: 46 }}>
-                                        <div style={{ width: 32, height: 2, background: '#d4d0c8' }} />
-                                      </div>
-                                      <KpiCard node={grandchild} userMap={userMap} />
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}

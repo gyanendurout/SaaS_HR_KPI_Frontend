@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { kpis, cascade, type Kpi, type CascadeSummary } from '@/lib/api';
+import { useAuthStore } from '@/store/auth';
 
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, { bg: string; color: string }> = {
@@ -22,6 +23,9 @@ function StatusBadge({ status }: { status: string }) {
 const LEVEL_COLORS = ['#000000', '#333333', '#666666', '#aaaaaa'];
 
 export default function CascadePage() {
+  const currentUser = useAuthStore((s) => s.user);
+  const isAdmin = currentUser?.is_admin ?? false;
+
   const [rootKpis, setRootKpis] = useState<Kpi[]>([]);
   const [selectedId, setSelectedId] = useState<string>('');
   const [summary, setSummary] = useState<CascadeSummary | null>(null);
@@ -31,13 +35,15 @@ export default function CascadePage() {
   const [treeVersion, setTreeVersion] = useState(0);
 
   useEffect(() => {
-    kpis.list({ limit: 100, status: 'active' })
+    if (!currentUser?.id) return;
+    // Non-admins only see KPIs they own in the cascade tree
+    kpis.list({ limit: 100, status: 'active', owner_id: isAdmin ? undefined : currentUser.id })
       .then((kRes) => {
         const topLevel = kRes.data.filter((k) => !k.parent_id);
         setRootKpis(topLevel);
         if (topLevel.length > 0) setSelectedId(topLevel[0].id);
       }).finally(() => setLoading(false));
-  }, []);
+  }, [isAdmin, currentUser?.id]);
 
   const loadSummary = useCallback(async (id: string) => {
     if (!id) return;
@@ -201,6 +207,7 @@ export default function CascadePage() {
           parent={summary.parent}
           remainingPct={summary.remaining_pct}
           existingChildIds={summary.children.map((c) => c.id)}
+          ownerFilter={isAdmin ? undefined : (currentUser?.id ?? undefined)}
           onClose={() => setShowCreate(false)}
           onSaved={() => { setShowCreate(false); loadSummary(selectedId); setTreeVersion((v) => v + 1); }}
         />
@@ -268,10 +275,11 @@ function KpiTreeNode({ kpi, level, selectedId, onSelect, levelColor, refreshKey 
   );
 }
 
-function AddChildModal({ parent, remainingPct, existingChildIds = [], onClose, onSaved }: {
+function AddChildModal({ parent, remainingPct, existingChildIds = [], ownerFilter, onClose, onSaved }: {
   parent: Kpi;
   remainingPct: number;
   existingChildIds?: string[];
+  ownerFilter?: string;
   onClose: () => void;
   onSaved: () => void;
 }) {
@@ -283,7 +291,8 @@ function AddChildModal({ parent, remainingPct, existingChildIds = [], onClose, o
   const [loadingList, setLoadingList] = useState(true);
 
   useEffect(() => {
-    kpis.list({ limit: 200 }).then((res) => {
+    // Non-admins can only link KPIs they own
+    kpis.list({ limit: 200, owner_id: ownerFilter }).then((res) => {
       const eligible = res.data.filter(
         (k) => k.id !== parent.id && !existingChildIds.includes(k.id) && k.status !== 'cancelled'
       );

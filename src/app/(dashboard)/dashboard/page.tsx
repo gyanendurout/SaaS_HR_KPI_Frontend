@@ -42,6 +42,8 @@ const WORKFLOW = [
 
 export default function DashboardPage() {
   const user = useAuthStore((s) => s.user);
+  const isAdmin = user?.is_admin ?? false;
+
   const [allKpis, setAllKpis]           = useState<Kpi[]>([]);
   const [allUsers, setAllUsers]         = useState<User[]>([]);
   const [allRegions, setAllRegions]     = useState<Region[]>([]);
@@ -50,8 +52,10 @@ export default function DashboardPage() {
   const [regionId, setRegionId]         = useState<string>('all');
 
   useEffect(() => {
+    if (!user?.id) return;
     Promise.allSettled([
-      kpis.list({ limit: 200 }),
+      // Admins see all KPIs; non-admins see only their own
+      kpis.list({ limit: 200, owner_id: isAdmin ? undefined : user.id }),
       users.list({ limit: 100 }),
       approvals.list({ status: 'pending', limit: 6 }),
       regions.list(),
@@ -61,7 +65,7 @@ export default function DashboardPage() {
       if (ar.status === 'fulfilled') setPending(ar.value.data);
       if (rr.status === 'fulfilled') setAllRegions(rr.value.data);
     }).finally(() => setLoading(false));
-  }, []);
+  }, [isAdmin, user?.id]);
 
   const fKpis    = regionId === 'all' ? allKpis : allKpis.filter((k) => k.region_id === regionId);
   const fUsers   = regionId === 'all' ? allUsers : allUsers.filter((u) => u.region_id === regionId);
@@ -102,10 +106,10 @@ export default function DashboardPage() {
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 10, position: 'relative' }}>
           {([
-            ['Total KPIs',       allKpis.length],
-            ['Active',           allKpis.filter((k) => k.status === 'active').length],
-            ['Cascaded',         allKpis.filter((k) => k.parent_id).length],
-            ['Pending Approval', pending.length],
+            [isAdmin ? 'Total KPIs' : 'My KPIs',  allKpis.length],
+            ['Active',                              allKpis.filter((k) => k.status === 'active').length],
+            ['Cascaded',                            allKpis.filter((k) => k.parent_id).length],
+            ['Pending Approval',                    pending.length],
           ] as [string, number][]).map(([label, value]) => (
             <div key={label}
               style={{ background: 'rgba(255,255,255,.07)', borderTop: '1px solid rgba(255,255,255,.08)', borderRight: '1px solid rgba(255,255,255,.08)', borderBottom: '1px solid rgba(255,255,255,.08)', borderLeft: '1px solid rgba(255,255,255,.08)', borderRadius: 9, padding: '13px 15px', transition: 'background .15s', cursor: 'default' }}
@@ -152,7 +156,7 @@ export default function DashboardPage() {
         <div style={{ padding: '14px 18px' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
             <span style={{ fontSize: 13, fontWeight: 700, color: '#111110' }}>
-              {regionLabel} KPIs
+              {isAdmin ? `${regionLabel} KPIs` : 'My KPIs'}
               <span style={{ fontWeight: 400, color: '#8a8580', fontSize: 12, marginLeft: 6 }}>({fKpis.length})</span>
             </span>
             <Link href="/kpis" style={{ fontSize: 12, color: '#8a8580', textDecoration: 'none', fontWeight: 500 }}

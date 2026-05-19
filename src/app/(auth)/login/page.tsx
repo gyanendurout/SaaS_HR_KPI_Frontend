@@ -144,6 +144,7 @@ export default function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              autoComplete="email"
               placeholder="you@joola.in"
               style={{
                 width: '100%',
@@ -183,6 +184,7 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              autoComplete="current-password"
               placeholder="••••••••"
               style={{
                 width: '100%',
@@ -204,6 +206,7 @@ export default function LoginPage() {
 
           {error && (
             <div
+              role="alert"
               style={{
                 fontSize: 12,
                 padding: '9px 12px',
@@ -233,9 +236,11 @@ export default function LoginPage() {
               fontFamily: 'inherit',
               cursor: loading ? 'not-allowed' : 'pointer',
               opacity: loading ? 0.6 : 1,
-              transition: 'opacity .15s',
+              transition: 'opacity .15s, background .15s',
               marginTop: 4,
             }}
+            onMouseEnter={(e) => { if (!loading) (e.currentTarget as HTMLElement).style.background = '#222'; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = '#000'; }}
           >
             {loading ? 'Signing in…' : 'Sign in →'}
           </button>

@@ -20,6 +20,8 @@ function Avatar({ name, size = 32 }: { name: string; size?: number }) {
 
 export default function PeoplePage() {
   const currentUser = useAuthStore((s) => s.user);
+  const isAdmin     = currentUser?.is_admin ?? false;
+
   const [data, setData] = useState<User[]>([]);
   const [total, setTotal] = useState(0);
   const [regionList, setRegionList] = useState<Region[]>([]);
@@ -32,6 +34,14 @@ export default function PeoplePage() {
   const LIMIT = 20;
 
   const load = useCallback(async () => {
+    if (!currentUser) return;
+    if (!isAdmin) {
+      // Non-admins only see themselves
+      setData([currentUser as User]);
+      setTotal(1);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     try {
       const res = await users.list({ page, limit: LIMIT, search: search || undefined, status: filterStatus || undefined });
@@ -40,7 +50,7 @@ export default function PeoplePage() {
     } finally {
       setLoading(false);
     }
-  }, [page, search, filterStatus]);
+  }, [isAdmin, currentUser, page, search, filterStatus]);
 
   useEffect(() => { load(); }, [load]);
   useEffect(() => { regions.list().then((r) => setRegionList(r.data)).catch(() => {}); }, []);
@@ -49,8 +59,12 @@ export default function PeoplePage() {
     <div className="p-8">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-black tracking-tight" style={{ color: 'var(--near-black)' }}>People</h1>
-          <p className="text-sm mt-0.5" style={{ color: 'var(--t3)' }}>{total} members</p>
+          <h1 className="text-2xl font-black tracking-tight" style={{ color: 'var(--near-black)' }}>
+            {isAdmin ? 'People' : 'My Profile'}
+          </h1>
+          <p className="text-sm mt-0.5" style={{ color: 'var(--t3)' }}>
+            {isAdmin ? `${total} members` : 'Your account details'}
+          </p>
         </div>
         {currentUser?.is_admin && (
           <button type="button"
@@ -63,26 +77,28 @@ export default function PeoplePage() {
         )}
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-wrap gap-3 mb-5">
-        <input
-          placeholder="Search by name or email…"
-          value={search}
-          onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-          className="rounded-lg px-3.5 py-2 text-sm outline-none"
-          style={{ border: '1.5px solid var(--border)', background: 'var(--card)', width: 260 }}
-        />
-        <select
-          value={filterStatus}
-          onChange={(e) => { setFilterStatus(e.target.value); setPage(1); }}
-          className="rounded-lg px-3.5 py-2 text-sm outline-none"
-          style={{ border: '1.5px solid var(--border)', background: 'var(--card)', color: 'var(--t2)' }}
-        >
-          <option value="">All Statuses</option>
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
-        </select>
-      </div>
+      {/* Filters — admins only */}
+      {isAdmin && (
+        <div className="flex flex-wrap gap-3 mb-5">
+          <input
+            placeholder="Search by name or email…"
+            value={search}
+            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+            className="rounded-lg px-3.5 py-2 text-sm outline-none"
+            style={{ border: '1.5px solid var(--border)', background: 'var(--card)', width: 260 }}
+          />
+          <select
+            value={filterStatus}
+            onChange={(e) => { setFilterStatus(e.target.value); setPage(1); }}
+            className="rounded-lg px-3.5 py-2 text-sm outline-none"
+            style={{ border: '1.5px solid var(--border)', background: 'var(--card)', color: 'var(--t2)' }}
+          >
+            <option value="">All Statuses</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+        </div>
+      )}
 
       {/* Grid */}
       {loading ? (
@@ -173,8 +189,8 @@ export default function PeoplePage() {
         </div>
       )}
 
-      {/* Pagination */}
-      {total > LIMIT && (
+      {/* Pagination — admins only */}
+      {isAdmin && total > LIMIT && (
         <div className="flex items-center justify-between mt-6">
           <p className="text-xs" style={{ color: 'var(--t3)' }}>
             Showing {(page - 1) * LIMIT + 1}–{Math.min(page * LIMIT, total)} of {total}

@@ -24,6 +24,8 @@ type TabId = 'owned' | 'all' | 'cascaded' | 'draft';
 
 export default function KpisPage() {
   const currentUser = useAuthStore((s) => s.user);
+  const isAdmin = currentUser?.is_admin ?? false;
+
   const [data, setData] = useState<Kpi[]>([]);
   const [allUsers, setAllUsers] = useState<User[]>([]);
   const [regionList, setRegionList] = useState<Region[]>([]);
@@ -32,7 +34,8 @@ export default function KpisPage() {
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
   const [filterRegion, setFilterRegion] = useState('');
-  const [activeTab, setActiveTab] = useState<TabId>('all');
+  // Admins default to 'all'; regular users default to their own KPIs view
+  const [activeTab, setActiveTab] = useState<TabId>(isAdmin ? 'all' : 'owned');
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
   const LIMIT = 20;
@@ -40,13 +43,20 @@ export default function KpisPage() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await kpis.list({ page, limit: LIMIT, status: filterStatus || undefined, region_id: filterRegion || undefined });
+      const res = await kpis.list({
+        page,
+        limit: LIMIT,
+        status: filterStatus || undefined,
+        region_id: filterRegion || undefined,
+        // Non-admins only see their own KPIs; admins see all
+        owner_id: isAdmin ? undefined : (currentUser?.id ?? undefined),
+      });
       setData(res.data);
       setTotal(res.total);
     } finally {
       setLoading(false);
     }
-  }, [page, filterStatus, filterRegion]);
+  }, [page, filterStatus, filterRegion, isAdmin, currentUser?.id]);
 
   useEffect(() => { load(); }, [load]);
   useEffect(() => {
@@ -58,7 +68,8 @@ export default function KpisPage() {
     ? data.filter((k) => k.name.toLowerCase().includes(search.toLowerCase()) || k.kpi_number.toLowerCase().includes(search.toLowerCase()))
     : data;
 
-  const ownedKpis = searched.filter((k) => k.owner_id === currentUser?.id);
+  // For admins, client-side owned filter; for non-admins the API already filtered to their KPIs
+  const ownedKpis = isAdmin ? searched.filter((k) => k.owner_id === currentUser?.id) : searched;
   const cascadedKpis = searched.filter((k) => k.parent_id !== null);
   const draftKpis = searched.filter((k) => k.status === 'draft');
 
@@ -69,12 +80,18 @@ export default function KpisPage() {
     draft: draftKpis,
   };
 
-  const tabs: { id: TabId; label: string; count: number }[] = [
-    { id: 'all', label: 'All KPIs', count: searched.length },
-    { id: 'owned', label: 'Owned by Me', count: ownedKpis.length },
-    { id: 'cascaded', label: 'Cascaded', count: cascadedKpis.length },
-    { id: 'draft', label: 'Pending Approval', count: draftKpis.length },
-  ];
+  const tabs: { id: TabId; label: string; count: number }[] = isAdmin
+    ? [
+        { id: 'all',      label: 'All KPIs',        count: searched.length },
+        { id: 'owned',    label: 'Owned by Me',      count: ownedKpis.length },
+        { id: 'cascaded', label: 'Cascaded',         count: cascadedKpis.length },
+        { id: 'draft',    label: 'Pending Approval', count: draftKpis.length },
+      ]
+    : [
+        { id: 'owned',    label: 'My KPIs',          count: ownedKpis.length },
+        { id: 'cascaded', label: 'Cascaded',         count: cascadedKpis.length },
+        { id: 'draft',    label: 'Pending Approval', count: draftKpis.length },
+      ];
 
   const displayKpis = tabKpis[activeTab];
 
@@ -91,13 +108,15 @@ export default function KpisPage() {
           MY KPIs
         </div>
         <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,.35)', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: 5 }}>
-          My KPI Portfolio
+          {isAdmin ? 'Admin · All KPIs' : 'My KPI Portfolio'}
         </div>
         <div style={{ fontSize: 22, fontWeight: 900, color: '#fff', letterSpacing: '-.4px', marginBottom: 3 }}>
-          All KPIs
+          {isAdmin ? 'Organisation KPIs' : 'My KPIs'}
         </div>
         <div style={{ fontSize: 12.5, color: 'rgba(255,255,255,.45)', marginBottom: 16 }}>
-          KPIs you own, contribute to, or are involved in through cascade or approval
+          {isAdmin
+            ? 'All KPIs across the organisation — admin view'
+            : 'KPIs you own or are responsible for'}
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 10 }}>
           {[
@@ -272,6 +291,7 @@ export default function KpisPage() {
       {showCreate && (
         <CreateKpiModal
           regions={regionList}
+          currentUserId={currentUser?.id}
           onClose={() => setShowCreate(false)}
           onSaved={() => { setShowCreate(false); load(); }}
         />
@@ -280,7 +300,7 @@ export default function KpisPage() {
   );
 }
 
-function CreateKpiModal({ regions: regionList, onClose, onSaved }: { regions: Region[]; onClose: () => void; onSaved: () => void }) {
+function CreateKpiModal({ regions: regionList, currentUserId, onClose, onSaved }: { regions: Region[]; currentUserId?: string; onClose: () => void; onSaved: () => void }) {
   const [form, setForm] = useState({ name: '', description: '', type: 'quantitative', period: 'quarterly', update_frequency: 'monthly', target_value: '', unit: '', start_date: '', end_date: '', allocation_pct: '100', region_id: regionList[0]?.id ?? '' });
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
@@ -290,7 +310,7 @@ function CreateKpiModal({ regions: regionList, onClose, onSaved }: { regions: Re
     if (!form.name || !form.region_id) { setError('Name and region are required'); return; }
     setSaving(true); setError('');
     try {
-      await kpis.create({ name: form.name, description: form.description || undefined, type: form.type as 'quantitative' | 'qualitative', period: form.period as 'monthly' | 'quarterly' | 'annual', update_frequency: form.update_frequency as 'weekly' | 'monthly' | 'quarterly', target_value: form.target_value ? Number(form.target_value) : undefined, unit: form.unit || undefined, start_date: form.start_date || undefined, end_date: form.end_date || undefined, allocation_pct: Number(form.allocation_pct), region_id: form.region_id });
+      await kpis.create({ name: form.name, description: form.description || undefined, type: form.type as 'quantitative' | 'qualitative', period: form.period as 'monthly' | 'quarterly' | 'annual', update_frequency: form.update_frequency as 'weekly' | 'monthly' | 'quarterly', target_value: form.target_value ? Number(form.target_value) : undefined, unit: form.unit || undefined, start_date: form.start_date || undefined, end_date: form.end_date || undefined, allocation_pct: Number(form.allocation_pct), region_id: form.region_id, owner_id: currentUserId });
       onSaved();
     } catch (err: unknown) { setError(err instanceof Error ? err.message : 'Failed to create KPI'); } finally { setSaving(false); }
   };
