@@ -16,17 +16,19 @@ const NAV_SECTIONS = [
   {
     label: 'KPI Management',
     items: [
-      { href: '/kpis',        label: 'My KPIs',    icon: '◎' },
-      { href: '/cascade',     label: 'Cascade',    icon: '⌥' },
-      { href: '/kpi-org',     label: 'KPI Org',    icon: '⊹' },
-      { href: '/updates',     label: 'Updates',    icon: '↑' },
-      { href: '/assignments', label: 'Assignments', icon: '⊞' },
+      { href: '/kpis',        label: 'My KPIs',      icon: '◎' },
+      { href: '/templates',   label: 'KPI Templates', icon: '⊟' },
+      { href: '/kpis/new',    label: 'Add KPI',       icon: '+' },
+      { href: '/assignments', label: 'KPI Assignment', icon: '⊞' },
+      { href: '/cascade',     label: 'Cascade KPIs',  icon: '⌥' },
+      { href: '/kpi-org',     label: 'KPI Org',       icon: '⊹' },
+      { href: '/updates',     label: 'KPI Updates',   icon: '↑' },
     ],
   },
   {
     label: 'Organization',
     items: [
-      { href: '/people',    label: 'People',    icon: '◻' },
+      { href: '/people',    label: 'Employees', icon: '◻' },
       { href: '/org-chart', label: 'Org Chart', icon: '⋮' },
       { href: '/regions',   label: 'Regions',   icon: '◈' },
     ],
@@ -90,7 +92,9 @@ export default function Sidebar() {
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               {section.items.map((item) => {
-                const active = pathname === item.href || pathname.startsWith(item.href + '/');
+                const active = item.href === '/kpis'
+                  ? pathname === '/kpis'
+                  : pathname === item.href || pathname.startsWith(item.href + '/');
                 const badgeCount = item.badge ? pendingCount : 0;
                 return (
                   <Link
@@ -104,7 +108,7 @@ export default function Sidebar() {
                     onMouseEnter={(e) => { if (!active) (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,.06)'; }}
                     onMouseLeave={(e) => { if (!active) (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
                   >
-                    <span className="text-base leading-none">{item.icon}</span>
+                    <span className="nav-icon text-base leading-none">{item.icon}</span>
                     <span style={{ flex: 1 }}>{item.label}</span>
                     {badgeCount > 0 && (
                       <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 6px', borderRadius: 8, background: '#f59e0b', color: '#000', lineHeight: 1 }}>

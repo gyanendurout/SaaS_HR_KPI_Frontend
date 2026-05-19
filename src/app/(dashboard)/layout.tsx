@@ -110,6 +110,19 @@ function Topbar() {
 
       {/* Right side */}
       <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
+        {/* Page-level CTA (matches v4 topbar CTA pattern) */}
+        {pathname === '/templates' && (
+          <button type="button" className="btn btn-black btn-sm"
+            onClick={() => router.push('/templates?new=1')}>
+            + New Template
+          </button>
+        )}
+        {pathname === '/kpis' && (
+          <button type="button" className="btn btn-black btn-sm"
+            onClick={() => router.push('/kpis/new')}>
+            + Add KPI
+          </button>
+        )}
         {/* Export button */}
         <button
           type="button"

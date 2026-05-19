@@ -164,7 +164,7 @@ export default function PeoplePage() {
                         Deactivate
                       </button>
                     )}
-                    {u.id !== currentUser.id && (
+                    {/* {u.id !== currentUser.id && (
                       <button type="button"
                         onClick={async () => {
                           if (!confirm(`Permanently delete ${u.full_name}? This removes their account and cannot be undone.`)) return;
@@ -180,7 +180,7 @@ export default function PeoplePage() {
                       >
                         Delete
                       </button>
-                    )}
+                    )} */}
                   </div>
                 )}
               </div>

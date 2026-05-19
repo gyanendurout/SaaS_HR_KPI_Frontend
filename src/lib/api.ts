@@ -404,6 +404,44 @@ export const notifications = {
     request<{ success: boolean }>('/api/notifications/read-all', { method: 'PUT' }),
 };
 
+// ─── KPI Templates ────────────────────────────────────────────────────────────
+
+export interface ApiKpiTemplate {
+  id: string;
+  name: string;
+  category: string;
+  icon: string;
+  fields: import('./kpi-templates').TemplateField[];
+  used_in: number;
+  is_default: boolean;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export const templates = {
+  list: () =>
+    request<{ success: boolean; data: ApiKpiTemplate[] }>('/api/templates'),
+
+  getById: (id: string) =>
+    request<{ success: boolean; data: ApiKpiTemplate }>(`/api/templates/${id}`),
+
+  create: (payload: { name: string; category: string; icon: string; fields: import('./kpi-templates').TemplateField[] }) =>
+    request<{ success: boolean; data: ApiKpiTemplate }>('/api/templates', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+
+  update: (id: string, payload: Partial<{ name: string; category: string; icon: string; fields: import('./kpi-templates').TemplateField[] }>) =>
+    request<{ success: boolean; data: ApiKpiTemplate }>(`/api/templates/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    }),
+
+  remove: (id: string) =>
+    request<{ success: boolean }>(`/api/templates/${id}`, { method: 'DELETE' }),
+};
+
 // ─── Audit ────────────────────────────────────────────────────────────────────
 
 export interface AuditEntry {

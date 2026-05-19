@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { kpis, users, regions, type Kpi, type User, type Region } from '@/lib/api';
 import { useAuthStore } from '@/store/auth';
 
@@ -23,6 +24,7 @@ function StatusBadge({ status }: { status: string }) {
 type TabId = 'owned' | 'all' | 'cascaded' | 'draft';
 
 export default function KpisPage() {
+  const router = useRouter();
   const currentUser = useAuthStore((s) => s.user);
   const isAdmin = currentUser?.is_admin ?? false;
 
@@ -189,7 +191,7 @@ export default function KpisPage() {
           </select>
           <div style={{ marginLeft: 'auto' }}>
             <button type="button"
-              onClick={() => setShowCreate(true)}
+              onClick={() => router.push('/kpis/new')}
               style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '8px 14px', borderRadius: 6, fontSize: 12.5, fontFamily: 'inherit', fontWeight: 600, cursor: 'pointer', background: '#000', color: '#fff', border: '1px solid #000', transition: 'opacity .15s' }}
               onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.opacity = '.85')}
               onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.opacity = '1')}

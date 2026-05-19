@@ -94,7 +94,7 @@ export default function DashboardPage() {
     <div style={{ padding: '22px 26px' }}>
 
       {/* ══ 1. HERO CARD ══ */}
-      <div style={{ background: '#000', color: '#fff', borderRadius: 14, padding: '22px 26px', marginBottom: 18, position: 'relative', overflow: 'hidden' }}>
+      {/* <div style={{ background: '#000', color: '#fff', borderRadius: 14, padding: '22px 26px', marginBottom: 18, position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', right: -10, top: '50%', transform: 'translateY(-50%)', fontSize: 110, fontWeight: 900, color: 'rgba(255,255,255,.035)', letterSpacing: -4, pointerEvents: 'none', userSelect: 'none', lineHeight: 1 }}>
           JOOLA
         </div>
@@ -120,7 +120,7 @@ export default function DashboardPage() {
             </div>
           ))}
         </div>
-      </div>
+      </div> */}
 
       {/* ══ 2. REGION TABS + STATS + KPI TABLE (all one card) ══ */}
       <div style={{ background: '#fff', borderTop: '1px solid #e2dfd8', borderRight: '1px solid #e2dfd8', borderBottom: '1px solid #e2dfd8', borderLeft: '1px solid #e2dfd8', borderRadius: 14, overflow: 'hidden', boxShadow: '0 1px 4px rgba(0,0,0,.06)', marginBottom: 18 }}>
@@ -204,7 +204,7 @@ export default function DashboardPage() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
 
           {/* KPI Workflow */}
-          <div style={{ background: '#fff', borderTop: '1px solid #e2dfd8', borderRight: '1px solid #e2dfd8', borderBottom: '1px solid #e2dfd8', borderLeft: '1px solid #e2dfd8', borderRadius: 14, overflow: 'hidden', boxShadow: '0 1px 4px rgba(0,0,0,.06)' }}>
+          {/* <div style={{ background: '#fff', borderTop: '1px solid #e2dfd8', borderRight: '1px solid #e2dfd8', borderBottom: '1px solid #e2dfd8', borderLeft: '1px solid #e2dfd8', borderRadius: 14, overflow: 'hidden', boxShadow: '0 1px 4px rgba(0,0,0,.06)' }}>
             <div style={{ padding: '13px 18px', borderBottom: '1px solid #e2dfd8', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <span style={{ fontSize: 13.5, fontWeight: 700, color: '#111110', letterSpacing: '-.1px' }}>KPI Workflow</span>
               <span style={{ fontSize: 11, fontWeight: 600, padding: '2.5px 8px', borderRadius: 4, background: 'rgba(0,0,0,.05)', color: '#4a4640' }}>End-to-end</span>
@@ -225,7 +225,7 @@ export default function DashboardPage() {
                 </div>
               ))}
             </div>
-          </div>
+          </div> */}
 
           {/* Team Members */}
           <div style={{ background: '#fff', borderTop: '1px solid #e2dfd8', borderRight: '1px solid #e2dfd8', borderBottom: '1px solid #e2dfd8', borderLeft: '1px solid #e2dfd8', borderRadius: 14, overflow: 'hidden', boxShadow: '0 1px 4px rgba(0,0,0,.06)' }}>
@@ -265,7 +265,7 @@ export default function DashboardPage() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
 
           {/* Pending Approvals */}
-          <div style={{ background: '#fff', borderTop: '1px solid #e2dfd8', borderRight: '1px solid #e2dfd8', borderBottom: '1px solid #e2dfd8', borderLeft: '1px solid #e2dfd8', borderRadius: 14, overflow: 'hidden', boxShadow: '0 1px 4px rgba(0,0,0,.06)' }}>
+          {/* <div style={{ background: '#fff', borderTop: '1px solid #e2dfd8', borderRight: '1px solid #e2dfd8', borderBottom: '1px solid #e2dfd8', borderLeft: '1px solid #e2dfd8', borderRadius: 14, overflow: 'hidden', boxShadow: '0 1px 4px rgba(0,0,0,.06)' }}>
             <div style={{ padding: '13px 16px', borderBottom: '1px solid #e2dfd8', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <span style={{ fontSize: 13, fontWeight: 700, color: '#111110' }}>Pending Approvals</span>
               <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 10, background: pending.length > 0 ? 'rgba(180,83,9,.1)' : 'rgba(0,0,0,.05)', color: pending.length > 0 ? '#b45309' : '#8a8580' }}>
@@ -310,7 +310,7 @@ export default function DashboardPage() {
                 </Link>
               </div>
             )}
-          </div>
+          </div> */}
 
           {/* Quick Actions */}
           <div style={{ background: '#fff', borderTop: '1px solid #e2dfd8', borderRight: '1px solid #e2dfd8', borderBottom: '1px solid #e2dfd8', borderLeft: '1px solid #e2dfd8', borderRadius: 14, padding: '14px 16px', boxShadow: '0 1px 4px rgba(0,0,0,.06)' }}>
