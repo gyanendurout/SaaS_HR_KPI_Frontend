@@ -199,16 +199,7 @@ export default function ReportsPage() {
             </tbody>
           </table>
         </div>
-      </div>
-
-      {/* Audit log note */}
-      <div style={{ background: '#f8f7f5', border: '1px solid #e2dfd8', borderRadius: 10, padding: '14px 18px', display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-        <span style={{ fontSize: 16, flexShrink: 0 }}>🔒</span>
-        <div>
-          <div style={{ fontSize: 13, fontWeight: 600, color: '#4a4640', marginBottom: 3 }}>Audit Log</div>
-          <div style={{ fontSize: 12, color: '#8a8580' }}>Full audit trail (KPI creates, updates, approvals, cascades, user changes) is stored in the backend. Contact your administrator to access audit logs or set up automated reporting exports.</div>
-        </div>
-      </div>
+      </div>      
     </div>
   );
 }
