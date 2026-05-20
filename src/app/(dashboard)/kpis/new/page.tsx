@@ -249,15 +249,17 @@ export default function NewKpiPage() {
 
   const handleSubmitTemplate = async () => {
     if (!selectedTmpl) return;
-    const name = fieldValues[selectedTmpl.fields[0]?.id ?? ''] || '';
-    if (!name.trim()) { setError('KPI Name is required.'); return; }
+    const missing = selectedTmpl.fields.filter((f) => f.required && !(fieldValues[f.id] ?? '').trim());
+    if (missing.length > 0) { setError(`Please fill in: ${missing.map((f) => f.label).join(', ')}`); return; }
     setSaving(true); setError('');
     try {
       const payload = buildPayload(selectedTmpl, fieldValues, parentId, ownerId, updateFreq, currentUser?.id);
       const res = await kpis.create(payload);
       router.push(`/kpis/${res.data.id}`);
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Failed to create KPI. Please try again.');
+      let msg = e instanceof Error ? e.message : 'Failed to create KPI. Please try again.';
+      if (msg === 'region_id is required') msg = 'Please select a region for this KPI.';
+      setError(msg);
     } finally { setSaving(false); }
   };
 

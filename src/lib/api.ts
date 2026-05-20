@@ -411,6 +411,23 @@ export const notifications = {
 
 // ─── KPI Templates ────────────────────────────────────────────────────────────
 
+// DB schemas vary: some use `key`/`options`/`"select"` while the frontend
+// expects `id`/`opts`/`"dropdown"`. Normalize on the way in.
+function normalizeField(f: Record<string, unknown>): import('./kpi-templates').TemplateField {
+  const rawType = (f.type ?? 'text') as string;
+  return {
+    id: ((f.id ?? f.key ?? f.label) as string) || `field_${Math.random().toString(36).slice(2)}`,
+    label: (f.label ?? '') as string,
+    type: (rawType === 'select' ? 'dropdown' : rawType) as import('./kpi-templates').FieldType,
+    required: Boolean(f.required),
+    opts: ((f.opts ?? f.options) as string[] | undefined),
+  };
+}
+
+function normalizeTemplate(t: ApiKpiTemplate): ApiKpiTemplate {
+  return { ...t, fields: (t.fields as unknown as Record<string, unknown>[]).map(normalizeField) };
+}
+
 export interface ApiKpiTemplate {
   id: string;
   name: string;
@@ -425,11 +442,17 @@ export interface ApiKpiTemplate {
 }
 
 export const templates = {
-  list: () =>
-    request<{ success: boolean; data: ApiKpiTemplate[] }>('/api/templates'),
+  list: async () => {
+    const res = await request<{ success: boolean; data: ApiKpiTemplate[] }>('/api/templates');
+    res.data = res.data.map(normalizeTemplate);
+    return res;
+  },
 
-  getById: (id: string) =>
-    request<{ success: boolean; data: ApiKpiTemplate }>(`/api/templates/${id}`),
+  getById: async (id: string) => {
+    const res = await request<{ success: boolean; data: ApiKpiTemplate }>(`/api/templates/${id}`);
+    res.data = normalizeTemplate(res.data);
+    return res;
+  },
 
   create: (payload: { name: string; category: string; icon: string; fields: import('./kpi-templates').TemplateField[] }) =>
     request<{ success: boolean; data: ApiKpiTemplate }>('/api/templates', {
