@@ -95,13 +95,13 @@ export default function ReportsPage() {
   return (
     <div style={{ padding: '22px 26px' }}>
       {/* Header */}
-      <div style={{ marginBottom: 20 }}>
+      {/* <div style={{ marginBottom: 20 }}>
         <div style={{ fontSize: 15, fontWeight: 800, letterSpacing: '-.2px', marginBottom: 3, color: '#111110' }}>Reports & Exports</div>
         <div style={{ fontSize: 12, color: '#8a8580' }}>Generate and download reports across KPIs, employees, and progress metrics</div>
-      </div>
+      </div> */}
 
       {/* Summary metrics */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 10, marginBottom: 24 }}>
+      {/* <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 10, marginBottom: 24 }}>
         {[
           { label: 'Total KPIs', value: allKpis.length, color: '#111110' },
           { label: 'Active KPIs', value: activeKpis.length, color: '#1a7a4a' },
@@ -114,7 +114,7 @@ export default function ReportsPage() {
             <div style={{ fontSize: 22, fontWeight: 800, color: stat.color, letterSpacing: '-.5px' }}>{stat.value}</div>
           </div>
         ))}
-      </div>
+      </div> */}
 
       {/* Export cards */}
       <div style={{ marginBottom: 24 }}>
