@@ -125,6 +125,7 @@ export default function PeoplePage() {
                   <p className="font-semibold text-sm truncate" style={{ color: 'var(--t1)' }}>{u.full_name}</p>
                   <p className="text-xs truncate mt-0.5" style={{ color: 'var(--t3)' }}>{u.designation ?? 'No title'}</p>
                   <p className="text-xs truncate mt-0.5" style={{ color: 'var(--t4)' }}>{u.email}</p>
+                  <p className="text-xs truncate mt-0.5" style={{ color: 'var(--t4)' }}>{u.phone}</p>
                 </div>
                 <span
                   className="text-xs font-semibold px-2 py-0.5 rounded-full shrink-0"

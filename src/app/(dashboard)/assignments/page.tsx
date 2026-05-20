@@ -224,6 +224,7 @@ function AssignModal({
 
 export default function AssignmentsPage() {
   const currentUser = useAuthStore((s) => s.user) as User | null;
+  const isAdmin = currentUser?.is_admin ?? false;
 
   const [allKpis,    setAllKpis]    = useState<Kpi[]>([]);
   const [allUsers,   setAllUsers]   = useState<User[]>([]);
@@ -261,7 +262,8 @@ export default function AssignmentsPage() {
     const matchSearch = !search || k.name.toLowerCase().includes(q) || k.kpi_number.toLowerCase().includes(q);
     const matchStatus = !filterStatus || k.status === filterStatus;
     const matchRegion = !filterRegion || k.region_id === filterRegion;
-    return matchSearch && matchStatus && matchRegion;
+    const matchUser   = isAdmin || k.owner_id === currentUser?.id;
+    return matchSearch && matchStatus && matchRegion && matchUser;
   });
 
   const openModal = (kpiId = '') => { setPreKpiId(kpiId); setModalOpen(true); };

@@ -2,8 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import { regions, kpis, users, type Region, type Kpi, type User } from '@/lib/api';
+import { useAuthStore } from '@/store/auth';
 
 export default function RegionsPage() {
+  const currentUser = useAuthStore((s) => s.user);
+  const isAdmin = currentUser?.is_admin ?? false;
+
   const [allRegions, setAllRegions] = useState<Region[]>([]);
   const [allKpis, setAllKpis] = useState<Kpi[]>([]);
   const [allUsers, setAllUsers] = useState<User[]>([]);
@@ -56,6 +60,10 @@ export default function RegionsPage() {
 
   const getRegionColor = (idx: number) => REGION_COLORS[idx % REGION_COLORS.length];
 
+  const visibleRegions = isAdmin
+    ? allRegions
+    : allRegions.filter((r) => r.id === currentUser?.region_id);
+
   const selectedKpis = selectedRegion ? allKpis.filter((k) => k.region_id === selectedRegion.id) : [];
   const selectedUsers = selectedRegion ? allUsers.filter((u) => u.region_id === selectedRegion.id) : [];
 
@@ -67,25 +75,22 @@ export default function RegionsPage() {
       <div style={{ marginBottom: 20, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
         <div>
           <div style={{ fontSize: 15, fontWeight: 800, letterSpacing: '-.2px', marginBottom: 3, color: '#111110' }}>Regions & Workspaces</div>
-          <div style={{ fontSize: 12, color: '#8a8580' }}>KPI performance by region — {allRegions.length} region{allRegions.length !== 1 ? 's' : ''} · {allKpis.filter((k) => k.status !== 'cancelled').length} active KPIs total</div>
+          <div style={{ fontSize: 12, color: '#8a8580' }}>KPI performance by region — {visibleRegions.length} region{visibleRegions.length !== 1 ? 's' : ''} · {allKpis.filter((k) => k.status !== 'cancelled').length} active KPIs total</div>
         </div>
-        <button
-          type="button"
-          className="btn btn-black"
-          onClick={() => {
-            setForm({ name: '', code: '' });
-            setFormError('');
-            setModalOpen(true);
-          }}
-          style={{
-            padding: '12px 22px',
-            fontSize: 15,
-            borderRadius: 8,
-            fontWeight: 600,
-          }}
-        >
-          + New Region
-        </button>
+        {isAdmin && (
+          <button
+            type="button"
+            className="btn btn-black"
+            onClick={() => {
+              setForm({ name: '', code: '' });
+              setFormError('');
+              setModalOpen(true);
+            }}
+            style={{ padding: '12px 22px', fontSize: 15, borderRadius: 8, fontWeight: 600 }}
+          >
+            + New Region
+          </button>
+        )}
       </div>
 
       {/* Summary stats */}
@@ -106,14 +111,14 @@ export default function RegionsPage() {
       <div style={{ display: 'grid', gridTemplateColumns: selectedRegion ? '1fr 1.1fr' : '1fr', gap: 16 }}>
         {/* Region cards */}
         <div>
-          {allRegions.length === 0 ? (
+          {visibleRegions.length === 0 ? (
             <div style={{ border: '2px dashed #e2dfd8', borderRadius: 14, padding: '48px 20px', textAlign: 'center', background: '#f8f7f5' }}>
               <p style={{ fontSize: 14, fontWeight: 600, color: '#4a4640', marginBottom: 4 }}>No regions configured</p>
               <p style={{ fontSize: 12, color: '#8a8580' }}>Contact your administrator to set up regions.</p>
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {allRegions.map((region, idx) => {
+              {visibleRegions.map((region, idx) => {
                 const stats = regionStats(region);
                 const color = getRegionColor(idx);
                 const isSelected = selectedRegion?.id === region.id;
