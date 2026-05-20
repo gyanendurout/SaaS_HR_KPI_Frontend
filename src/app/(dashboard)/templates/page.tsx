@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   FIELD_TYPES, makeField, exportTemplateCsv,
@@ -58,7 +59,7 @@ function BuilderModal({
   const dropField  = (idx: number) => setBFields(bFields.filter((_, i) => i !== idx));
   const pushField  = (type: FieldType) => setBFields([...bFields, { ...makeField(), type }]);
 
-  return (
+  return createPortal(
     <div
       className="modal-bg"
       onClick={(e) => e.target === e.currentTarget && onClose()}
@@ -214,7 +215,8 @@ function BuilderModal({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 

@@ -29,6 +29,11 @@ async function request<T>(
   const json = await res.json();
 
   if (!res.ok) {
+    if (res.status === 401 && typeof window !== 'undefined' && !window.location.pathname.startsWith('/login')) {
+      localStorage.removeItem('joola_token');
+      localStorage.removeItem('joola-auth');
+      window.location.href = '/login';
+    }
     throw new ApiError(
       json?.error?.message ?? 'Request failed',
       res.status,

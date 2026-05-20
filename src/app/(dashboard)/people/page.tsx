@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { users, regions, type User, type Region } from '@/lib/api';
 import { useAuthStore } from '@/store/auth';
 
@@ -296,7 +297,7 @@ function UserModal({
     }
   };
 
-  return (
+  return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
       style={{ background: 'rgba(0,0,0,.5)' }}
@@ -369,6 +370,7 @@ function UserModal({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
