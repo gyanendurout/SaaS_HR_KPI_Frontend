@@ -84,39 +84,29 @@ function Topbar() {
 
   return (
     <div
-      style={{
-        height: 54,
-        background: '#fff',
-        borderBottom: '1px solid #e2dfd8',
-        padding: '0 26px',
-        display: 'flex',
-        alignItems: 'center',
-        gap: 14,
-        flexShrink: 0,
-        boxShadow: '0 1px 3px rgba(0,0,0,.08)',
-      }}
+      className="flex items-center gap-[14px] shrink-0 bg-white border-b border-border px-[26px] h-13.5 shadow-[0_1px_3px_rgba(0,0,0,.08)]"
     >
       <div>
-        <span style={{ fontSize: 17, fontWeight: 700, color: '#111110', letterSpacing: '-.2px' }}>
+        <span className="text-[17px] font-bold text-near-black tracking-[-0.2px]">
           {title}
         </span>
         {bc && (
-          <div style={{ fontSize: 11, color: '#8a8580', marginTop: 1 }}>
+          <div className="text-[11px] text-t3 mt-px">
             <span>{bc}</span>
-            <span style={{ color: '#c4c0b8', margin: '0 4px' }}>›</span>
+            <span className="text-t4 mx-1">›</span>
           </div>
         )}
       </div>
 
       {/* Right side */}
-      <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
+      <div className="ml-auto flex items-center gap-2">
         {/* Page-level CTA (matches v4 topbar CTA pattern) */}
-        {pathname === '/templates' && (
+        {/* {pathname === '/templates' && (
           <button type="button" className="btn btn-black btn-sm"
             onClick={() => router.push('/templates?new=1')}>
             + New Template
           </button>
-        )}
+        )} */}
         {pathname === '/kpis' && (
           <button type="button" className="btn btn-black btn-sm"
             onClick={() => router.push('/kpis/new')}>
@@ -128,8 +118,7 @@ function Topbar() {
           type="button"
           onClick={handleExport}
           disabled={exporting}
-          className="btn btn-outline btn-sm"
-          style={{ gap: 6 }}
+          className="btn btn-outline btn-sm gap-[6px]"
         >
           {exporting ? '…' : (
             <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
@@ -140,44 +129,31 @@ function Topbar() {
         </button>
 
         {/* Notification bell */}
-        <button
+        {/* <button
           type="button"
           aria-label="Notifications"
           className="icon-btn"
         >
           <BellIcon />
           <span
-            style={{
-              position: 'absolute', top: 7, right: 7,
-              width: 7, height: 7, borderRadius: '50%',
-              background: '#b91c1c', border: '1.5px solid #fff',
-            }}
+            className="absolute top-[7px] right-[7px] w-[7px] h-[7px] rounded-full bg-red-700 border-[1.5px] border-white"
           />
-        </button>
+        </button> */}
 
         {/* User pill */}
         <div
-          style={{
-            display: 'flex', alignItems: 'center', gap: 8,
-            padding: '5px 10px 5px 6px', background: '#f8f7f5',
-            border: '1px solid #e2dfd8', borderRadius: 8, cursor: 'default',
-            transition: 'background .14s, border-color .14s',
-          }}
+          className="flex items-center gap-2 py-[5px] pr-[10px] pl-[6px] bg-off border border-border rounded-lg cursor-default transition-[background,border-color] duration-[140ms]"
           onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = '#eeece8'; }}
-          onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = '#f8f7f5'; }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = ''; }}
         >
           <div
-            style={{
-              width: 26, height: 26, borderRadius: '50%', background: '#000',
-              color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 9.5, fontWeight: 800, flexShrink: 0,
-            }}
+            className="flex items-center justify-center rounded-full bg-black text-white text-[9.5px] font-extrabold shrink-0 w-[26px] h-[26px]"
           >
             {initials}
           </div>
           <div>
-            <div style={{ fontSize: 12, fontWeight: 700, color: '#111110' }}>{user?.full_name ?? '—'}</div>
-            <div style={{ fontSize: 10, color: '#8a8580' }}>{user?.is_admin ? 'Admin' : 'Member'}</div>
+            <div className="text-xs font-bold text-near-black">{user?.full_name ?? '—'}</div>
+            <div className="text-[10px] text-t3">{user?.is_admin ? 'Admin' : 'Member'}</div>
           </div>
         </div>
       </div>
@@ -188,11 +164,11 @@ function Topbar() {
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
     <AuthGuard>
-      <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
+      <div className="flex h-screen overflow-hidden">
         <Sidebar />
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#f5f4f1' }}>
+        <div className="flex-1 flex flex-col overflow-hidden bg-bg">
           <Topbar />
-          <main style={{ flex: 1, overflowY: 'auto' }} className="page-anim">
+          <main className="flex-1 overflow-y-auto page-anim">
             {children}
           </main>
         </div>

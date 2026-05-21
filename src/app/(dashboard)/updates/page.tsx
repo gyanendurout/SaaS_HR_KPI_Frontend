@@ -13,7 +13,6 @@ export default function UpdatesPage() {
   const [form, setForm] = useState<{ current_value: string; status: string }>({ current_value: '', status: 'active' });
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
-  // Snapshot "now" once after mount so render stays pure and comparisons are stable.
   const [now, setNow] = useState<number>(0);
 
   useEffect(() => {
@@ -44,39 +43,42 @@ export default function UpdatesPage() {
     } finally { setSaving(false); }
   };
 
-  if (loading) return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 256, color: '#8a8580', fontSize: 13 }}>Loading…</div>;
+  if (loading) return <div className="flex items-center justify-center h-64 text-t3 text-[13px]">Loading…</div>;
 
   return (
-    <div style={{ padding: '22px 26px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
+    <div className="px-6.5 py-5.5">
+      <div className="flex items-center justify-between mb-4.5">
         <div>
-          <div style={{ fontSize: 15, fontWeight: 800, letterSpacing: '-.2px', marginBottom: 3, color: '#111110' }}>KPI Progress Updates</div>
-          <div style={{ fontSize: 12, color: '#8a8580' }}>Periodic updates · Configurable frequency · Flows upward through hierarchy</div>
+          <div className="text-[15px] font-black tracking-[-0.2px] mb-0.75 text-near-black">KPI Progress Updates</div>
+          <div className="text-xs text-t3">Periodic updates · Configurable frequency · Flows upward through hierarchy</div>
         </div>
       </div>
 
       {/* KPI Updates Table */}
-      <div style={{ background: '#fff', border: '1px solid #e2dfd8', borderRadius: 14, overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,.08)', marginBottom: 18 }}>
-        <div style={{ padding: '13px 18px', borderBottom: '1px solid #e2dfd8', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span style={{ fontSize: 13.5, fontWeight: 700, color: '#111110', letterSpacing: '-.1px' }}>My KPIs — Updates</span>
-          <span style={{ display: 'inline-flex', padding: '2.5px 8px', borderRadius: 4, fontSize: 11, fontWeight: 600, background: 'rgba(180,83,9,.1)', color: '#b45309' }}>
+      <div className="bg-white border border-border rounded-modal overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,.08)] mb-4.5">
+        <div className="flex items-center justify-between px-4.5 py-3.25 border-b border-border">
+          <span className="text-[13.5px] font-bold text-near-black tracking-[-0.1px]">My KPIs — Updates</span>
+          <span className="inline-flex px-2 py-[2.5px] rounded text-[11px] font-semibold bg-[rgba(180,83,9,.1)] text-brand-amber">
             {dueKpis.length} due soon
           </span>
         </div>
 
         {myKpis.length === 0 ? (
-          <div style={{ padding: '48px 20px', textAlign: 'center' }}>
-            <div style={{ fontSize: 28, opacity: .4, marginBottom: 8 }}>📊</div>
-            <p style={{ fontSize: 13, fontWeight: 600, color: '#4a4640', marginBottom: 4 }}>No KPIs assigned</p>
-            <p style={{ fontSize: 12, color: '#8a8580' }}>You have no owned or contributing KPIs. <Link href="/kpis" style={{ color: '#000', textDecoration: 'underline' }}>Browse KPIs →</Link></p>
+          <div className="py-12 px-5 text-center">
+            <div className="text-[28px] opacity-40 mb-2">📊</div>
+            <p className="text-[13px] font-semibold text-t2 mb-1">No KPIs assigned</p>
+            <p className="text-xs text-t3">
+              You have no owned or contributing KPIs.{' '}
+              <Link href="/kpis" className="text-black underline">Browse KPIs →</Link>
+            </p>
           </div>
         ) : (
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
               <thead>
-                <tr style={{ borderBottom: '1.5px solid #e2dfd8', background: '#f0efec' }}>
+                <tr className="border-b-[1.5px] border-border bg-[#f0efec]">
                   {['KPI No', 'KPI Name', 'Target', 'Current Value', 'Frequency', 'Next Due', 'Status', ''].map((h) => (
-                    <th key={h} style={{ textAlign: 'left', fontSize: 10, fontWeight: 700, color: '#8a8580', textTransform: 'uppercase', letterSpacing: 1, padding: '9px 14px', whiteSpace: 'nowrap' }}>{h}</th>
+                    <th key={h} className="text-left text-[10px] font-bold text-t3 uppercase tracking-widest py-2.25 px-3.5 whitespace-nowrap">{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -88,79 +90,100 @@ export default function UpdatesPage() {
                   const isUpdating = updating === k.id;
                   return (
                     <Fragment key={k.id}>
-                      <tr style={{ borderBottom: '1px solid #e2dfd8', background: isUpdating ? '#f8f7f5' : 'transparent', transition: 'background .1s' }}
+                      <tr
+                        className="border-b border-border transition-colors duration-100"
+                        style={{ background: isUpdating ? '#f8f7f5' : undefined }}
                         onMouseEnter={(e) => { if (!isUpdating) (e.currentTarget as HTMLElement).style.background = '#f8f7f5'; }}
-                        onMouseLeave={(e) => { if (!isUpdating) (e.currentTarget as HTMLElement).style.background = 'transparent'; }}>
-                        <td style={{ padding: '11px 14px' }}>
-                          <span style={{ fontFamily: 'monospace', fontSize: 10, fontWeight: 700, padding: '2px 6px', borderRadius: 3, background: '#e4e1db', color: '#4a4640' }}>{k.kpi_number}</span>
+                        onMouseLeave={(e) => { if (!isUpdating) (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
+                      >
+                        <td className="py-[11px] px-3.5">
+                          <span className="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded-[3px] bg-[#e4e1db] text-t2">{k.kpi_number}</span>
                         </td>
-                        <td style={{ padding: '11px 14px' }}>
-                          <Link href={`/kpis/${k.id}`} style={{ fontSize: 13, fontWeight: 700, color: '#111110', textDecoration: 'none', letterSpacing: '-.1px' }}>{k.name}</Link>
-                          <div style={{ fontSize: 11, color: '#8a8580', marginTop: 1 }}>{ownerName(k.owner_id)}</div>
+                        <td className="py-[11px] px-3.5">
+                          <Link href={`/kpis/${k.id}`} className="text-[13px] font-bold text-near-black no-underline tracking-[-0.1px] hover:underline">{k.name}</Link>
+                          <div className="text-[11px] text-t3 mt-px">{ownerName(k.owner_id)}</div>
                         </td>
-                        <td style={{ padding: '11px 14px', fontSize: 12, color: '#4a4640', whiteSpace: 'nowrap' }}>
+                        <td className="py-[11px] px-3.5 text-xs text-t2 whitespace-nowrap">
                           {k.target_value ? `${k.target_value.toLocaleString()}${k.unit ? ' ' + k.unit : ''}` : '—'}
                         </td>
-                        <td style={{ padding: '11px 14px', fontSize: 12, color: '#111110', fontWeight: 600, whiteSpace: 'nowrap' }}>
-                          {k.current_value !== null ? `${k.current_value.toLocaleString()}${k.unit ? ' ' + k.unit : ''}` : <span style={{ color: '#c4c0b8' }}>—</span>}
+                        <td className="py-[11px] px-3.5 text-xs text-near-black font-semibold whitespace-nowrap">
+                          {k.current_value !== null
+                            ? `${k.current_value.toLocaleString()}${k.unit ? ' ' + k.unit : ''}`
+                            : <span className="text-t4">—</span>}
                         </td>
-                        <td style={{ padding: '11px 14px', fontSize: 12, color: '#8a8580', textTransform: 'capitalize', whiteSpace: 'nowrap' }}>{k.update_frequency}</td>
-                        <td style={{ padding: '11px 14px', whiteSpace: 'nowrap' }}>
+                        <td className="py-[11px] px-3.5 text-xs text-t3 capitalize whitespace-nowrap">{k.update_frequency}</td>
+                        <td className="py-[11px] px-3.5 whitespace-nowrap">
                           {k.next_due_date ? (
-                            <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 7px', borderRadius: 4, background: isOverdue ? 'rgba(185,28,28,.1)' : isDue ? 'rgba(180,83,9,.1)' : 'transparent', color: isOverdue ? '#b91c1c' : isDue ? '#b45309' : '#8a8580' }}>
+                            <span className="text-[11px] font-bold px-[7px] py-0.5 rounded"
+                              style={{
+                                background: isOverdue ? 'rgba(185,28,28,.1)' : isDue ? 'rgba(180,83,9,.1)' : 'transparent',
+                                color: isOverdue ? '#b91c1c' : isDue ? '#b45309' : '#8a8580',
+                              }}>
                               {new Date(k.next_due_date).toLocaleDateString()}
                             </span>
-                          ) : <span style={{ color: '#c4c0b8', fontSize: 12 }}>—</span>}
+                          ) : <span className="text-xs text-t4">—</span>}
                         </td>
-                        <td style={{ padding: '11px 14px' }}>
-                          <span style={{ display: 'inline-flex', padding: '2.5px 8px', borderRadius: 4, fontSize: 11, fontWeight: 600, background: k.status === 'active' ? 'rgba(26,122,74,.1)' : k.status === 'draft' ? 'rgba(180,83,9,.1)' : 'rgba(24,84,168,.1)', color: k.status === 'active' ? '#15633c' : k.status === 'draft' ? '#b45309' : '#1854a8' }}>{k.status}</span>
+                        <td className="py-[11px] px-3.5">
+                          <span className="inline-flex px-2 py-[2.5px] rounded text-[11px] font-semibold"
+                            style={{
+                              background: k.status === 'active' ? 'rgba(26,122,74,.1)' : k.status === 'draft' ? 'rgba(180,83,9,.1)' : 'rgba(24,84,168,.1)',
+                              color: k.status === 'active' ? '#15633c' : k.status === 'draft' ? '#b45309' : '#1854a8',
+                            }}>
+                            {k.status}
+                          </span>
                         </td>
-                        <td style={{ padding: '11px 14px' }}>
+                        <td className="py-[11px] px-3.5">
                           {!isUpdating ? (
-                            <button type="button" onClick={() => handleOpenUpdate(k)} style={{ fontSize: 11.5, padding: '5px 11px', borderRadius: 5, border: '1px solid #e2dfd8', background: '#f8f7f5', cursor: 'pointer', color: '#4a4640', fontFamily: 'inherit', fontWeight: 600, transition: 'all .13s' }}
-                              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = '#000'; (e.currentTarget as HTMLElement).style.background = '#fff'; }}
-                              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = '#e2dfd8'; (e.currentTarget as HTMLElement).style.background = '#f8f7f5'; }}>
+                            <button type="button" onClick={() => handleOpenUpdate(k)}
+                              className="text-[11.5px] py-[5px] px-[11px] rounded-[5px] border border-border bg-off cursor-pointer text-t2 font-[inherit] font-semibold transition-all duration-130 hover:border-black hover:bg-white">
                               Log Update
                             </button>
                           ) : (
-                            <button type="button" onClick={() => setUpdating(null)} style={{ fontSize: 11.5, padding: '5px 11px', borderRadius: 5, border: '1px solid #e2dfd8', background: '#fff', cursor: 'pointer', color: '#8a8580', fontFamily: 'inherit' }}>Cancel</button>
+                            <button type="button" onClick={() => setUpdating(null)}
+                              className="text-[11.5px] py-[5px] px-[11px] rounded-[5px] border border-border bg-white cursor-pointer text-t3 font-[inherit]">
+                              Cancel
+                            </button>
                           )}
                         </td>
                       </tr>
 
                       {/* Inline update form */}
                       {isUpdating && (
-                        <tr style={{ borderBottom: '1px solid #e2dfd8', background: '#f8f7f5' }}>
-                          <td colSpan={8} style={{ padding: '14px 18px' }}>
-                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'flex-end' }}>
+                        <tr className="border-b border-border bg-off">
+                          <td colSpan={8} className="py-3.5 px-4.5">
+                            <div className="flex flex-wrap gap-3 items-end">
                               <div>
-                                <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#4a4640', marginBottom: 5, textTransform: 'uppercase', letterSpacing: '.4px' }}>
+                                <label className="block text-[11px] font-bold text-t2 mb-[5px] uppercase tracking-[0.4px]">
                                   Current Value {k.unit ? `(${k.unit})` : ''}
                                 </label>
                                 <input
-                                  style={{ background: '#fff', border: '1.5px solid #e2dfd8', borderRadius: 6, padding: '8px 12px', color: '#111110', fontFamily: 'inherit', fontSize: 13, outline: 'none', width: 160 }}
+                                  className="bg-white border-[1.5px] border-border rounded-md py-2 px-3 text-near-black font-[inherit] text-[13px] outline-none w-40 transition-[border-color] duration-180 focus:border-black"
                                   type="number"
                                   value={form.current_value}
                                   onChange={(e) => setForm((f) => ({ ...f, current_value: e.target.value }))}
                                   placeholder={String(k.target_value ?? '')}
-                                  onFocus={(e) => (e.target.style.borderColor = '#000')}
-                                  onBlur={(e) => (e.target.style.borderColor = '#e2dfd8')}
                                 />
                               </div>
                               <div>
-                                <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#4a4640', marginBottom: 5, textTransform: 'uppercase', letterSpacing: '.4px' }}>Status</label>
-                                <select style={{ background: '#fff', border: '1.5px solid #e2dfd8', borderRadius: 6, padding: '8px 12px', color: '#111110', fontFamily: 'inherit', fontSize: 13, outline: 'none' }}
-                                  value={form.status} onChange={(e) => setForm((f) => ({ ...f, status: e.target.value }))}>
+                                <label className="block text-[11px] font-bold text-t2 mb-[5px] uppercase tracking-[0.4px]">Status</label>
+                                <select
+                                  className="bg-white border-[1.5px] border-border rounded-md py-2 px-3 text-near-black font-[inherit] text-[13px] outline-none"
+                                  value={form.status}
+                                  onChange={(e) => setForm((f) => ({ ...f, status: e.target.value }))}>
                                   <option value="draft">Draft</option>
                                   <option value="active">Active</option>
                                   <option value="completed">Completed</option>
                                 </select>
                               </div>
-                              <div style={{ display: 'flex', gap: 8 }}>
-                                <button type="button" onClick={() => handleSave(k.id)} disabled={saving} style={{ padding: '8px 16px', borderRadius: 6, fontSize: 12.5, fontWeight: 600, cursor: saving ? 'not-allowed' : 'pointer', background: '#000', color: '#fff', border: '1px solid #000', fontFamily: 'inherit', opacity: saving ? .6 : 1 }}>
+                              <div className="flex gap-2">
+                                <button type="button" onClick={() => handleSave(k.id)} disabled={saving}
+                                  className="py-2 px-4 rounded-md text-[12.5px] font-semibold bg-black text-white border border-black font-[inherit] disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer">
                                   {saving ? 'Saving…' : 'Save Update'}
                                 </button>
-                                <button type="button" onClick={() => setUpdating(null)} style={{ padding: '8px 16px', borderRadius: 6, fontSize: 12.5, fontWeight: 500, cursor: 'pointer', background: '#fff', border: '1px solid #cdc9c1', color: '#4a4640', fontFamily: 'inherit' }}>Cancel</button>
+                                <button type="button" onClick={() => setUpdating(null)}
+                                  className="py-2 px-4 rounded-md text-[12.5px] font-medium bg-white border border-border2 text-t2 font-[inherit] cursor-pointer">
+                                  Cancel
+                                </button>
                               </div>
                             </div>
                           </td>
@@ -176,32 +199,37 @@ export default function UpdatesPage() {
       </div>
 
       {/* Update Timeline */}
-      <div style={{ background: '#fff', border: '1px solid #e2dfd8', borderRadius: 14, overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,.08)' }}>
-        <div style={{ padding: '13px 18px', borderBottom: '1px solid #e2dfd8' }}>
-          <span style={{ fontSize: 13.5, fontWeight: 700, color: '#111110', letterSpacing: '-.1px' }}>Update Timeline</span>
-          <span style={{ fontSize: 11.5, color: '#8a8580', marginLeft: 8 }}>visible to hierarchy above</span>
+      <div className="bg-white border border-border rounded-modal overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,.08)]">
+        <div className="flex items-center gap-2 px-4.5 py-3.25 border-b border-border">
+          <span className="text-[13.5px] font-bold text-near-black tracking-[-0.1px]">Update Timeline</span>
+          <span className="text-[11.5px] text-t3">visible to hierarchy above</span>
         </div>
-        <div style={{ padding: '16px 18px' }}>
+        <div className="px-4.5 py-4">
           {myKpis.filter((k) => k.current_value !== null).length === 0 ? (
-            <p style={{ fontSize: 13, color: '#8a8580' }}>No updates logged yet. Click &quot;Log Update&quot; on any KPI above to record progress.</p>
+            <p className="text-[13px] text-t3">No updates logged yet. Click &quot;Log Update&quot; on any KPI above to record progress.</p>
           ) : (
             <div>
               {myKpis.filter((k) => k.current_value !== null).map((k, i) => {
                 const pct = k.target_value ? Math.min(100, Math.round(((k.current_value ?? 0) / k.target_value) * 100)) : null;
+                const total = myKpis.filter((x) => x.current_value !== null).length;
                 return (
-                  <div key={k.id} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '10px 0', borderBottom: i < myKpis.filter((x) => x.current_value !== null).length - 1 ? '1px dashed #e2dfd8' : 'none' }}>
-                    <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#000', border: '2px solid #000', flexShrink: 0, marginTop: 4 }} />
-                    <div style={{ flex: 1 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
-                        <span style={{ fontFamily: 'monospace', fontSize: 9.5, fontWeight: 700, padding: '2px 5px', borderRadius: 3, background: '#e4e1db', color: '#4a4640' }}>{k.kpi_number}</span>
-                        <Link href={`/kpis/${k.id}`} style={{ fontSize: 13, fontWeight: 700, color: '#111110', textDecoration: 'none' }}>{k.name}</Link>
+                  <div key={k.id} className="flex items-start gap-3 py-2.5"
+                    style={{ borderBottom: i < total - 1 ? '1px dashed #e2dfd8' : 'none' }}>
+                    <div className="w-2.5 h-2.5 rounded-full bg-black border-2 border-black shrink-0 mt-1" />
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-0.75">
+                        <span className="font-mono text-[9.5px] font-bold px-[5px] py-0.5 rounded-[3px] bg-[#e4e1db] text-t2">{k.kpi_number}</span>
+                        <Link href={`/kpis/${k.id}`} className="text-[13px] font-bold text-near-black no-underline hover:underline">{k.name}</Link>
                         {pct !== null && (
-                          <span style={{ fontSize: 11.5, color: pct >= 100 ? '#15633c' : pct >= 50 ? '#1854a8' : '#b45309', fontWeight: 700 }}>{pct}%</span>
+                          <span className="text-[11.5px] font-bold"
+                            style={{ color: pct >= 100 ? '#15633c' : pct >= 50 ? '#1854a8' : '#b45309' }}>
+                            {pct}%
+                          </span>
                         )}
                       </div>
-                      <div style={{ fontSize: 12, color: '#8a8580' }}>
-                        Current: <strong style={{ color: '#111110' }}>{k.current_value?.toLocaleString()} {k.unit}</strong>
-                        {k.target_value && <> · Target: <strong style={{ color: '#111110' }}>{k.target_value.toLocaleString()} {k.unit}</strong></>}
+                      <div className="text-xs text-t3">
+                        Current: <strong className="text-near-black">{k.current_value?.toLocaleString()} {k.unit}</strong>
+                        {k.target_value && <> · Target: <strong className="text-near-black">{k.target_value.toLocaleString()} {k.unit}</strong></>}
                       </div>
                     </div>
                   </div>

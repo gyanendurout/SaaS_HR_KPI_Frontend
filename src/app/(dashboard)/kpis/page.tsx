@@ -15,7 +15,9 @@ function StatusBadge({ status }: { status: string }) {
   };
   const s = map[status] ?? { bg: 'rgba(0,0,0,.05)', color: '#8a8580' };
   return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', padding: '2.5px 8px', borderRadius: 4, fontSize: 11, fontWeight: 600, background: s.bg, color: s.color, flexShrink: 0 }}>
+    <span
+      className="inline-flex items-center py-[2.5px] px-2 rounded text-[11px] font-semibold shrink-0"
+      style={{ background: s.bg, color: s.color }}>
       {status}
     </span>
   );
@@ -36,7 +38,6 @@ export default function KpisPage() {
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
   const [filterRegion, setFilterRegion] = useState('');
-  // Admins default to 'all'; regular users default to their own KPIs view
   const [activeTab, setActiveTab] = useState<TabId>(isAdmin ? 'all' : 'owned');
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
@@ -50,7 +51,6 @@ export default function KpisPage() {
         limit: LIMIT,
         status: filterStatus || undefined,
         region_id: filterRegion || undefined,
-        // Non-admins only see their own KPIs; admins see all
         owner_id: isAdmin ? undefined : (currentUser?.id ?? undefined),
       });
       setData(res.data);
@@ -70,10 +70,9 @@ export default function KpisPage() {
     ? data.filter((k) => k.name.toLowerCase().includes(search.toLowerCase()) || k.kpi_number.toLowerCase().includes(search.toLowerCase()))
     : data;
 
-  // For admins, client-side owned filter; for non-admins the API already filtered to their KPIs
-  const ownedKpis = isAdmin ? searched.filter((k) => k.owner_id === currentUser?.id) : searched;
+  const ownedKpis    = isAdmin ? searched.filter((k) => k.owner_id === currentUser?.id) : searched;
   const cascadedKpis = searched.filter((k) => k.parent_id !== null);
-  const draftKpis = searched.filter((k) => k.status === 'draft');
+  const draftKpis    = searched.filter((k) => k.status === 'draft');
 
   const tabKpis: Record<TabId, Kpi[]> = {
     owned: ownedKpis,
@@ -104,56 +103,52 @@ export default function KpisPage() {
 
   return (
     <div>
-      {/* ─── Black Hero ─── */}
-      <div style={{ background: '#000', borderRadius: 0, padding: '20px 26px', marginBottom: 0, position: 'relative', overflow: 'hidden' }}>
-        <div aria-hidden style={{ position: 'absolute', right: -10, top: '50%', transform: 'translateY(-50%)', fontSize: 80, fontWeight: 900, color: 'rgba(255,255,255,.04)', letterSpacing: -3, pointerEvents: 'none', userSelect: 'none', lineHeight: 1 }}>
+      {/* Black Hero */}
+      <div className="bg-black py-5 px-6.5 relative overflow-hidden">
+        <div aria-hidden className="absolute -right-2.5 top-1/2 -translate-y-1/2 text-[80px] font-black text-white/4 tracking-[-3px] pointer-events-none select-none leading-none">
           MY KPIs
         </div>
-        <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,.35)', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: 5 }}>
+        <div className="text-[10px] font-bold text-white/35 uppercase tracking-[1.5px] mb-1.25">
           {isAdmin ? 'Admin · All KPIs' : 'My KPI Portfolio'}
         </div>
-        <div style={{ fontSize: 22, fontWeight: 900, color: '#fff', letterSpacing: '-.4px', marginBottom: 3 }}>
+        <div className="text-[22px] font-black text-white tracking-[-0.4px] mb-0.75">
           {isAdmin ? 'Organisation KPIs' : 'My KPIs'}
         </div>
-        <div style={{ fontSize: 12.5, color: 'rgba(255,255,255,.45)', marginBottom: 16 }}>
-          {isAdmin
-            ? 'All KPIs across the organisation — admin view'
-            : 'KPIs you own or are responsible for'}
+        <div className="text-[12.5px] text-white/45 mb-4">
+          {isAdmin ? 'All KPIs across the organisation — admin view' : 'KPIs you own or are responsible for'}
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 10 }}>
+        <div className="grid grid-cols-4 gap-2.5">
           {[
             { v: data.filter((k) => k.status === 'active').length, l: 'Active' },
-            { v: ownedKpis.length, l: 'Owned' },
+            { v: ownedKpis.length,    l: 'Owned'    },
             { v: cascadedKpis.length, l: 'Cascaded' },
-            { v: draftKpis.length, l: 'Pending' },
+            { v: draftKpis.length,    l: 'Pending'  },
           ].map(({ v, l }) => (
-            <div key={l} style={{ background: 'rgba(255,255,255,.07)', border: '1px solid rgba(255,255,255,.1)', borderRadius: 9, padding: '12px 14px' }}>
-              <div style={{ fontSize: 24, fontWeight: 800, letterSpacing: '-.5px', lineHeight: 1, marginBottom: 2, color: '#fff' }}>{v}</div>
-              <div style={{ fontSize: 10, color: 'rgba(255,255,255,.38)', textTransform: 'uppercase', letterSpacing: 1 }}>{l}</div>
+            <div key={l} className="bg-white/7 border border-white/10 rounded-[9px] py-3 px-3.5">
+              <div className="text-[24px] font-black tracking-[-0.5px] leading-none mb-0.5 text-white">{v}</div>
+              <div className="text-[10px] text-white/38 uppercase tracking-[1px]">{l}</div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* ─── Tabs + Content ─── */}
-      <div style={{ padding: '0 26px' }}>
+      {/* Tabs + Content */}
+      <div className="px-6.5">
         {/* Tab bar */}
-        <div style={{ display: 'flex', borderBottom: '2px solid #e2dfd8', marginBottom: 0, background: '#fff', borderTop: 'none' }}>
+        <div className="flex border-b-2 border-border bg-card">
           {tabs.map((t) => (
             <button type="button"
               key={t.id}
               onClick={() => setActiveTab(t.id)}
+              className="py-2.25 px-4.5 text-[13px] cursor-pointer border-none bg-transparent font-[inherit] flex items-center gap-1.5 transition-all duration-140 -mb-0.5"
               style={{
-                padding: '9px 18px', fontSize: 13, fontWeight: activeTab === t.id ? 700 : 500,
-                cursor: 'pointer', border: 'none', background: 'none',
-                color: activeTab === t.id ? '#000' : '#4a4640', fontFamily: 'inherit',
+                fontWeight: activeTab === t.id ? 700 : 500,
+                color: activeTab === t.id ? '#000' : '#4a4640',
                 borderBottom: `2.5px solid ${activeTab === t.id ? '#000' : 'transparent'}`,
-                marginBottom: -2, display: 'flex', alignItems: 'center', gap: 6,
-                transition: 'all .14s',
-              }}
-            >
+              }}>
               {t.label}
-              <span style={{ fontSize: 10, fontWeight: 700, padding: '1.5px 6px', borderRadius: 10, background: activeTab === t.id ? '#000' : '#e8e6e1', color: activeTab === t.id ? '#fff' : '#8a8580' }}>
+              <span className="text-[10px] font-bold py-[1.5px] px-1.5 rounded-[10px]"
+                style={{ background: activeTab === t.id ? '#000' : '#e8e6e1', color: activeTab === t.id ? '#fff' : '#8a8580' }}>
                 {t.count}
               </span>
             </button>
@@ -161,20 +156,17 @@ export default function KpisPage() {
         </div>
 
         {/* Filters */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, padding: '14px 0' }}>
+        <div className="flex flex-wrap gap-2.5 py-3.5">
           <input
             placeholder="Search KPIs…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            style={{ background: '#fff', border: '1.5px solid #e2dfd8', borderRadius: 6, padding: '8px 12px', color: '#111110', fontFamily: 'inherit', fontSize: 13, outline: 'none', width: 220 }}
-            onFocus={(e) => (e.target.style.borderColor = '#000')}
-            onBlur={(e) => (e.target.style.borderColor = '#e2dfd8')}
+            className="bg-card border-[1.5px] border-border rounded-md py-2 px-3 text-near-black font-[inherit] text-[13px] outline-none w-55 transition-[border-color] focus:border-black"
           />
           <select
             value={filterStatus}
             onChange={(e) => { setFilterStatus(e.target.value); setPage(1); }}
-            style={{ background: '#fff', border: '1.5px solid #e2dfd8', borderRadius: 6, padding: '8px 12px', color: '#4a4640', fontFamily: 'inherit', fontSize: 13, outline: 'none' }}
-          >
+            className="bg-card border-[1.5px] border-border rounded-md py-2 px-3 text-t2 font-[inherit] text-[13px] outline-none">
             <option value="">All Statuses</option>
             <option value="draft">Draft</option>
             <option value="active">Active</option>
@@ -184,72 +176,71 @@ export default function KpisPage() {
           <select
             value={filterRegion}
             onChange={(e) => { setFilterRegion(e.target.value); setPage(1); }}
-            style={{ background: '#fff', border: '1.5px solid #e2dfd8', borderRadius: 6, padding: '8px 12px', color: '#4a4640', fontFamily: 'inherit', fontSize: 13, outline: 'none' }}
-          >
+            className="bg-card border-[1.5px] border-border rounded-md py-2 px-3 text-t2 font-[inherit] text-[13px] outline-none">
             <option value="">All Regions</option>
             {regionList.map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}
           </select>
-          <div style={{ marginLeft: 'auto' }}>
+          <div className="ml-auto">
             <button type="button"
               onClick={() => router.push('/kpis/new')}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '8px 14px', borderRadius: 6, fontSize: 12.5, fontFamily: 'inherit', fontWeight: 600, cursor: 'pointer', background: '#000', color: '#fff', border: '1px solid #000', transition: 'opacity .15s' }}
-              onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.opacity = '.85')}
-              onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.opacity = '1')}
-            >
+              className="inline-flex items-center gap-1.25 py-2 px-3.5 rounded-md text-[12.5px] font-[inherit] font-semibold cursor-pointer bg-black text-white border border-black transition-opacity hover:opacity-85">
               + New KPI
             </button>
           </div>
         </div>
 
         {/* Table */}
-        <div style={{ background: '#fff', border: '1px solid #e2dfd8', borderRadius: 12, overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,.08)', marginBottom: 20 }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+        <div className="bg-card border border-border rounded-card overflow-hidden shadow-card mb-5">
+          <table className="w-full border-collapse">
             <thead>
-              <tr style={{ borderBottom: '1.5px solid #e2dfd8', background: '#f0efec' }}>
+              <tr className="border-b-[1.5px] border-border bg-[#f0efec]">
                 {['KPI No', 'Name', 'Type', 'Status', 'Progress', 'Due Date', ''].map((h) => (
-                  <th key={h} style={{ textAlign: 'left', fontSize: 10, fontWeight: 700, color: '#8a8580', textTransform: 'uppercase', letterSpacing: 1, padding: '9px 14px', whiteSpace: 'nowrap' }}>{h}</th>
+                  <th key={h} className="text-left text-[10px] font-bold text-t3 uppercase tracking-[1px] py-2.25 px-3.5 whitespace-nowrap">{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {loading && (
-                <tr><td colSpan={7} style={{ padding: '32px 14px', textAlign: 'center', fontSize: 13, color: '#8a8580' }}>Loading…</td></tr>
+                <tr><td colSpan={7} className="py-8 px-3.5 text-center text-[13px] text-t3">Loading…</td></tr>
               )}
               {!loading && displayKpis.length === 0 && (
-                <tr><td colSpan={7} style={{ padding: '32px 14px', textAlign: 'center', fontSize: 13, color: '#8a8580' }}>No KPIs found.</td></tr>
+                <tr><td colSpan={7} className="py-8 px-3.5 text-center text-[13px] text-t3">No KPIs found.</td></tr>
               )}
               {displayKpis.map((k) => {
                 const pct = progress(k);
                 const owner = allUsers.find((u) => u.id === k.owner_id);
                 return (
-                  <tr key={k.id} style={{ borderBottom: '1px solid #e2dfd8', transition: 'background .1s', cursor: 'pointer' }}
+                  <tr key={k.id}
+                    className="border-b border-border transition-colors duration-100 cursor-pointer"
                     onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = '#f8f7f5')}
                     onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = 'transparent')}>
-                    <td style={{ padding: '11px 14px' }}>
-                      <span style={{ display: 'inline-flex', padding: '2px 7px', borderRadius: 3, fontSize: 10, fontWeight: 700, letterSpacing: '.3px', background: '#e4e1db', color: '#4a4640', fontFamily: 'monospace' }}>{k.kpi_number}</span>
+                    <td className="py-2.75 px-3.5">
+                      <span className="inline-flex py-0.5 px-1.75 rounded-[3px] text-[10px] font-bold tracking-[.3px] bg-bg3 text-t2 font-mono">{k.kpi_number}</span>
                     </td>
-                    <td style={{ padding: '11px 14px' }}>
-                      <Link href={`/kpis/${k.id}`} style={{ color: '#111110', fontWeight: 600, textDecoration: 'none', fontSize: 13 }}>{k.name}</Link>
-                      {owner && <div style={{ fontSize: 11, color: '#8a8580', marginTop: 1 }}>{owner.full_name}</div>}
+                    <td className="py-2.75 px-3.5">
+                      <Link href={`/kpis/${k.id}`} className="text-near-black font-semibold no-underline text-[13px]">{k.name}</Link>
+                      {owner && <div className="text-[11px] text-t3 mt-px">{owner.full_name}</div>}
                     </td>
-                    <td style={{ padding: '11px 14px', fontSize: 12, color: '#8a8580', textTransform: 'capitalize', whiteSpace: 'nowrap' }}>{k.type}</td>
-                    <td style={{ padding: '11px 14px' }}><StatusBadge status={k.status} /></td>
-                    <td style={{ padding: '11px 14px' }}>
+                    <td className="py-2.75 px-3.5 text-xs text-t3 capitalize whitespace-nowrap">{k.type}</td>
+                    <td className="py-2.75 px-3.5"><StatusBadge status={k.status} /></td>
+                    <td className="py-2.75 px-3.5">
                       {pct !== null ? (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                          <div style={{ flex: 1, height: 5, background: '#e4e1db', borderRadius: 2, overflow: 'hidden', maxWidth: 80 }}>
-                            <div style={{ height: '100%', width: `${pct}%`, background: pct >= 100 ? '#1a7a4a' : pct >= 50 ? '#1854a8' : '#b45309', borderRadius: 2 }} />
+                        <div className="flex items-center gap-2">
+                          <div className="flex-1 h-1.25 bg-bg3 rounded-xs overflow-hidden max-w-20">
+                            <div className="h-full rounded-xs"
+                              style={{ width: `${pct}%`, background: pct >= 100 ? '#1a7a4a' : pct >= 50 ? '#1854a8' : '#b45309' }} />
                           </div>
-                          <span style={{ fontSize: 11, fontWeight: 600, color: '#8a8580' }}>{pct}%</span>
+                          <span className="text-[11px] font-semibold text-t3">{pct}%</span>
                         </div>
-                      ) : <span style={{ fontSize: 12, color: '#c4c0b8' }}>—</span>}
+                      ) : <span className="text-xs text-t4">—</span>}
                     </td>
-                    <td style={{ padding: '11px 14px', fontSize: 12, color: '#8a8580', whiteSpace: 'nowrap' }}>
+                    <td className="py-2.75 px-3.5 text-xs text-t3 whitespace-nowrap">
                       {k.next_due_date ? new Date(k.next_due_date).toLocaleDateString() : '—'}
                     </td>
-                    <td style={{ padding: '11px 14px' }}>
-                      <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                        <Link href={`/kpis/${k.id}`} style={{ display: 'inline-flex', padding: '5px 12px', borderRadius: 5, fontSize: 12, fontWeight: 600, background: '#f0efec', color: '#4a4640', border: '1px solid #e2dfd8', textDecoration: 'none' }}>View</Link>
+                    <td className="py-2.75 px-3.5">
+                      <div className="flex gap-1.5 items-center">
+                        <Link href={`/kpis/${k.id}`}
+                          className="inline-flex py-1.25 px-3 rounded-[5px] text-xs font-semibold bg-[#f0efec] text-t2 border border-border no-underline">View</Link>
                         {k.status !== 'cancelled' && (currentUser?.is_admin || k.owner_id === currentUser?.id) && (
                           <button type="button"
                             onClick={async (e) => {
@@ -262,8 +253,7 @@ export default function KpisPage() {
                                 alert(err instanceof Error ? err.message : 'Failed to cancel KPI');
                               }
                             }}
-                            style={{ display: 'inline-flex', padding: '5px 12px', borderRadius: 5, fontSize: 12, fontWeight: 600, background: 'rgba(185,28,28,.08)', color: '#b91c1c', border: '1px solid rgba(185,28,28,.25)', cursor: 'pointer', fontFamily: 'inherit' }}
-                          >
+                            className="inline-flex py-1.25 px-3 rounded-[5px] text-xs font-semibold bg-[rgba(185,28,28,.08)] text-brand-red border border-[rgba(185,28,28,.25)] cursor-pointer font-[inherit]">
                             Delete
                           </button>
                         )}
@@ -278,13 +268,13 @@ export default function KpisPage() {
 
         {/* Pagination */}
         {total > LIMIT && (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-            <p style={{ fontSize: 12, color: '#8a8580' }}>Showing {(page - 1) * LIMIT + 1}–{Math.min(page * LIMIT, total)} of {total}</p>
-            <div style={{ display: 'flex', gap: 8 }}>
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-xs text-t3">Showing {(page - 1) * LIMIT + 1}–{Math.min(page * LIMIT, total)} of {total}</p>
+            <div className="flex gap-2">
               <button type="button" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}
-                style={{ padding: '6px 12px', borderRadius: 6, fontSize: 12, fontWeight: 600, border: '1px solid #e2dfd8', background: '#fff', cursor: 'pointer', opacity: page === 1 ? .4 : 1 }}>← Prev</button>
+                className="py-1.5 px-3 rounded-md text-xs font-semibold border border-border bg-card cursor-pointer disabled:opacity-40">← Prev</button>
               <button type="button" onClick={() => setPage((p) => p + 1)} disabled={page * LIMIT >= total}
-                style={{ padding: '6px 12px', borderRadius: 6, fontSize: 12, fontWeight: 600, border: '1px solid #e2dfd8', background: '#fff', cursor: 'pointer', opacity: page * LIMIT >= total ? .4 : 1 }}>Next →</button>
+                className="py-1.5 px-3 rounded-md text-xs font-semibold border border-border bg-card cursor-pointer disabled:opacity-40">Next →</button>
             </div>
           </div>
         )}
@@ -317,66 +307,74 @@ function CreateKpiModal({ regions: regionList, currentUserId, onClose, onSaved }
     } catch (err: unknown) { setError(err instanceof Error ? err.message : 'Failed to create KPI'); } finally { setSaving(false); }
   };
 
+  const inputCls = 'w-full bg-card border-[1.5px] border-border rounded-md py-2.25 px-3 text-near-black font-[inherit] text-[13px] outline-none box-border transition-[border-color] focus:border-black';
+  const labelCls = 'block text-[11px] font-bold text-t2 mb-1.25 uppercase tracking-[.4px]';
+
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 500, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16, background: 'rgba(0,0,0,.5)', backdropFilter: 'blur(3px)' }} onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <div style={{ width: '100%', maxWidth: 540, borderRadius: 18, overflow: 'hidden', background: '#fff', boxShadow: '0 20px 60px rgba(0,0,0,.2)', border: '1px solid #e2dfd8' }}>
-        <div style={{ padding: '20px 24px 16px', borderBottom: '1px solid #e2dfd8', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', background: '#fff', borderRadius: '18px 18px 0 0' }}>
+    <div className="fixed inset-0 z-500 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+      onClick={(e) => e.target === e.currentTarget && onClose()}>
+      <div className="w-full max-w-135 rounded-[18px] overflow-hidden bg-card shadow-[0_20px_60px_rgba(0,0,0,.2)] border border-border">
+        <div className="px-6 pt-5 pb-4 border-b border-border flex items-start justify-between">
           <div>
-            <div style={{ fontSize: 18, fontWeight: 800, letterSpacing: '-.3px' }}>New KPI</div>
-            <div style={{ fontSize: 12, color: '#8a8580', marginTop: 2 }}>Fill in the details to create a new KPI</div>
+            <div className="text-[18px] font-black tracking-[-0.3px]">New KPI</div>
+            <div className="text-xs text-t3 mt-0.5">Fill in the details to create a new KPI</div>
           </div>
-          <button type="button" onClick={onClose} style={{ background: '#f0efec', border: '1px solid #e2dfd8', width: 28, height: 28, borderRadius: 6, cursor: 'pointer', color: '#4a4640', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
+          <button type="button" onClick={onClose}
+            className="bg-[#f0efec] border border-border w-7 h-7 rounded-md cursor-pointer text-t2 text-sm flex items-center justify-center">✕</button>
         </div>
-        <div style={{ padding: '20px 24px', maxHeight: '60vh', overflowY: 'auto' }}>
-          {[
-            { label: 'Name *', child: <input style={{ width: '100%', background: '#fff', border: '1.5px solid #e2dfd8', borderRadius: 6, padding: '9px 12px', color: '#111110', fontFamily: 'inherit', fontSize: 13, outline: 'none', boxSizing: 'border-box' as const }} value={form.name} onChange={(e) => set('name', e.target.value)} placeholder="KPI name" onFocus={(e) => (e.target.style.borderColor = '#000')} onBlur={(e) => (e.target.style.borderColor = '#e2dfd8')} /> },
-            { label: 'Description', child: <textarea style={{ width: '100%', background: '#fff', border: '1.5px solid #e2dfd8', borderRadius: 6, padding: '9px 12px', color: '#111110', fontFamily: 'inherit', fontSize: 13, outline: 'none', boxSizing: 'border-box' as const, minHeight: 60, resize: 'vertical' as const }} value={form.description} onChange={(e) => set('description', e.target.value)} placeholder="Optional description" onFocus={(e) => (e.target.style.borderColor = '#000')} onBlur={(e) => (e.target.style.borderColor = '#e2dfd8')} /> },
-          ].map(({ label, child }) => (
-            <div key={label} style={{ marginBottom: 13 }}>
-              <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#4a4640', marginBottom: 5, textTransform: 'uppercase', letterSpacing: '.4px' }}>{label}</label>
-              {child}
-            </div>
-          ))}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 13 }}>
+        <div className="px-6 py-5 overflow-y-auto" style={{ maxHeight: '60vh' }}>
+          <div className="mb-3.25">
+            <label className={labelCls}>Name *</label>
+            <input className={inputCls} value={form.name} onChange={(e) => set('name', e.target.value)} placeholder="KPI name" />
+          </div>
+          <div className="mb-3.25">
+            <label className={labelCls}>Description</label>
+            <textarea className={`${inputCls} min-h-15 resize-y`} value={form.description} onChange={(e) => set('description', e.target.value)} placeholder="Optional description" />
+          </div>
+          <div className="grid grid-cols-2 gap-3 mb-3.25">
             {[
               { label: 'Type', field: 'type', opts: [['quantitative', 'Quantitative'], ['qualitative', 'Qualitative']] },
               { label: 'Period', field: 'period', opts: [['monthly', 'Monthly'], ['quarterly', 'Quarterly'], ['annual', 'Annual']] },
             ].map(({ label, field, opts }) => (
               <div key={field}>
-                <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#4a4640', marginBottom: 5, textTransform: 'uppercase', letterSpacing: '.4px' }}>{label}</label>
-                <select style={{ width: '100%', background: '#fff', border: '1.5px solid #e2dfd8', borderRadius: 6, padding: '9px 12px', color: '#111110', fontFamily: 'inherit', fontSize: 13, outline: 'none' }} value={(form as Record<string, string>)[field]} onChange={(e) => set(field, e.target.value)}>
+                <label className={labelCls}>{label}</label>
+                <select className={inputCls} value={(form as Record<string, string>)[field]} onChange={(e) => set(field, e.target.value)}>
                   {opts.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
                 </select>
               </div>
             ))}
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 13 }}>
+          <div className="grid grid-cols-2 gap-3 mb-3.25">
             <div>
-              <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#4a4640', marginBottom: 5, textTransform: 'uppercase', letterSpacing: '.4px' }}>Region *</label>
-              <select style={{ width: '100%', background: '#fff', border: '1.5px solid #e2dfd8', borderRadius: 6, padding: '9px 12px', color: '#111110', fontFamily: 'inherit', fontSize: 13, outline: 'none' }} value={form.region_id} onChange={(e) => set('region_id', e.target.value)}>
+              <label className={labelCls}>Region *</label>
+              <select className={inputCls} value={form.region_id} onChange={(e) => set('region_id', e.target.value)}>
                 {regionList.map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}
               </select>
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#4a4640', marginBottom: 5, textTransform: 'uppercase', letterSpacing: '.4px' }}>Target Value</label>
-              <input style={{ width: '100%', background: '#fff', border: '1.5px solid #e2dfd8', borderRadius: 6, padding: '9px 12px', color: '#111110', fontFamily: 'inherit', fontSize: 13, outline: 'none', boxSizing: 'border-box' as const }} type="number" value={form.target_value} onChange={(e) => set('target_value', e.target.value)} placeholder="e.g. 1000000" onFocus={(e) => (e.target.style.borderColor = '#000')} onBlur={(e) => (e.target.style.borderColor = '#e2dfd8')} />
+              <label className={labelCls}>Target Value</label>
+              <input className={inputCls} type="number" value={form.target_value} onChange={(e) => set('target_value', e.target.value)} placeholder="e.g. 1000000" />
             </div>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 13 }}>
+          <div className="grid grid-cols-2 gap-3 mb-3.25">
             <div>
-              <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#4a4640', marginBottom: 5, textTransform: 'uppercase', letterSpacing: '.4px' }}>Start Date</label>
-              <input type="date" style={{ width: '100%', background: '#fff', border: '1.5px solid #e2dfd8', borderRadius: 6, padding: '9px 12px', color: '#111110', fontFamily: 'inherit', fontSize: 13, outline: 'none', boxSizing: 'border-box' as const }} value={form.start_date} onChange={(e) => set('start_date', e.target.value)} />
+              <label className={labelCls}>Start Date</label>
+              <input type="date" className={inputCls} value={form.start_date} onChange={(e) => set('start_date', e.target.value)} />
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#4a4640', marginBottom: 5, textTransform: 'uppercase', letterSpacing: '.4px' }}>End Date</label>
-              <input type="date" style={{ width: '100%', background: '#fff', border: '1.5px solid #e2dfd8', borderRadius: 6, padding: '9px 12px', color: '#111110', fontFamily: 'inherit', fontSize: 13, outline: 'none', boxSizing: 'border-box' as const }} value={form.end_date} onChange={(e) => set('end_date', e.target.value)} />
+              <label className={labelCls}>End Date</label>
+              <input type="date" className={inputCls} value={form.end_date} onChange={(e) => set('end_date', e.target.value)} />
             </div>
           </div>
-          {error && <div style={{ fontSize: 12, padding: '9px 12px', borderRadius: 7, background: 'rgba(185,28,28,.08)', color: '#b91c1c', border: '1px solid rgba(185,28,28,.2)' }}>{error}</div>}
+          {error && (
+            <div className="text-xs py-2.25 px-3 rounded-[7px] bg-[rgba(185,28,28,.08)] text-brand-red border border-[rgba(185,28,28,.2)]">{error}</div>
+          )}
         </div>
-        <div style={{ padding: '13px 24px', borderTop: '1px solid #e2dfd8', display: 'flex', justifyContent: 'flex-end', gap: 7, background: '#fff', borderRadius: '0 0 18px 18px' }}>
-          <button type="button" onClick={onClose} style={{ padding: '8px 16px', borderRadius: 6, fontSize: 13, fontWeight: 500, cursor: 'pointer', background: '#fff', border: '1px solid #cdc9c1', color: '#4a4640', fontFamily: 'inherit' }}>Cancel</button>
-          <button type="button" onClick={handleSave} disabled={saving} style={{ padding: '8px 16px', borderRadius: 6, fontSize: 13, fontWeight: 600, cursor: saving ? 'not-allowed' : 'pointer', background: '#000', color: '#fff', border: '1px solid #000', fontFamily: 'inherit', opacity: saving ? .6 : 1 }}>
+        <div className="px-6 py-3.25 border-t border-border flex justify-end gap-1.75">
+          <button type="button" onClick={onClose}
+            className="py-2 px-4 rounded-md text-[13px] font-medium cursor-pointer bg-card border border-border2 text-t2 font-[inherit]">Cancel</button>
+          <button type="button" onClick={handleSave} disabled={saving}
+            className="py-2 px-4 rounded-md text-[13px] font-semibold bg-black text-white border border-black font-[inherit] disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer">
             {saving ? 'Creating…' : 'Create KPI'}
           </button>
         </div>

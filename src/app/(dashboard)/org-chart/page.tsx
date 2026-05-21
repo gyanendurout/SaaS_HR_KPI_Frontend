@@ -14,7 +14,9 @@ function Avatar({ name, size = 36 }: { name: string; size?: number }) {
   const bg = getAvatarColor(name);
   const initials = name.split(' ').slice(0, 2).map((w) => w[0]).join('').toUpperCase();
   return (
-    <div style={{ width: size, height: size, borderRadius: '50%', background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: size * 0.35, flexShrink: 0 }}>
+    <div
+      className="rounded-full flex items-center justify-center text-white font-bold shrink-0"
+      style={{ width: size, height: size, background: bg, fontSize: size * 0.35 }}>
       {initials}
     </div>
   );
@@ -29,25 +31,34 @@ function OrgNode({ user, allUsers, depth = 0, expanded: defaultExpanded = false 
   const borderColor = borderColors[Math.min(depth, borderColors.length - 1)];
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+    <div className="flex flex-col items-center">
       {/* Node card */}
-      <div style={{ position: 'relative', background: '#fff', border: '1.5px solid #e2dfd8', borderTop: `3px solid ${borderColor}`, borderRadius: 10, padding: '12px 16px', minWidth: 180, maxWidth: 220, boxShadow: '0 1px 4px rgba(0,0,0,.07)', cursor: hasChildren ? 'pointer' : 'default' }}
+      <div
+        className="relative bg-card border-[1.5px] border-border rounded-[10px] py-3 px-4 min-w-45 max-w-55 shadow-[0_1px_4px_rgba(0,0,0,.07)]"
+        style={{ borderTop: `3px solid ${borderColor}`, cursor: hasChildren ? 'pointer' : 'default' }}
         onClick={() => hasChildren && setOpen((o) => !o)}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+        <div className="flex items-center gap-2.5 mb-1.5">
           <Avatar name={user.full_name} size={32} />
-          <div style={{ minWidth: 0 }}>
-            <div style={{ fontSize: 12.5, fontWeight: 700, color: '#111110', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user.full_name}</div>
-            {user.designation && <div style={{ fontSize: 11, color: '#8a8580', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user.designation}</div>}
+          <div className="min-w-0">
+            <div className="text-[12.5px] font-bold text-near-black whitespace-nowrap overflow-hidden text-ellipsis">{user.full_name}</div>
+            {user.designation && <div className="text-[11px] text-t3 whitespace-nowrap overflow-hidden text-ellipsis">{user.designation}</div>}
           </div>
         </div>
-        <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
+        <div className="flex gap-1.25 flex-wrap">
           {user.department && (
-            <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 6px', borderRadius: 3, background: '#f0efec', color: '#4a4640' }}>{user.department}</span>
+            <span className="text-[10px] font-semibold py-0.5 px-1.5 rounded-[3px] bg-[#f0efec] text-t2">{user.department}</span>
           )}
-          <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 6px', borderRadius: 3, background: user.status === 'active' ? 'rgba(26,122,74,.1)' : 'rgba(185,28,28,.08)', color: user.status === 'active' ? '#15633c' : '#b91c1c' }}>{user.status}</span>
+          <span
+            className="text-[10px] font-semibold py-0.5 px-1.5 rounded-[3px]"
+            style={{
+              background: user.status === 'active' ? 'rgba(26,122,74,.1)' : 'rgba(185,28,28,.08)',
+              color: user.status === 'active' ? '#15633c' : '#b91c1c',
+            }}>{user.status}</span>
         </div>
         {hasChildren && (
-          <div style={{ position: 'absolute', bottom: -10, left: '50%', transform: 'translateX(-50%)', width: 20, height: 20, borderRadius: '50%', background: open ? '#000' : '#e2dfd8', border: '2px solid #fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, color: open ? '#fff' : '#8a8580', fontWeight: 700, zIndex: 1 }}>
+          <div
+            className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 w-5 h-5 rounded-full border-2 border-white flex items-center justify-center text-[10px] font-bold z-1"
+            style={{ background: open ? '#000' : '#e2dfd8', color: open ? '#fff' : '#8a8580' }}>
             {open ? '−' : `+${children.length}`}
           </div>
         )}
@@ -55,18 +66,18 @@ function OrgNode({ user, allUsers, depth = 0, expanded: defaultExpanded = false 
 
       {/* Children */}
       {hasChildren && open && (
-        <div style={{ marginTop: 20, position: 'relative' }}>
+        <div className="mt-5 relative">
           {/* Vertical connector from parent */}
-          <div style={{ position: 'absolute', top: 0, left: '50%', width: 1, height: 20, background: '#e2dfd8', transform: 'translateX(-50%) translateY(-20px)' }} />
+          <div className="absolute top-0 left-1/2 w-px h-5 bg-border -translate-x-1/2 -translate-y-5" />
           {/* Horizontal connector */}
           {children.length > 1 && (
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, background: '#e2dfd8' }} />
+            <div className="absolute top-0 left-0 right-0 h-px bg-border" />
           )}
-          <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start' }}>
+          <div className="flex gap-6 items-start">
             {children.map((child) => (
-              <div key={child.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative' }}>
+              <div key={child.id} className="flex flex-col items-center relative">
                 {/* Vertical connector to child */}
-                <div style={{ width: 1, height: 20, background: '#e2dfd8', marginBottom: 0 }} />
+                <div className="w-px h-5 bg-border" />
                 <OrgNode user={child} allUsers={allUsers} depth={depth + 1} />
               </div>
             ))}
@@ -119,49 +130,51 @@ export default function OrgChartPage() {
     return Object.entries(map).sort((a, b) => b[1] - a[1]).slice(0, 5);
   }, [allUsers]);
 
-  if (loading) return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 256, color: '#8a8580', fontSize: 13 }}>Loading…</div>;
+  if (loading) return <div className="flex items-center justify-center h-64 text-t3 text-[13px]">Loading…</div>;
 
   return (
-    <div style={{ padding: '22px 26px' }}>
+    <div className="px-6.5 py-5.5">
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 18, flexWrap: 'wrap', gap: 12 }}>
+      <div className="flex items-start justify-between mb-4.5 flex-wrap gap-3">
         <div>
-          <div style={{ fontSize: 15, fontWeight: 800, letterSpacing: '-.2px', marginBottom: 3, color: '#111110' }}>Organization Chart</div>
-          <div style={{ fontSize: 12, color: '#8a8580' }}>{allUsers.length} employees · {roots.length} root nodes · {deptStats.length} departments</div>
+          <div className="text-[15px] font-black tracking-[-0.2px] mb-0.75 text-near-black">Organization Chart</div>
+          <div className="text-xs text-t3">{allUsers.length} employees · {roots.length} root nodes · {deptStats.length} departments</div>
         </div>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+        <div className="flex gap-2 items-center">
           <input
             placeholder="Search employees…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            style={{ background: '#fff', border: '1.5px solid #e2dfd8', borderRadius: 8, padding: '8px 12px', fontSize: 13, color: '#111110', fontFamily: 'inherit', outline: 'none', width: 220 }}
-            onFocus={(e) => (e.target.style.borderColor = '#000')}
-            onBlur={(e) => (e.target.style.borderColor = '#e2dfd8')}
+            className="bg-card border-[1.5px] border-border rounded-lg py-2 px-3 text-[13px] text-near-black font-[inherit] outline-none w-55 transition-[border-color] duration-180 focus:border-black"
           />
         </div>
       </div>
 
       {/* Dept stats row */}
       {deptStats.length > 0 && (
-        <div style={{ display: 'flex', gap: 8, marginBottom: 18, flexWrap: 'wrap' }}>
+        <div className="flex gap-2 mb-4.5 flex-wrap">
           {deptStats.map(([dept, count]) => (
-            <div key={dept} style={{ background: '#fff', border: '1px solid #e2dfd8', borderRadius: 8, padding: '7px 13px', display: 'flex', alignItems: 'center', gap: 7 }}>
-              <span style={{ fontSize: 12, fontWeight: 600, color: '#111110' }}>{dept}</span>
-              <span style={{ fontSize: 11, color: '#8a8580', fontWeight: 500 }}>{count}</span>
+            <div key={dept} className="bg-card border border-border rounded-lg py-1.75 px-3.25 flex items-center gap-1.75">
+              <span className="text-xs font-semibold text-near-black">{dept}</span>
+              <span className="text-[11px] text-t3 font-medium">{count}</span>
             </div>
           ))}
         </div>
       )}
 
       {/* Tree */}
-      <div style={{ background: '#fff', border: '1px solid #e2dfd8', borderRadius: 14, padding: '32px 24px', overflowX: 'auto', boxShadow: '0 1px 3px rgba(0,0,0,.06)', minHeight: 300 }}>
+      <div className="bg-card border border-border rounded-modal py-8 px-6 overflow-x-auto shadow-[0_1px_3px_rgba(0,0,0,.06)] min-h-75">
         {filteredRoots.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '48px 20px' }}>
-            <p style={{ fontSize: 14, fontWeight: 600, color: '#4a4640', marginBottom: 4 }}>{search ? 'No employees match your search' : 'No employees found'}</p>
-            <p style={{ fontSize: 12, color: '#8a8580' }}>{search ? 'Try a different name, designation, or department.' : 'Add employees to see the org chart.'}</p>
+          <div className="text-center py-12 px-5">
+            <p className="text-sm font-semibold text-t2 mb-1">
+              {search ? 'No employees match your search' : 'No employees found'}
+            </p>
+            <p className="text-xs text-t3">
+              {search ? 'Try a different name, designation, or department.' : 'Add employees to see the org chart.'}
+            </p>
           </div>
         ) : (
-          <div style={{ display: 'flex', gap: 40, flexWrap: 'wrap', justifyContent: 'center' }}>
+          <div className="flex gap-10 flex-wrap justify-center">
             {filteredRoots.map((root) => (
               <OrgNode key={root.id} user={root} allUsers={search ? filteredUsers : allUsers} depth={0} expanded />
             ))}
@@ -170,11 +183,11 @@ export default function OrgChartPage() {
       </div>
 
       {/* Legend */}
-      <div style={{ display: 'flex', gap: 16, marginTop: 14, flexWrap: 'wrap' }}>
+      <div className="flex gap-4 mt-3.5 flex-wrap">
         {[['Level 0', '#000'], ['Level 1', '#1a7a4a'], ['Level 2', '#1854a8'], ['Level 3', '#b45309'], ['Level 4+', '#7c3aed']].map(([label, color]) => (
-          <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <div style={{ width: 12, height: 3, background: color, borderRadius: 2 }} />
-            <span style={{ fontSize: 11, color: '#8a8580' }}>{label}</span>
+          <div key={label} className="flex items-center gap-1.5">
+            <div className="w-3 h-0.75 rounded-xs" style={{ background: color }} />
+            <span className="text-[11px] text-t3">{label}</span>
           </div>
         ))}
       </div>

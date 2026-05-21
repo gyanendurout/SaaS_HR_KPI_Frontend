@@ -11,7 +11,7 @@ type ImportStep = 1 | 2 | 3 | 4;
 
 interface ParsedRow {
   rowIndex:    number;
-  values:      Record<string, string>; // field.id → value
+  values:      Record<string, string>;
   parentKpiNo: string;
   errors:      string[];
   isValid:     boolean;
@@ -52,26 +52,26 @@ const STEPS = ['Select Template', 'Download Sheet', 'Upload & Validate', 'Confir
 
 function StepsBar({ current }: { current: ImportStep }) {
   return (
-    <div style={{ display: 'flex', background: '#fff', border: '1px solid #e2dfd8', borderRadius: 10, overflow: 'hidden', marginBottom: 18 }}>
+    <div className="flex bg-card border border-border rounded-[10px] overflow-hidden mb-4.5">
       {STEPS.map((label, i) => {
         const num = (i + 1) as ImportStep;
         const isActive = num === current;
         const isDone   = num < current;
         return (
-          <div key={num} style={{
-            flex: 1, padding: '11px 14px', display: 'flex', alignItems: 'center', gap: 7,
-            borderRight: i < STEPS.length - 1 ? '1px solid #e2dfd8' : 'none',
-            background: isActive ? '#f8f7f5' : 'transparent',
-            fontSize: 12, color: isDone ? '#15633c' : isActive ? '#111110' : '#8a8580',
-            fontWeight: isActive ? 700 : 500,
-          }}>
-            <div style={{
-              width: 20, height: 20, borderRadius: '50%', flexShrink: 0,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 10, fontWeight: 800,
-              background: isActive ? '#111110' : isDone ? 'rgba(26,122,74,.1)' : '#e4e1db',
-              color: isActive ? '#fff' : isDone ? '#15633c' : '#8a8580',
+          <div key={num}
+            className="flex-1 py-2.75 px-3.5 flex items-center gap-1.75 text-xs"
+            style={{
+              borderRight: i < STEPS.length - 1 ? '1px solid #e2dfd8' : 'none',
+              background: isActive ? '#f8f7f5' : 'transparent',
+              color: isDone ? '#15633c' : isActive ? '#111110' : '#8a8580',
+              fontWeight: isActive ? 700 : 500,
             }}>
+            <div
+              className="w-5 h-5 rounded-full shrink-0 flex items-center justify-center text-[10px] font-extrabold"
+              style={{
+                background: isActive ? '#111110' : isDone ? 'rgba(26,122,74,.1)' : '#e4e1db',
+                color: isActive ? '#fff' : isDone ? '#15633c' : '#8a8580',
+              }}>
               {isDone ? '✓' : num}
             </div>
             {label}
@@ -112,9 +112,9 @@ function FieldInput({
   );
 
   if (field.type === 'percentage') return (
-    <div style={{ position: 'relative' }}>
+    <div className="relative">
       <input className="fi" type="number" min={0} max={100} placeholder="e.g. 90" value={value} onChange={(e) => onChange(e.target.value)} style={{ paddingRight: 28 }} />
-      <span style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', fontSize: 12, color: '#8a8580' }}>%</span>
+      <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-t3">%</span>
     </div>
   );
 
@@ -149,7 +149,6 @@ function buildPayload(
     if (ll.includes('kpi name') || (field.type === 'text' && tmpl.fields.indexOf(field) === 0)) {
       name = val;
     } else if (ll.includes('region') || ll.includes('country')) {
-      // Only use CSV region if it looks like a UUID (avoid plain text like "China")
       if (isUuid(val)) regionIdFromCsv = val;
     } else if (ll.includes('kpi type')) {
       kpiType = val.toLowerCase() === 'qualitative' ? 'qualitative' : 'quantitative';
@@ -279,11 +278,9 @@ export default function NewKpiPage() {
       }
 
       const headerRow = matrix[0].map((h) => h.replace(/\s*\*\s*$/, '').trim());
-      // Expected: KPI No, Parent KPI No, then each template field label
       const expectedFieldHeaders = tmpl.fields.map((f) => f.label);
-      const colOffset = 2; // first 2 cols are KPI No + Parent KPI No
+      const colOffset = 2;
 
-      // Soft header check — warn but don't block
       const headerMismatch = expectedFieldHeaders.some((lbl, idx) => {
         const col = headerRow[colOffset + idx];
         return col && col.toLowerCase() !== lbl.toLowerCase();
@@ -314,7 +311,6 @@ export default function NewKpiPage() {
           }
         });
 
-        // Validate parent KPI number exists
         if (parentKpiNo && !allKpis.find((k) => k.kpi_number.toLowerCase() === parentKpiNo.toLowerCase())) {
           rowErrors.push(`Parent KPI "${parentKpiNo}" not found in system`);
         }
@@ -323,7 +319,6 @@ export default function NewKpiPage() {
       }
 
       if (headerMismatch) {
-        // Non-fatal: show a warning in the errors of row 0-like notice but continue
         setImportParseErr('Warning: Some column headers may not match the template. Check results below.');
       }
       setParsedRows(parsed);
@@ -384,85 +379,86 @@ export default function NewKpiPage() {
   // ── Render ──────────────────────────────────────────────────────────────────
 
   return (
-    <div style={{ padding: '22px 26px' }}>
+    <div className="px-6.5 py-5.5">
 
       {/* Header */}
-      <div style={{ marginBottom: 20 }}>
-        <div style={{ fontSize: 15, fontWeight: 800, letterSpacing: '-.2px', marginBottom: 3, color: '#111110' }}>Add KPI</div>
-        <div style={{ fontSize: 12, color: '#8a8580' }}>Create from a template or import via Excel</div>
+      <div className="mb-5">
+        <div className="text-[15px] font-black tracking-[-0.2px] mb-0.75 text-near-black">Add KPI</div>
+        <div className="text-xs text-t3">Create from a template or import via Excel</div>
       </div>
 
       {/* Method cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 20, maxWidth: 700 }}>
+      <div className="grid grid-cols-2 gap-3 mb-5 max-w-175">
         <div onClick={() => setMethod('form')}
-          style={{ border: `2px solid ${method === 'form' ? '#111110' : '#e2dfd8'}`, borderRadius: 12, padding: 20, cursor: 'pointer', background: method === 'form' ? '#f8f7f5' : '#fff', transition: 'all .15s' }}>
-          <div style={{ width: 36, height: 36, borderRadius: 8, background: '#e8e6e1', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 10 }}>
+          className="rounded-xl p-5 cursor-pointer transition-all duration-150"
+          style={{
+            border: `2px solid ${method === 'form' ? '#111110' : '#e2dfd8'}`,
+            background: method === 'form' ? '#f8f7f5' : '#fff',
+          }}>
+          <div className="w-9 h-9 rounded-lg bg-[#e8e6e1] flex items-center justify-center mb-2.5">
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="#4a4640" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <rect x="3" y="2" width="12" height="14" rx="2"/><line x1="6" y1="6" x2="12" y2="6"/><line x1="6" y1="9" x2="12" y2="9"/><line x1="6" y1="12" x2="10" y2="12"/>
             </svg>
           </div>
-          <div style={{ fontSize: 14, fontWeight: 800, marginBottom: 3, letterSpacing: '-.2px', color: '#111110' }}>Use Template</div>
-          <div style={{ fontSize: 12, color: '#8a8580', lineHeight: 1.5 }}>Select a KPI template and fill in the fields directly in the portal</div>
+          <div className="text-sm font-black mb-0.75 tracking-[-0.2px] text-near-black">Use Template</div>
+          <div className="text-xs text-t3 leading-relaxed">Select a KPI template and fill in the fields directly in the portal</div>
         </div>
 
         <div onClick={() => { setMethod('excel'); setImportStep(1); }}
-          style={{ border: `2px solid ${method === 'excel' ? '#111110' : '#e2dfd8'}`, borderRadius: 12, padding: 20, cursor: 'pointer', background: method === 'excel' ? '#f8f7f5' : '#fff', transition: 'all .15s' }}>
-          <div style={{ width: 36, height: 36, borderRadius: 8, background: '#e8e6e1', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 10 }}>
+          className="rounded-xl p-5 cursor-pointer transition-all duration-150"
+          style={{
+            border: `2px solid ${method === 'excel' ? '#111110' : '#e2dfd8'}`,
+            background: method === 'excel' ? '#f8f7f5' : '#fff',
+          }}>
+          <div className="w-9 h-9 rounded-lg bg-[#e8e6e1] flex items-center justify-center mb-2.5">
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="#4a4640" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <rect x="2" y="2" width="14" height="14" rx="2"/><line x1="2" y1="7" x2="16" y2="7"/><line x1="2" y1="11" x2="16" y2="11"/><line x1="7" y1="7" x2="7" y2="16"/>
             </svg>
           </div>
-          <div style={{ fontSize: 14, fontWeight: 800, marginBottom: 3, letterSpacing: '-.2px', color: '#111110' }}>Import via Excel</div>
-          <div style={{ fontSize: 12, color: '#8a8580', lineHeight: 1.5 }}>Download template → fill offline → upload for validation → confirm &amp; submit</div>
+          <div className="text-sm font-black mb-0.75 tracking-[-0.2px] text-near-black">Import via Excel</div>
+          <div className="text-xs text-t3 leading-relaxed">Download template → fill offline → upload for validation → confirm &amp; submit</div>
         </div>
       </div>
 
       {/* ── Use Template ── */}
       {method === 'form' && (
-        <div style={{ maxWidth: 700 }}>
-          <div style={{ background: '#fff', border: '1px solid #e2dfd8', borderRadius: 14, overflow: 'hidden', boxShadow: '0 1px 4px rgba(0,0,0,.06)' }}>
-            <div style={{ padding: '13px 18px', borderBottom: '1px solid #e2dfd8' }}>
-              <div style={{ fontSize: 13.5, fontWeight: 700, color: '#111110' }}>Template Details</div>
+        <div className="max-w-175">
+          <div className="bg-card border border-border rounded-modal overflow-hidden shadow-card">
+            <div className="py-3.25 px-4.5 border-b border-border">
+              <div className="text-[13.5px] font-bold text-near-black">Template Details</div>
             </div>
-            <div style={{ padding: '18px 20px' }}>
+            <div className="py-4.5 px-5">
               {loadingTemplates ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                <div className="flex flex-col gap-3.5">
                   {[0,1,2,3,4].map((i) => (
                     <div key={i}>
-                      <div style={{ width: 80, height: 10, background: '#e8e6e1', borderRadius: 4, marginBottom: 7 }} />
-                      <div style={{ width: '100%', height: 36, background: '#f0efec', borderRadius: 7 }} />
+                      <div className="w-20 h-2.5 bg-[#e8e6e1] rounded mb-1.75" />
+                      <div className="w-full h-9 bg-off rounded-[7px]" />
                     </div>
                   ))}
                 </div>
               ) : !selectedTmpl ? (
-                <div style={{ padding: '20px 0', textAlign: 'center', fontSize: 13, color: '#8a8580' }}>
-                  No templates found. <a href="/templates" style={{ color: '#111110', fontWeight: 600 }}>Create one first →</a>
+                <div className="py-5 text-center text-[13px] text-t3">
+                  No templates found. <a href="/templates" className="text-near-black font-semibold">Create one first →</a>
                 </div>
               ) : (<>
-                <div style={{ marginBottom: 18 }}>
+                <div className="mb-4.5">
                   <label className="flabel">KPI Template *</label>
                   <select className="fi" value={selectedTmplId} onChange={(e) => { setSelectedTmplId(e.target.value); setFieldValues({}); }}>
                     {tmplList.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
                   </select>
                 </div>
-                <div style={{ height: 1, background: '#e2dfd8', marginBottom: 16 }} />
-                <div style={{ fontSize: 14, fontWeight: 800, marginBottom: 16, letterSpacing: '-.2px', color: '#111110' }}>{selectedTmpl.name} — Fill KPI Details</div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                <div className="h-px bg-border mb-4" />
+                <div className="text-sm font-black mb-4 tracking-[-0.2px] text-near-black">{selectedTmpl.name} — Fill KPI Details</div>
+                <div className="flex flex-col gap-3.5">
                   {selectedTmpl.fields.map((field) => (
                     <div key={field.id}>
                       <label className="flabel">
-                        {field.label.toUpperCase()}{field.required && <span style={{ color: '#b91c1c', marginLeft: 3 }}>*</span>}
+                        {field.label.toUpperCase()}{field.required && <span className="text-brand-red ml-0.75">*</span>}
                       </label>
                       <FieldInput field={field} value={fieldValues[field.id] ?? ''} onChange={(v) => setField(field.id, v)} allRegions={allRegions} />
                     </div>
                   ))}
-                  {/* <div>
-                    <label className="flabel">Parent KPI (cascade from)</label>
-                    <select className="fi" value={parentId} onChange={(e) => setParentId(e.target.value)}>
-                      <option value="">None — top-level KPI</option>
-                      {allKpis.map((k) => <option key={k.id} value={k.id}>{k.kpi_number} — {k.name}</option>)}
-                    </select>
-                  </div> */}
                   <div>
                     <label className="flabel">Assign To</label>
                     <select className="fi" value={ownerId} onChange={(e) => setOwnerId(e.target.value)}>
@@ -482,13 +478,13 @@ export default function NewKpiPage() {
                   </div>
                 </div>
                 {error && (
-                  <div style={{ marginTop: 14, padding: '10px 14px', background: 'rgba(185,28,28,.07)', border: '1px solid rgba(185,28,28,.2)', borderRadius: 7, fontSize: 12.5, color: '#b91c1c' }}>{error}</div>
+                  <div className="mt-3.5 py-2.5 px-3.5 bg-[rgba(185,28,28,.07)] border border-[rgba(185,28,28,.2)] rounded-[7px] text-[12.5px] text-brand-red">{error}</div>
                 )}
-                <div style={{ marginTop: 18, display: 'flex', gap: 8 }}>
-                  <button type="button" onClick={handleSubmitTemplate} disabled={saving} className="btn btn-black" style={{ padding: '10px 20px', fontSize: 13, fontWeight: 700, borderRadius: 8 }}>
+                <div className="mt-4.5 flex gap-2">
+                  <button type="button" onClick={handleSubmitTemplate} disabled={saving} className="btn btn-black py-2.5 px-5 text-[13px] font-bold rounded-lg">
                     {saving ? 'Creating KPI…' : 'Submit KPI for Approval →'}
                   </button>
-                  <button type="button" onClick={() => router.push('/kpis')} className="btn btn-outline" style={{ padding: '10px 18px', fontSize: 13, borderRadius: 8 }}>
+                  <button type="button" onClick={() => router.push('/kpis')} className="btn btn-outline py-2.5 px-4.5 text-[13px] rounded-lg">
                     Cancel
                   </button>
                 </div>
@@ -500,27 +496,27 @@ export default function NewKpiPage() {
 
       {/* ── Excel wizard ── */}
       {method === 'excel' && (
-        <div style={{ maxWidth: 700 }}>
+        <div className="max-w-175">
           <StepsBar current={importStep} />
 
           {/* Step 1 — Select Template */}
           {importStep === 1 && (
-            <div style={{ background: '#fff', border: '1px solid #e2dfd8', borderRadius: 14, overflow: 'hidden', boxShadow: '0 1px 4px rgba(0,0,0,.06)' }}>
-              <div style={{ padding: '13px 18px', borderBottom: '1px solid #e2dfd8' }}>
-                <div style={{ fontSize: 13.5, fontWeight: 700, color: '#111110' }}>Step 1 — Select Template</div>
+            <div className="bg-card border border-border rounded-modal overflow-hidden shadow-card">
+              <div className="py-3.25 px-4.5 border-b border-border">
+                <div className="text-[13.5px] font-bold text-near-black">Step 1 — Select Template</div>
               </div>
-              <div style={{ padding: '18px 20px' }}>
+              <div className="py-4.5 px-5">
                 {loadingTemplates ? (
-                  <div style={{ height: 36, background: '#f0efec', borderRadius: 7, marginBottom: 16 }} />
+                  <div className="h-9 bg-off rounded-[7px] mb-4" />
                 ) : (
-                  <div style={{ marginBottom: 16 }}>
+                  <div className="mb-4">
                     <label className="flabel">Template</label>
                     <select className="fi" value={importTmplId} onChange={(e) => setImportTmplId(e.target.value)}>
                       <option value="">— choose a template —</option>
                       {tmplList.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
                     </select>
                     {importTmpl && (
-                      <div style={{ marginTop: 10, padding: '9px 12px', background: '#f8f7f5', borderRadius: 7, border: '1px solid #e2dfd8', fontSize: 12, color: '#4a4640' }}>
+                      <div className="mt-2.5 py-2.25 px-3 bg-off rounded-[7px] border border-border text-xs text-t2">
                         <strong>{importTmpl.fields.length} columns</strong> will be included:{' '}
                         {importTmpl.fields.map((f) => f.label + (f.required ? '*' : '')).join(', ')}
                       </div>
@@ -536,15 +532,15 @@ export default function NewKpiPage() {
 
           {/* Step 2 — Download */}
           {importStep === 2 && (
-            <div style={{ background: '#fff', border: '1px solid #e2dfd8', borderRadius: 14, overflow: 'hidden', boxShadow: '0 1px 4px rgba(0,0,0,.06)' }}>
-              <div style={{ padding: '13px 18px', borderBottom: '1px solid #e2dfd8' }}>
-                <div style={{ fontSize: 13.5, fontWeight: 700, color: '#111110' }}>Step 2 — Download Template Sheet</div>
+            <div className="bg-card border border-border rounded-modal overflow-hidden shadow-card">
+              <div className="py-3.25 px-4.5 border-b border-border">
+                <div className="text-[13.5px] font-bold text-near-black">Step 2 — Download Template Sheet</div>
               </div>
-              <div style={{ padding: '18px 20px' }}>
+              <div className="py-4.5 px-5">
                 {/* Download card */}
-                <div style={{ padding: '22px 20px', background: '#f8f7f5', border: '1px solid #e2dfd8', borderRadius: 10, marginBottom: 16 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 14 }}>
-                    <div style={{ width: 44, height: 44, borderRadius: 10, background: '#e4e1db', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <div className="py-5.5 px-5 bg-off border border-border rounded-[10px] mb-4">
+                  <div className="flex items-center gap-3.5 mb-3.5">
+                    <div className="w-11 h-11 rounded-[10px] bg-bg3 flex items-center justify-center shrink-0">
                       <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="#4a4640" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                         <rect x="3" y="2" width="16" height="18" rx="2.5"/>
                         <line x1="3" y1="8" x2="19" y2="8"/>
@@ -553,8 +549,8 @@ export default function NewKpiPage() {
                       </svg>
                     </div>
                     <div>
-                      <div style={{ fontSize: 14, fontWeight: 800, color: '#111110', marginBottom: 2 }}>{importTmpl?.name ?? '—'} Template</div>
-                      <div style={{ fontSize: 12, color: '#8a8580' }}>CSV with {importTmpl ? importTmpl.fields.length + 2 : 0} columns • Pre-formatted headers</div>
+                      <div className="text-sm font-black text-near-black mb-0.5">{importTmpl?.name ?? '—'} Template</div>
+                      <div className="text-xs text-t3">CSV with {importTmpl ? importTmpl.fields.length + 2 : 0} columns • Pre-formatted headers</div>
                     </div>
                   </div>
                   <button type="button" className="btn btn-black btn-sm" disabled={!importTmpl}
@@ -565,25 +561,25 @@ export default function NewKpiPage() {
 
                 {/* Column guide */}
                 {importTmpl && (
-                  <div style={{ marginBottom: 16 }}>
-                    <div style={{ fontSize: 11.5, fontWeight: 700, color: '#4a4640', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '.5px' }}>Column Guide</div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  <div className="mb-4">
+                    <div className="text-[11.5px] font-bold text-t2 mb-2 uppercase tracking-[.5px]">Column Guide</div>
+                    <div className="flex flex-col gap-1">
                       {[
                         { col: 'KPI No',        note: 'Leave as KPI-??? — auto-assigned on import', req: false },
                         { col: 'Parent KPI No', note: 'Enter exact KPI number (e.g. KPI-001) or leave blank for root', req: false },
                         ...importTmpl.fields.map((f) => ({ col: f.label, note: `${f.type} field`, req: f.required })),
                       ].map((c, i) => (
-                        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, padding: '5px 10px', background: i % 2 === 0 ? '#f8f7f5' : '#fff', borderRadius: 5 }}>
-                          <span style={{ fontFamily: 'monospace', fontSize: 10.5, fontWeight: 700, color: '#4a4640', minWidth: 130 }}>{c.col}{c.req ? ' *' : ''}</span>
-                          <span style={{ color: '#8a8580' }}>{c.note}</span>
-                          {c.req && <span style={{ marginLeft: 'auto', fontSize: 9.5, fontWeight: 700, color: '#b91c1c', background: 'rgba(185,28,28,.06)', padding: '1px 5px', borderRadius: 3 }}>REQUIRED</span>}
+                        <div key={i} className={`flex items-center gap-2 text-xs py-1.25 px-2.5 rounded-[5px] ${i % 2 === 0 ? 'bg-off' : 'bg-card'}`}>
+                          <span className="font-mono text-[10.5px] font-bold text-t2 min-w-32.5">{c.col}{c.req ? ' *' : ''}</span>
+                          <span className="text-t3">{c.note}</span>
+                          {c.req && <span className="ml-auto text-[9.5px] font-bold text-brand-red bg-[rgba(185,28,28,.06)] py-px px-1.25 rounded-xs">REQUIRED</span>}
                         </div>
                       ))}
                     </div>
                   </div>
                 )}
 
-                <div style={{ display: 'flex', gap: 8 }}>
+                <div className="flex gap-2">
                   <button type="button" className="btn btn-outline btn-sm" onClick={() => setImportStep(1)}>← Back</button>
                   <button type="button" className="btn btn-black btn-sm" onClick={() => setImportStep(3)}>
                     I&apos;ve filled the sheet — Upload →
@@ -595,18 +591,18 @@ export default function NewKpiPage() {
 
           {/* Step 3 — Upload */}
           {importStep === 3 && (
-            <div style={{ background: '#fff', border: '1px solid #e2dfd8', borderRadius: 14, overflow: 'hidden', boxShadow: '0 1px 4px rgba(0,0,0,.06)' }}>
-              <div style={{ padding: '13px 18px', borderBottom: '1px solid #e2dfd8' }}>
-                <div style={{ fontSize: 13.5, fontWeight: 700, color: '#111110' }}>Step 3 — Upload &amp; Validate</div>
+            <div className="bg-card border border-border rounded-modal overflow-hidden shadow-card">
+              <div className="py-3.25 px-4.5 border-b border-border">
+                <div className="text-[13.5px] font-bold text-near-black">Step 3 — Upload &amp; Validate</div>
               </div>
-              <div style={{ padding: '18px 20px' }}>
+              <div className="py-4.5 px-5">
 
                 {/* Hidden file input */}
                 <input
                   ref={fileInputRef}
                   type="file"
                   accept=".csv,.xlsx,.xls"
-                  style={{ display: 'none' }}
+                  className="hidden"
                   onChange={(e) => {
                     const f = e.target.files?.[0];
                     if (f) handleFileSelect(f);
@@ -623,46 +619,44 @@ export default function NewKpiPage() {
                   onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
                   onDragLeave={() => setIsDragging(false)}
                   onClick={() => fileInputRef.current?.click()}
+                  className="rounded-[10px] py-9 px-5 text-center cursor-pointer mb-3.5 transition-all duration-150 border-2 border-dashed"
                   style={{
-                    borderRadius: 10, padding: '36px 20px', textAlign: 'center',
-                    cursor: 'pointer', marginBottom: 14, transition: 'all .15s',
-                    borderStyle: 'dashed', borderWidth: 2,
                     borderColor: isDragging ? '#111110' : uploadedFile ? '#1a7a4a' : '#d4d1cb',
                     background: uploadedFile ? 'rgba(26,122,74,.04)' : isDragging ? '#f8f7f5' : '#faf9f7',
                   }}
                 >
                   {uploadedFile ? (
                     <>
-                      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 8 }}>
-                        <div style={{ width: 40, height: 40, borderRadius: 8, background: 'rgba(26,122,74,.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <div className="flex justify-center mb-2">
+                        <div className="w-10 h-10 rounded-lg bg-[rgba(26,122,74,.1)] flex items-center justify-center">
                           <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#15633c" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M4 4h8l4 4v8a1 1 0 01-1 1H4a1 1 0 01-1-1V5a1 1 0 011-1z"/>
                             <polyline points="12 4 12 8 16 8"/>
                           </svg>
                         </div>
                       </div>
-                      <div style={{ fontSize: 13.5, fontWeight: 700, color: '#15633c', marginBottom: 3 }}>{uploadedFile.name}</div>
-                      <div style={{ fontSize: 12, color: '#8a8580', marginBottom: 6 }}>{fmtFileSize(uploadedFile.size)} · Click to replace</div>
+                      <div className="text-[13.5px] font-bold text-brand-green mb-0.75">{uploadedFile.name}</div>
+                      <div className="text-xs text-t3 mb-1.5">{fmtFileSize(uploadedFile.size)} · Click to replace</div>
                     </>
                   ) : (
                     <>
-                      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}>
-                        <svg width="36" height="36" viewBox="0 0 36 36" fill="none" style={{ color: '#8a8580' }}>
+                      <div className="flex justify-center mb-2.5">
+                        <svg width="36" height="36" viewBox="0 0 36 36" fill="none" className="text-t3">
                           <rect x="3" y="3" width="30" height="30" rx="6" stroke="currentColor" strokeWidth="1.5" fill="none"/>
                           <path d="M18 9v14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
                           <path d="M12 15l6-7 6 7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
                           <path d="M10 30h16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
                         </svg>
                       </div>
-                      <div style={{ fontSize: 13.5, fontWeight: 700, color: '#4a4640', marginBottom: 4 }}>Drop your filled CSV here</div>
-                      <div style={{ fontSize: 12, color: '#8a8580' }}>or click to browse &nbsp;·&nbsp; .csv .xlsx .xls &nbsp;·&nbsp; Max 10 MB</div>
+                      <div className="text-[13.5px] font-bold text-t2 mb-1">Drop your filled CSV here</div>
+                      <div className="text-xs text-t3">or click to browse &nbsp;·&nbsp; .csv .xlsx .xls &nbsp;·&nbsp; Max 10 MB</div>
                     </>
                   )}
                 </div>
 
                 {importParseErr && (
-                  <div style={{ marginBottom: 14, padding: '10px 13px', background: 'rgba(180,83,9,.06)', border: '1px solid rgba(180,83,9,.18)', borderRadius: 7, fontSize: 12.5, color: '#b45309', display: 'flex', gap: 8, alignItems: 'flex-start' }}>
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={{ flexShrink: 0, marginTop: 1 }}>
+                  <div className="mb-3.5 py-2.5 px-3.25 bg-[rgba(180,83,9,.06)] border border-[rgba(180,83,9,.18)] rounded-[7px] text-[12.5px] text-brand-amber flex gap-2 items-start">
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="shrink-0 mt-px">
                       <circle cx="7" cy="7" r="6" fill="rgba(180,83,9,.15)"/>
                       <path d="M7 4.5v3M7 9.5h.01" stroke="#b45309" strokeWidth="1.5" strokeLinecap="round"/>
                     </svg>
@@ -670,7 +664,7 @@ export default function NewKpiPage() {
                   </div>
                 )}
 
-                <div style={{ display: 'flex', gap: 8 }}>
+                <div className="flex gap-2">
                   <button type="button" className="btn btn-outline btn-sm"
                     onClick={() => { setUploadedFile(null); setParsedRows([]); setImportParseErr(''); setImportStep(2); if (fileInputRef.current) fileInputRef.current.value = ''; }}>
                     ← Back
@@ -684,17 +678,19 @@ export default function NewKpiPage() {
           {importStep === 4 && (
             <div>
 
-              {/* Batch defaults — required before submit */}
-              <div style={{ background: '#fff', border: `1.5px solid ${batchSettingsComplete ? '#e2dfd8' : '#b91c1c'}`, borderRadius: 14, overflow: 'hidden', boxShadow: '0 1px 4px rgba(0,0,0,.06)', marginBottom: 14 }}>
-                <div style={{ padding: '11px 16px', borderBottom: '1px solid #e2dfd8', display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: '#111110' }}>Batch Defaults</div>
+              {/* Batch defaults */}
+              <div
+                className="bg-card rounded-modal overflow-hidden shadow-card mb-3.5"
+                style={{ border: `1.5px solid ${batchSettingsComplete ? '#e2dfd8' : '#b91c1c'}` }}>
+                <div className="py-2.75 px-4 border-b border-border flex items-center gap-2">
+                  <div className="text-[13px] font-bold text-near-black">Batch Defaults</div>
                   {!batchSettingsComplete && (
-                    <span style={{ fontSize: 10.5, fontWeight: 700, color: '#b91c1c', background: 'rgba(185,28,28,.08)', padding: '2px 7px', borderRadius: 4 }}>REQUIRED</span>
+                    <span className="text-[10.5px] font-bold text-brand-red bg-[rgba(185,28,28,.08)] py-0.5 px-1.75 rounded">REQUIRED</span>
                   )}
                 </div>
-                <div style={{ padding: '14px 16px', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
+                <div className="py-3.5 px-4 grid grid-cols-3 gap-3">
                   <div>
-                    <label className="flabel">Region <span style={{ color: '#b91c1c' }}>*</span></label>
+                    <label className="flabel">Region <span className="text-brand-red">*</span></label>
                     <select className="fi" value={batchRegionId} onChange={(e) => setBatchRegionId(e.target.value)}>
                       <option value="">— Select Region —</option>
                       {allRegions.map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}
@@ -721,44 +717,44 @@ export default function NewKpiPage() {
               </div>
 
               {/* Summary banner */}
-              <div style={{
-                display: 'flex', alignItems: 'center', gap: 10, padding: '11px 16px',
-                borderRadius: 9, marginBottom: 14,
-                background: invalidCount === 0 ? 'rgba(26,122,74,.07)' : 'rgba(180,83,9,.07)',
-                border: `1px solid ${invalidCount === 0 ? 'rgba(26,122,74,.2)' : 'rgba(180,83,9,.2)'}`,
-              }}>
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ flexShrink: 0 }}>
+              <div
+                className="flex items-center gap-2.5 py-2.75 px-4 rounded-[9px] mb-3.5"
+                style={{
+                  background: invalidCount === 0 ? 'rgba(26,122,74,.07)' : 'rgba(180,83,9,.07)',
+                  border: `1px solid ${invalidCount === 0 ? 'rgba(26,122,74,.2)' : 'rgba(180,83,9,.2)'}`,
+                }}>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="shrink-0">
                   {invalidCount === 0 ? (
                     <><circle cx="8" cy="8" r="7" fill="rgba(26,122,74,.15)"/><path d="M5 8l2 2 4-4" stroke="#15633c" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></>
                   ) : (
                     <><circle cx="8" cy="8" r="7" fill="rgba(180,83,9,.15)"/><path d="M8 5v3.5M8 11h.01" stroke="#b45309" strokeWidth="1.6" strokeLinecap="round"/></>
                   )}
                 </svg>
-                <span style={{ fontSize: 13, fontWeight: 600, color: invalidCount === 0 ? '#15633c' : '#b45309' }}>
+                <span className="text-[13px] font-semibold" style={{ color: invalidCount === 0 ? '#15633c' : '#b45309' }}>
                   {invalidCount === 0
                     ? `All ${validCount} row${validCount !== 1 ? 's' : ''} are valid and ready to import`
                     : `${validCount} valid · ${invalidCount} need review`}
                 </span>
                 <button type="button" onClick={resetExcel}
-                  style={{ marginLeft: 'auto', fontSize: 12, color: '#8a8580', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', fontFamily: 'inherit' }}>
+                  className="ml-auto text-xs text-t3 bg-transparent border-none cursor-pointer underline font-[inherit]">
                   Re-upload
                 </button>
               </div>
 
               {/* Validation errors */}
               {invalidCount > 0 && (
-                <div style={{ background: '#fff', border: '1px solid #e2dfd8', borderRadius: 14, overflow: 'hidden', boxShadow: '0 1px 4px rgba(0,0,0,.06)', marginBottom: 14 }}>
-                  <div style={{ padding: '11px 16px', borderBottom: '1px solid #e2dfd8', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: '#111110' }}>Validation Issues</div>
-                    <span style={{ fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 4, background: 'rgba(180,83,9,.1)', color: '#b45309' }}>{invalidCount} row{invalidCount !== 1 ? 's' : ''}</span>
+                <div className="bg-card border border-border rounded-modal overflow-hidden shadow-card mb-3.5">
+                  <div className="py-2.75 px-4 border-b border-border flex items-center justify-between">
+                    <div className="text-[13px] font-bold text-near-black">Validation Issues</div>
+                    <span className="text-[11px] font-semibold py-0.5 px-2 rounded bg-[rgba(180,83,9,.1)] text-brand-amber">{invalidCount} row{invalidCount !== 1 ? 's' : ''}</span>
                   </div>
-                  <div style={{ padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: 7 }}>
+                  <div className="py-3 px-4 flex flex-col gap-1.75">
                     {parsedRows.filter((r) => !r.isValid).map((r) => (
-                      <div key={r.rowIndex} style={{ padding: '9px 12px', background: 'rgba(185,28,28,.04)', border: '1px solid rgba(185,28,28,.14)', borderRadius: 7 }}>
-                        <div style={{ fontSize: 11.5, fontWeight: 700, color: '#b91c1c', marginBottom: 4 }}>Row {r.rowIndex}</div>
+                      <div key={r.rowIndex} className="py-2.25 px-3 bg-[rgba(185,28,28,.04)] border border-[rgba(185,28,28,.14)] rounded-[7px]">
+                        <div className="text-[11.5px] font-bold text-brand-red mb-1">Row {r.rowIndex}</div>
                         {r.errors.map((e, i) => (
-                          <div key={i} style={{ fontSize: 12, color: '#b45309', display: 'flex', gap: 6, alignItems: 'flex-start' }}>
-                            <span style={{ marginTop: 2, flexShrink: 0 }}>•</span>{e}
+                          <div key={i} className="text-xs text-brand-amber flex gap-1.5 items-start">
+                            <span className="mt-0.5 shrink-0">•</span>{e}
                           </div>
                         ))}
                       </div>
@@ -768,16 +764,16 @@ export default function NewKpiPage() {
               )}
 
               {/* Preview table */}
-              <div style={{ background: '#fff', border: '1px solid #e2dfd8', borderRadius: 14, overflow: 'hidden', boxShadow: '0 1px 4px rgba(0,0,0,.06)', marginBottom: 14 }}>
-                <div style={{ padding: '11px 16px', borderBottom: '1px solid #e2dfd8' }}>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: '#111110' }}>Preview — {parsedRows.length} row{parsedRows.length !== 1 ? 's' : ''} to import</div>
+              <div className="bg-card border border-border rounded-modal overflow-hidden shadow-card mb-3.5">
+                <div className="py-2.75 px-4 border-b border-border">
+                  <div className="text-[13px] font-bold text-near-black">Preview — {parsedRows.length} row{parsedRows.length !== 1 ? 's' : ''} to import</div>
                 </div>
-                <div style={{ overflowX: 'auto' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse">
                     <thead>
-                      <tr style={{ background: '#f0efec', borderBottom: '1.5px solid #e2dfd8' }}>
+                      <tr className="bg-off border-b-[1.5px] border-border">
                         {['Row', 'KPI Name', 'Parent', 'Target', 'Status'].map((h) => (
-                          <th key={h} style={{ textAlign: 'left', fontSize: 10, fontWeight: 700, color: '#8a8580', textTransform: 'uppercase', letterSpacing: 1, padding: '8px 14px', whiteSpace: 'nowrap' }}>{h}</th>
+                          <th key={h} className="text-left text-[10px] font-bold text-t3 uppercase tracking-[1px] py-2 px-3.5 whitespace-nowrap">{h}</th>
                         ))}
                       </tr>
                     </thead>
@@ -789,17 +785,23 @@ export default function NewKpiPage() {
                         const kpiName    = nameField   ? (row.values[nameField.id]   || '—') : '—';
                         const target     = targetField ? (row.values[targetField.id] || '—') : '—';
                         return (
-                          <tr key={row.rowIndex} style={{ borderBottom: '1px solid #e2dfd8', background: row.isValid ? 'rgba(26,122,74,.02)' : 'rgba(185,28,28,.02)' }}>
-                            <td style={{ padding: '9px 14px', fontSize: 11.5, color: '#8a8580', fontFamily: 'monospace' }}>{row.rowIndex}</td>
-                            <td style={{ padding: '9px 14px', fontSize: 13, fontWeight: 700, color: '#111110' }}>{kpiName}</td>
-                            <td style={{ padding: '9px 14px', fontSize: 12, color: '#4a4640' }}>
+                          <tr key={row.rowIndex}
+                            className="border-b border-border"
+                            style={{ background: row.isValid ? 'rgba(26,122,74,.02)' : 'rgba(185,28,28,.02)' }}>
+                            <td className="py-2.25 px-3.5 text-[11.5px] text-t3 font-mono">{row.rowIndex}</td>
+                            <td className="py-2.25 px-3.5 text-[13px] font-bold text-near-black">{kpiName}</td>
+                            <td className="py-2.25 px-3.5 text-xs text-t2">
                               {row.parentKpiNo ? (
-                                <span style={{ fontFamily: 'monospace', fontSize: 10, fontWeight: 700, padding: '2px 5px', borderRadius: 3, background: '#e4e1db', color: '#4a4640' }}>{row.parentKpiNo}</span>
-                              ) : <span style={{ color: '#c4c0b8' }}>—</span>}
+                                <span className="font-mono text-[10px] font-bold py-0.5 px-1.25 rounded-xs bg-bg3 text-t2">{row.parentKpiNo}</span>
+                              ) : <span className="text-t4">—</span>}
                             </td>
-                            <td style={{ padding: '9px 14px', fontSize: 12, fontWeight: 700, color: '#111110' }}>{target}</td>
-                            <td style={{ padding: '9px 14px' }}>
-                              <span style={{ fontSize: 11, fontWeight: 600, padding: '2.5px 8px', borderRadius: 4, background: row.isValid ? 'rgba(26,122,74,.1)' : 'rgba(180,83,9,.1)', color: row.isValid ? '#15633c' : '#b45309' }}>
+                            <td className="py-2.25 px-3.5 text-xs font-bold text-near-black">{target}</td>
+                            <td className="py-2.25 px-3.5">
+                              <span className="text-[11px] font-semibold py-[2.5px] px-2 rounded"
+                                style={{
+                                  background: row.isValid ? 'rgba(26,122,74,.1)' : 'rgba(180,83,9,.1)',
+                                  color: row.isValid ? '#15633c' : '#b45309',
+                                }}>
                                 {row.isValid ? 'Valid' : 'Review'}
                               </span>
                             </td>
@@ -813,8 +815,8 @@ export default function NewKpiPage() {
 
               {/* Parse / submit error notice */}
               {importParseErr && (
-                <div style={{ marginBottom: 14, padding: '10px 13px', background: 'rgba(185,28,28,.05)', border: '1px solid rgba(185,28,28,.2)', borderRadius: 8, fontSize: 12.5, color: '#b91c1c', display: 'flex', gap: 8, alignItems: 'flex-start' }}>
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={{ flexShrink: 0, marginTop: 1 }}>
+                <div className="mb-3.5 py-2.5 px-3.25 bg-[rgba(185,28,28,.05)] border border-[rgba(185,28,28,.2)] rounded-lg text-[12.5px] text-brand-red flex gap-2 items-start">
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="shrink-0 mt-px">
                     <circle cx="7" cy="7" r="6" fill="rgba(185,28,28,.12)"/>
                     <path d="M7 4.5v3M7 9.5h.01" stroke="#b91c1c" strokeWidth="1.5" strokeLinecap="round"/>
                   </svg>
@@ -824,14 +826,17 @@ export default function NewKpiPage() {
 
               {/* Submit result */}
               {submitResult ? (
-                <div style={{ borderRadius: 12, overflow: 'hidden', border: '1px solid #e2dfd8' }}>
-                  <div style={{
-                    padding: '16px 20px',
-                    background: submitResult.failed === 0 ? 'rgba(26,122,74,.06)' : submitResult.success === 0 ? 'rgba(185,28,28,.04)' : '#fff',
-                    display: 'flex', alignItems: 'center', gap: 14,
-                  }}>
-                    <div style={{ width: 40, height: 40, borderRadius: '50%', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      background: submitResult.failed === 0 ? 'rgba(26,122,74,.15)' : submitResult.success === 0 ? 'rgba(185,28,28,.12)' : '#e4e1db' }}>
+                <div className="rounded-xl overflow-hidden border border-border">
+                  <div
+                    className="py-4 px-5 flex items-center gap-3.5"
+                    style={{
+                      background: submitResult.failed === 0 ? 'rgba(26,122,74,.06)' : submitResult.success === 0 ? 'rgba(185,28,28,.04)' : '#fff',
+                    }}>
+                    <div
+                      className="w-10 h-10 rounded-full shrink-0 flex items-center justify-center"
+                      style={{
+                        background: submitResult.failed === 0 ? 'rgba(26,122,74,.15)' : submitResult.success === 0 ? 'rgba(185,28,28,.12)' : '#e4e1db',
+                      }}>
                       <svg width="18" height="18" viewBox="0 0 18 18" fill="none"
                         stroke={submitResult.failed === 0 ? '#15633c' : submitResult.success === 0 ? '#b91c1c' : '#4a4640'}
                         strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -840,13 +845,13 @@ export default function NewKpiPage() {
                           : <polyline points="4 9 7 12 14 6"/>}
                       </svg>
                     </div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 14, fontWeight: 800, color: '#111110', marginBottom: 2 }}>
+                    <div className="flex-1">
+                      <div className="text-sm font-black text-near-black mb-0.5">
                         {submitResult.success > 0
                           ? `${submitResult.success} KPI${submitResult.success !== 1 ? 's' : ''} created successfully${submitResult.failed > 0 ? ` · ${submitResult.failed} failed` : ''}`
                           : `All ${submitResult.failed} KPI${submitResult.failed !== 1 ? 's' : ''} failed to create`}
                       </div>
-                      <div style={{ fontSize: 12, color: '#8a8580' }}>
+                      <div className="text-xs text-t3">
                         {submitResult.success > 0 ? 'Created KPIs are in draft status pending approval.' : 'Check the errors below and try again.'}
                       </div>
                     </div>
@@ -856,19 +861,20 @@ export default function NewKpiPage() {
                       </button>
                     )}
                   </div>
-                  {/* Show API errors if any failed */}
                   {submitResult.errors.length > 0 && (
-                    <div style={{ padding: '10px 20px 14px', borderTop: '1px solid #e2dfd8', display: 'flex', flexDirection: 'column', gap: 5 }}>
-                      <div style={{ fontSize: 11, fontWeight: 700, color: '#b91c1c', textTransform: 'uppercase', letterSpacing: '.4px', marginBottom: 2 }}>Errors</div>
+                    <div className="py-2.5 px-5 pb-3.5 border-t border-border flex flex-col gap-1.25">
+                      <div className="text-[11px] font-bold text-brand-red uppercase tracking-[.4px] mb-0.5">Errors</div>
                       {submitResult.errors.map((e, i) => (
-                        <div key={i} style={{ fontSize: 12, color: '#b45309', display: 'flex', gap: 6 }}>
-                          <span style={{ flexShrink: 0 }}>•</span>{e}
+                        <div key={i} className="text-xs text-brand-amber flex gap-1.5">
+                          <span className="shrink-0">•</span>{e}
                         </div>
                       ))}
                     </div>
                   )}
                   {submitResult.failed > 0 && (
-                    <div style={{ padding: '10px 20px 14px', borderTop: submitResult.errors.length ? 'none' : '1px solid #e2dfd8' }}>
+                    <div
+                      className="py-2.5 px-5 pb-3.5"
+                      style={{ borderTop: submitResult.errors.length ? 'none' : '1px solid #e2dfd8' }}>
                       <button type="button" className="btn btn-outline btn-sm" onClick={() => setSubmitResult(null)}>
                         Try Again
                       </button>
@@ -876,12 +882,12 @@ export default function NewKpiPage() {
                   )}
                 </div>
               ) : (
-                <div style={{ display: 'flex', gap: 8 }}>
+                <div className="flex gap-2">
                   <button type="button" className="btn btn-outline btn-sm" onClick={resetExcel}>← Re-upload</button>
                   <button type="button" className="btn btn-black btn-sm"
                     disabled={submitting || validCount === 0 || !batchSettingsComplete}
-                    onClick={handleBulkSubmit}
-                    style={{ opacity: (submitting || validCount === 0 || !batchSettingsComplete) ? .6 : 1 }}>
+                    style={{ opacity: (submitting || validCount === 0 || !batchSettingsComplete) ? .6 : 1 }}
+                    onClick={handleBulkSubmit}>
                     {submitting ? `Submitting… (${validCount})` : `Submit ${validCount} Valid KPI${validCount !== 1 ? 's' : ''} →`}
                   </button>
                 </div>

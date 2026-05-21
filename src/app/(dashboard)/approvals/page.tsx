@@ -84,37 +84,38 @@ export default function ApprovalsPage() {
   ];
 
   return (
-    <div style={{ padding: '22px 26px' }}>
-      <div style={{ marginBottom: 18 }}>
-        <div style={{ fontSize: 15, fontWeight: 800, letterSpacing: '-.2px', marginBottom: 3, color: '#111110' }}>
+    <div className="px-[26px] py-[22px]">
+      <div className="mb-[18px]">
+        <div className="text-[15px] font-black tracking-[-0.2px] mb-[3px] text-near-black">
           Approval Inbox
         </div>
-        <div style={{ fontSize: 12, color: '#8a8580' }}>
+        <div className="text-xs text-t3">
           KPI approval requests — review, approve, or reject below
         </div>
       </div>
 
       {/* Tabs */}
-      <div style={{ display: 'flex', borderBottom: '2px solid #e2dfd8', marginBottom: 18 }}>
+      <div className="flex border-b-2 border-border mb-[18px]">
         {tabs.map((t) => (
           <button type="button"
             key={t.id}
             onClick={() => setActiveTab(t.id)}
+            className="flex items-center gap-[6px] px-[18px] py-[9px] text-[13px] border-none bg-transparent cursor-pointer font-[inherit] transition-all duration-[140ms] -mb-[2px]"
             style={{
-              padding: '9px 18px', fontSize: 13, fontWeight: activeTab === t.id ? 700 : 500,
-              cursor: 'pointer', border: 'none', background: 'none',
-              color: activeTab === t.id ? '#000' : '#4a4640', fontFamily: 'inherit',
+              fontWeight: activeTab === t.id ? 700 : 500,
+              color: activeTab === t.id ? '#000' : '#4a4640',
               borderBottom: `2.5px solid ${activeTab === t.id ? '#000' : 'transparent'}`,
-              marginBottom: -2, display: 'flex', alignItems: 'center', gap: 6, transition: 'all .14s',
             }}
           >
             {t.label}
             {t.count !== undefined && (
-              <span style={{
-                fontSize: 10.5, fontWeight: 700, padding: '2px 7px', borderRadius: 10,
-                background: activeTab === t.id ? (t.id === 'pending' ? '#b45309' : t.id === 'approved' ? '#1a7a4a' : t.id === 'rejected' ? '#b91c1c' : '#000') : '#e8e6e1',
-                color: activeTab === t.id ? '#fff' : '#8a8580',
-              }}>
+              <span className="text-[10.5px] font-bold px-[7px] py-[2px] rounded-[10px]"
+                style={{
+                  background: activeTab === t.id
+                    ? (t.id === 'pending' ? '#b45309' : t.id === 'approved' ? '#1a7a4a' : t.id === 'rejected' ? '#b91c1c' : '#000')
+                    : '#e8e6e1',
+                  color: activeTab === t.id ? '#fff' : '#8a8580',
+                }}>
                 {t.count}
               </span>
             )}
@@ -125,18 +126,18 @@ export default function ApprovalsPage() {
       {/* Note modal */}
       {noteTarget && (
         <div
-          style={{ position: 'fixed', inset: 0, zIndex: 50, background: 'rgba(0,0,0,.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}
+          className="fixed inset-0 z-50 bg-black/45 flex items-center justify-center p-4"
           onClick={(e) => e.target === e.currentTarget && setNoteTarget(null)}
         >
-          <div style={{ width: '100%', maxWidth: 440, background: '#fff', borderRadius: 16, overflow: 'hidden', boxShadow: '0 20px 60px rgba(0,0,0,.2)' }}>
-            <div style={{ padding: '18px 22px', borderBottom: '1px solid #e2dfd8', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span style={{ fontWeight: 800, fontSize: 14, color: noteTarget.action === 'approve' ? '#15633c' : '#b91c1c' }}>
+          <div className="w-full max-w-[440px] bg-white rounded-2xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,.2)]">
+            <div className="flex items-center justify-between px-[22px] py-[18px] border-b border-border">
+              <span className="font-black text-sm" style={{ color: noteTarget.action === 'approve' ? '#15633c' : '#b91c1c' }}>
                 {noteTarget.action === 'approve' ? '✓ Approve KPI' : '✕ Reject KPI'}
               </span>
-              <button type="button" onClick={() => setNoteTarget(null)} style={{ fontSize: 18, color: '#8a8580', border: 'none', background: 'none', cursor: 'pointer', lineHeight: 1 }}>×</button>
+              <button type="button" onClick={() => setNoteTarget(null)} className="text-[18px] text-t3 border-none bg-none cursor-pointer leading-none">×</button>
             </div>
-            <div style={{ padding: '18px 22px' }}>
-              <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#4a4640', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '.4px' }}>
+            <div className="px-[22px] py-[18px]">
+              <label className="block text-[11px] font-bold text-t2 mb-[6px] uppercase tracking-[0.4px]">
                 Reviewer Note (optional)
               </label>
               <textarea
@@ -144,24 +145,19 @@ export default function ApprovalsPage() {
                 onChange={(e) => setReviewNote(e.target.value)}
                 placeholder="Add a comment for the requester…"
                 rows={3}
-                style={{ width: '100%', border: '1.5px solid #e2dfd8', borderRadius: 8, padding: '9px 12px', fontFamily: 'inherit', fontSize: 13, resize: 'vertical', outline: 'none', color: '#111110', boxSizing: 'border-box' }}
-                onFocus={(e) => (e.currentTarget.style.borderColor = '#000')}
-                onBlur={(e) => (e.currentTarget.style.borderColor = '#e2dfd8')}
+                className="w-full border-[1.5px] border-border rounded-lg px-3 py-[9px] font-[inherit] text-[13px] resize-y outline-none text-near-black box-border transition-[border-color] duration-[180ms] focus:border-black"
               />
             </div>
-            <div style={{ padding: '14px 22px', borderTop: '1px solid #e2dfd8', display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-              <button type="button" onClick={() => setNoteTarget(null)} style={{ padding: '8px 16px', borderRadius: 7, fontSize: 13, fontWeight: 600, border: '1px solid #e2dfd8', background: '#fff', cursor: 'pointer', fontFamily: 'inherit', color: '#4a4640' }}>
+            <div className="flex gap-2 justify-end px-[22px] py-[14px] border-t border-border">
+              <button type="button" onClick={() => setNoteTarget(null)}
+                className="px-4 py-2 rounded-[7px] text-[13px] font-semibold border border-border bg-white cursor-pointer font-[inherit] text-t2">
                 Cancel
               </button>
               <button type="button"
                 disabled={actioning === noteTarget.id}
                 onClick={() => noteTarget.action === 'approve' ? handleApprove(noteTarget.id) : handleReject(noteTarget.id)}
-                style={{
-                  padding: '8px 18px', borderRadius: 7, fontSize: 13, fontWeight: 700, border: 'none',
-                  background: noteTarget.action === 'approve' ? '#1a7a4a' : '#b91c1c',
-                  color: '#fff', cursor: actioning === noteTarget.id ? 'not-allowed' : 'pointer',
-                  opacity: actioning === noteTarget.id ? .6 : 1, fontFamily: 'inherit',
-                }}
+                className="px-[18px] py-2 rounded-[7px] text-[13px] font-bold border-none text-white font-[inherit] transition-opacity duration-[140ms] disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+                style={{ background: noteTarget.action === 'approve' ? '#1a7a4a' : '#b91c1c' }}
               >
                 {actioning === noteTarget.id ? 'Processing…' : noteTarget.action === 'approve' ? 'Confirm Approve' : 'Confirm Reject'}
               </button>
@@ -171,37 +167,37 @@ export default function ApprovalsPage() {
       )}
 
       {loading ? (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 160 }}>
-          <p style={{ fontSize: 13, color: '#8a8580' }}>Loading…</p>
+        <div className="flex items-center justify-center h-40">
+          <p className="text-[13px] text-t3">Loading…</p>
         </div>
       ) : loadError === 'schema_missing' ? (
-        <div style={{ border: '1px solid rgba(180,83,9,.25)', borderLeft: '4px solid #b45309', borderRadius: 12, padding: '20px 22px', background: 'rgba(180,83,9,.04)' }}>
-          <p style={{ fontSize: 13, fontWeight: 700, color: '#b45309', marginBottom: 6 }}>
+        <div className="border border-[rgba(180,83,9,.25)] border-l-4 border-l-[#b45309] rounded-xl px-[22px] py-5 bg-[rgba(180,83,9,.04)]">
+          <p className="text-[13px] font-bold text-[#b45309] mb-[6px]">
             Database migration required
           </p>
-          <p style={{ fontSize: 12.5, color: '#4a4640', marginBottom: 12, lineHeight: 1.6 }}>
-            The <code style={{ background: '#f0efec', padding: '1px 5px', borderRadius: 3, fontSize: 11.5, fontFamily: 'monospace' }}>approvals</code> table doesn&apos;t exist yet.
+          <p className="text-[12.5px] text-t2 mb-3 leading-relaxed">
+            The <code className="bg-[#f0efec] px-[5px] py-px rounded text-[11.5px] font-mono">approvals</code> table doesn&apos;t exist yet.
             Run migration <strong>004_approvals_notifications_audit.sql</strong> in your Supabase SQL editor to enable this feature.
           </p>
-          <p style={{ fontSize: 11.5, color: '#8a8580', fontFamily: 'monospace', background: '#f8f7f5', padding: '8px 12px', borderRadius: 6, border: '1px solid #e2dfd8', margin: 0 }}>
+          <p className="text-[11.5px] text-t3 font-mono bg-off px-3 py-2 rounded-md border border-border m-0">
             joola-track-api/database/004_approvals_notifications_audit.sql
           </p>
         </div>
       ) : loadError ? (
-        <div style={{ border: '1px solid rgba(185,28,28,.2)', borderRadius: 12, padding: '16px 18px', background: 'rgba(185,28,28,.04)', fontSize: 12.5, color: '#b91c1c' }}>
+        <div className="border border-[rgba(185,28,28,.2)] rounded-xl px-[18px] py-4 bg-[rgba(185,28,28,.04)] text-[12.5px] text-brand-red">
           Failed to load approvals: {loadError}
         </div>
       ) : data.length === 0 ? (
-        <div style={{ border: '2px dashed #e2dfd8', borderRadius: 14, padding: '48px 20px', textAlign: 'center', background: '#f8f7f5' }}>
-          <p style={{ fontSize: 14, fontWeight: 600, color: '#4a4640', marginBottom: 4 }}>
+        <div className="border-2 border-dashed border-border rounded-[14px] py-12 px-5 text-center bg-off">
+          <p className="text-sm font-semibold text-t2 mb-1">
             {activeTab === 'pending' ? 'All caught up — no pending approvals' : `No ${activeTab} approvals`}
           </p>
-          <p style={{ fontSize: 12, color: '#8a8580' }}>
+          <p className="text-xs text-t3">
             {activeTab === 'pending' ? 'Submit a KPI for approval from the KPI detail page.' : ''}
           </p>
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div className="flex flex-col gap-[10px]">
           {data.map((a) => (
             <ApprovalCard
               key={a.id}
@@ -216,7 +212,7 @@ export default function ApprovalsPage() {
       )}
 
       {total > LIMIT && (
-        <p style={{ marginTop: 14, fontSize: 12, color: '#8a8580', textAlign: 'center' }}>
+        <p className="mt-[14px] text-xs text-t3 text-center">
           Showing {LIMIT} of {total} · Use filters for more
         </p>
       )}
@@ -237,86 +233,70 @@ function ApprovalCard({
   const borderColor = TAB_BORDER[approval.status as TabId] ?? '#cdc9c1';
 
   return (
-    <div style={{
-      background: '#fff',
-      borderTop: '1.5px solid #e2dfd8', borderRight: '1.5px solid #e2dfd8', borderBottom: '1.5px solid #e2dfd8',
-      borderLeft: `4px solid ${borderColor}`,
-      borderRadius: 12, overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,.06)',
-    }}>
-      <div style={{ padding: '14px 18px', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16 }}>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-            <span style={{ fontFamily: 'monospace', fontSize: 10, fontWeight: 700, padding: '2px 6px', borderRadius: 3, background: '#e4e1db', color: '#4a4640' }}>
+    <div className="bg-white rounded-xl overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,.06)]"
+      style={{
+        borderTop: '1.5px solid #e2dfd8', borderRight: '1.5px solid #e2dfd8',
+        borderBottom: '1.5px solid #e2dfd8', borderLeft: `4px solid ${borderColor}`,
+      }}>
+      <div className="flex items-start justify-between gap-4 px-[18px] py-[14px]">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-[6px]">
+            <span className="font-mono text-[10px] font-bold px-[6px] py-[2px] rounded bg-[#e4e1db] text-t2">
               {approval.kpis?.kpi_number ?? '—'}
             </span>
-            <span style={{ display: 'inline-flex', padding: '2.5px 8px', borderRadius: 4, fontSize: 11, fontWeight: 600, background: s.bg, color: s.color }}>
+            <span className="inline-flex px-2 py-[2.5px] rounded text-[11px] font-semibold"
+              style={{ background: s.bg, color: s.color }}>
               {approval.status}
             </span>
           </div>
 
           <Link
             href={`/kpis/${approval.kpi_id}`}
-            style={{ fontSize: 14, fontWeight: 700, color: '#111110', textDecoration: 'none', letterSpacing: '-.1px', display: 'block', marginBottom: 5 }}
+            className="text-sm font-bold text-near-black no-underline tracking-[-0.1px] block mb-[5px] hover:underline"
           >
             {approval.kpis?.name ?? 'KPI'}
           </Link>
 
           {approval.note && (
-            <p style={{ fontSize: 12, color: '#4a4640', margin: '0 0 6px', lineHeight: 1.5, fontStyle: 'italic' }}>
+            <p className="text-xs text-t2 m-0 mb-[6px] leading-relaxed italic">
               &ldquo;{approval.note}&rdquo;
             </p>
           )}
 
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
-            <span style={{ fontSize: 11.5, color: '#8a8580' }}>
-              Requested by <strong style={{ color: '#4a4640' }}>{approval.requester?.full_name ?? '—'}</strong>
+          <div className="flex flex-wrap gap-3">
+            <span className="text-[11.5px] text-t3">
+              Requested by <strong className="text-t2">{approval.requester?.full_name ?? '—'}</strong>
             </span>
-            <span style={{ fontSize: 11.5, color: '#8a8580' }}>
+            <span className="text-[11.5px] text-t3">
               {new Date(approval.requested_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
             </span>
             {approval.reviewed_at && (
-              <span style={{ fontSize: 11.5, color: '#8a8580' }}>
-                Reviewed by <strong style={{ color: '#4a4640' }}>{approval.reviewer?.full_name ?? '—'}</strong>
+              <span className="text-[11.5px] text-t3">
+                Reviewed by <strong className="text-t2">{approval.reviewer?.full_name ?? '—'}</strong>
               </span>
             )}
           </div>
 
           {approval.reviewer_note && (
-            <p style={{ fontSize: 11.5, color: '#8a8580', margin: '6px 0 0', padding: '6px 10px', background: '#f8f7f5', borderRadius: 6, borderLeft: '3px solid #e2dfd8' }}>
+            <p className="text-[11.5px] text-t3 mt-[6px] mb-0 px-[10px] py-[6px] bg-off rounded-md border-l-[3px] border-border">
               {approval.reviewer_note}
             </p>
           )}
         </div>
 
         {isAdmin && approval.status === 'pending' && (
-          <div style={{ display: 'flex', gap: 7, flexShrink: 0 }}>
+          <div className="flex gap-[7px] shrink-0">
             <button type="button"
               onClick={onApprove}
               disabled={actioning}
-              style={{
-                padding: '7px 14px', borderRadius: 6, fontSize: 12.5, fontWeight: 600,
-                cursor: actioning ? 'not-allowed' : 'pointer',
-                background: 'rgba(26,122,74,.1)', color: '#15633c',
-                border: '1px solid rgba(26,122,74,.2)', fontFamily: 'inherit',
-                opacity: actioning ? .5 : 1, transition: 'all .14s',
-              }}
-              onMouseEnter={(e) => { if (!actioning) (e.currentTarget as HTMLElement).style.background = 'rgba(26,122,74,.18)'; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(26,122,74,.1)'; }}
+              className="px-[14px] py-[7px] rounded-md text-[12.5px] font-semibold border border-[rgba(26,122,74,.2)] bg-[rgba(26,122,74,.1)] text-[#15633c] font-[inherit] transition-all duration-[140ms] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer hover:bg-[rgba(26,122,74,.18)]"
             >
               ✓ Approve
             </button>
             <button type="button"
               onClick={onReject}
               disabled={actioning}
-              style={{
-                padding: '7px 14px', borderRadius: 6, fontSize: 12.5, fontWeight: 600,
-                cursor: actioning ? 'not-allowed' : 'pointer',
-                background: 'rgba(185,28,28,.06)', color: '#b91c1c',
-                border: '1px solid rgba(185,28,28,.2)', fontFamily: 'inherit',
-                opacity: actioning ? .5 : 1, transition: 'all .14s',
-              }}
-              onMouseEnter={(e) => { if (!actioning) (e.currentTarget as HTMLElement).style.background = 'rgba(185,28,28,.12)'; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(185,28,28,.06)'; }}
+              className="px-[14px] py-[7px] rounded-md text-[12.5px] font-semibold border border-[rgba(185,28,28,.2)] bg-[rgba(185,28,28,.06)] text-brand-red font-[inherit] transition-all duration-[140ms] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer hover:bg-[rgba(185,28,28,.12)]"
             >
               ✕ Reject
             </button>

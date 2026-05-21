@@ -67,26 +67,25 @@ export default function RegionsPage() {
   const selectedKpis = selectedRegion ? allKpis.filter((k) => k.region_id === selectedRegion.id) : [];
   const selectedUsers = selectedRegion ? allUsers.filter((u) => u.region_id === selectedRegion.id) : [];
 
-  if (loading) return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 256, color: '#8a8580', fontSize: 13 }}>Loading…</div>;
+  if (loading) return <div className="flex items-center justify-center h-64 text-t3 text-[13px]">Loading…</div>;
 
   return (
-    <div style={{ padding: '22px 26px' }}>
+    <div className="px-[26px] py-[22px]">
       {/* Header */}
-      <div style={{ marginBottom: 20, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+      <div className="mb-5 flex items-start justify-between">
         <div>
-          <div style={{ fontSize: 15, fontWeight: 800, letterSpacing: '-.2px', marginBottom: 3, color: '#111110' }}>Regions & Workspaces</div>
-          <div style={{ fontSize: 12, color: '#8a8580' }}>KPI performance by region — {visibleRegions.length} region{visibleRegions.length !== 1 ? 's' : ''} · {allKpis.filter((k) => k.status !== 'cancelled').length} active KPIs total</div>
+          <div className="text-[15px] font-black tracking-[-0.2px] mb-[3px] text-near-black">Regions & Workspaces</div>
+          <div className="text-xs text-t3">KPI performance by region — {visibleRegions.length} region{visibleRegions.length !== 1 ? 's' : ''} · {allKpis.filter((k) => k.status !== 'cancelled').length} active KPIs total</div>
         </div>
         {isAdmin && (
           <button
             type="button"
-            className="btn btn-black"
+            className="btn btn-black py-3 px-[22px] text-[15px] rounded-lg font-semibold"
             onClick={() => {
               setForm({ name: '', code: '' });
               setFormError('');
               setModalOpen(true);
             }}
-            style={{ padding: '12px 22px', fontSize: 15, borderRadius: 8, fontWeight: 600 }}
           >
             + New Region
           </button>
@@ -94,30 +93,30 @@ export default function RegionsPage() {
       </div>
 
       {/* Summary stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 10, marginBottom: 20 }}>
+      <div className="grid gap-[10px] mb-5" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))' }}>
         {[
           { label: 'Total Regions', value: allRegions.length, color: '#111110' },
           { label: 'Total KPIs', value: allKpis.filter((k) => k.status !== 'cancelled').length, color: '#111110' },
           { label: 'Active KPIs', value: allKpis.filter((k) => k.status === 'active').length, color: '#1a7a4a' },
           { label: 'Pending Approval', value: allKpis.filter((k) => k.status === 'draft').length, color: '#b45309' },
         ].map((stat) => (
-          <div key={stat.label} style={{ background: '#fff', border: '1px solid #e2dfd8', borderRadius: 10, padding: '12px 14px', boxShadow: '0 1px 2px rgba(0,0,0,.04)' }}>
-            <div style={{ fontSize: 11, color: '#8a8580', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 5 }}>{stat.label}</div>
-            <div style={{ fontSize: 22, fontWeight: 800, color: stat.color, letterSpacing: '-.5px' }}>{stat.value}</div>
+          <div key={stat.label} className="bg-white border border-border rounded-[10px] px-[14px] py-3 shadow-[0_1px_2px_rgba(0,0,0,.04)]">
+            <div className="text-[11px] text-t3 font-semibold uppercase tracking-[0.5px] mb-[5px]">{stat.label}</div>
+            <div className="text-[22px] font-black tracking-[-0.5px]" style={{ color: stat.color }}>{stat.value}</div>
           </div>
         ))}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: selectedRegion ? '1fr 1.1fr' : '1fr', gap: 16 }}>
+      <div className="grid gap-4" style={{ gridTemplateColumns: selectedRegion ? '1fr 1.1fr' : '1fr' }}>
         {/* Region cards */}
         <div>
           {visibleRegions.length === 0 ? (
-            <div style={{ border: '2px dashed #e2dfd8', borderRadius: 14, padding: '48px 20px', textAlign: 'center', background: '#f8f7f5' }}>
-              <p style={{ fontSize: 14, fontWeight: 600, color: '#4a4640', marginBottom: 4 }}>No regions configured</p>
-              <p style={{ fontSize: 12, color: '#8a8580' }}>Contact your administrator to set up regions.</p>
+            <div className="border-2 border-dashed border-border rounded-[14px] py-12 px-5 text-center bg-off">
+              <p className="text-sm font-semibold text-[#4a4640] mb-1">No regions configured</p>
+              <p className="text-xs text-t3">Contact your administrator to set up regions.</p>
             </div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div className="flex flex-col gap-[10px]">
               {visibleRegions.map((region, idx) => {
                 const stats = regionStats(region);
                 const color = getRegionColor(idx);
@@ -126,24 +125,31 @@ export default function RegionsPage() {
                   <div key={region.id}>
                     <div
                       onClick={() => setSelectedRegion(isSelected ? null : region)}
-                      style={{ background: '#fff', borderTop: `1.5px solid ${isSelected ? color : '#e2dfd8'}`, borderRight: `1.5px solid ${isSelected ? color : '#e2dfd8'}`, borderBottom: `1.5px solid ${isSelected ? color : '#e2dfd8'}`, borderLeft: `4px solid ${color}`, borderRadius: 12, padding: '14px 16px', cursor: 'pointer', boxShadow: isSelected ? `0 0 0 2px ${color}30` : '0 1px 3px rgba(0,0,0,.06)', transition: 'all .14s' }}>
-                      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 10 }}>
+                      className="bg-white rounded-xl px-4 py-[14px] cursor-pointer transition-all duration-[140ms]"
+                      style={{
+                        borderTop: `1.5px solid ${isSelected ? color : '#e2dfd8'}`,
+                        borderRight: `1.5px solid ${isSelected ? color : '#e2dfd8'}`,
+                        borderBottom: `1.5px solid ${isSelected ? color : '#e2dfd8'}`,
+                        borderLeft: `4px solid ${color}`,
+                        boxShadow: isSelected ? `0 0 0 2px ${color}30` : '0 1px 3px rgba(0,0,0,.06)',
+                      }}>
+                      <div className="flex items-start justify-between mb-[10px]">
                         <div>
-                          <div style={{ fontSize: 13.5, fontWeight: 700, color: '#111110', letterSpacing: '-.1px', marginBottom: 2 }}>{region.name}</div>
-                          <div style={{ fontSize: 11, fontWeight: 600, color: '#8a8580', letterSpacing: '.5px', fontFamily: 'monospace' }}>{region.code}</div>
+                          <div className="text-[13.5px] font-bold text-near-black tracking-[-0.1px] mb-0.5">{region.name}</div>
+                          <div className="text-[11px] font-semibold text-t3 tracking-[0.5px] font-mono">{region.code}</div>
                         </div>
-                        <span style={{ fontSize: 11, color: isSelected ? color : '#8a8580', fontWeight: 700 }}>{isSelected ? '▲' : '▼'}</span>
+                        <span className="text-[11px] font-bold" style={{ color: isSelected ? color : '#8a8580' }}>{isSelected ? '▲' : '▼'}</span>
                       </div>
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6 }}>
+                      <div className="grid grid-cols-4 gap-[6px]">
                         {[
                           { label: 'Total', value: stats.total },
                           { label: 'Active', value: stats.active, color: '#1a7a4a' },
                           { label: 'Draft', value: stats.draft, color: '#b45309' },
                           { label: 'People', value: stats.users },
                         ].map((s) => (
-                          <div key={s.label} style={{ background: '#f8f7f5', borderRadius: 6, padding: '6px 8px', textAlign: 'center' }}>
-                            <div style={{ fontSize: 14, fontWeight: 800, color: s.color ?? '#111110' }}>{s.value}</div>
-                            <div style={{ fontSize: 9.5, color: '#8a8580', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.4px' }}>{s.label}</div>
+                          <div key={s.label} className="bg-off rounded-[6px] px-2 py-[6px] text-center">
+                            <div className="text-sm font-black" style={{ color: s.color ?? '#111110' }}>{s.value}</div>
+                            <div className="text-[9.5px] text-t3 font-semibold uppercase tracking-[0.4px]">{s.label}</div>
                           </div>
                         ))}
                       </div>
@@ -157,55 +163,61 @@ export default function RegionsPage() {
 
         {/* Region detail panel */}
         {selectedRegion && (
-          <div style={{ background: '#fff', border: '1px solid #e2dfd8', borderRadius: 14, overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,.07)', height: 'fit-content' }}>
-            <div style={{ padding: '14px 18px', borderBottom: '1px solid #e2dfd8', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div className="bg-white border border-border rounded-[14px] overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,.07)] h-fit">
+            <div className="px-[18px] py-[14px] border-b border-border flex items-center justify-between">
               <div>
-                <div style={{ fontSize: 13.5, fontWeight: 700, color: '#111110' }}>{selectedRegion.name}</div>
-                <div style={{ fontSize: 11, color: '#8a8580', fontFamily: 'monospace', marginTop: 2 }}>{selectedRegion.code}</div>
+                <div className="text-[13.5px] font-bold text-near-black">{selectedRegion.name}</div>
+                <div className="text-[11px] text-t3 font-mono mt-0.5">{selectedRegion.code}</div>
               </div>
-              <button type="button" onClick={() => setSelectedRegion(null)} style={{ padding: '4px 10px', borderRadius: 5, border: '1px solid #e2dfd8', background: '#f8f7f5', cursor: 'pointer', color: '#8a8580', fontSize: 12, fontFamily: 'inherit' }}>Close</button>
+              <button type="button" onClick={() => setSelectedRegion(null)} className="px-[10px] py-1 rounded-[5px] border border-border bg-off cursor-pointer text-t3 text-xs font-[inherit]">Close</button>
             </div>
 
             {/* KPIs in region */}
-            <div style={{ padding: '14px 18px', borderBottom: '1px solid #e2dfd8' }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: '#8a8580', textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 10 }}>KPIs ({selectedKpis.length})</div>
+            <div className="px-[18px] py-[14px] border-b border-border">
+              <div className="text-[11px] font-bold text-t3 uppercase tracking-[0.5px] mb-[10px]">KPIs ({selectedKpis.length})</div>
               {selectedKpis.length === 0 ? (
-                <p style={{ fontSize: 12, color: '#8a8580' }}>No KPIs in this region.</p>
+                <p className="text-xs text-t3">No KPIs in this region.</p>
               ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+                <div className="flex flex-col gap-[7px]">
                   {selectedKpis.slice(0, 8).map((k) => (
-                    <div key={k.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '7px 10px', background: '#f8f7f5', borderRadius: 7 }}>
-                      <div style={{ minWidth: 0 }}>
-                        <span style={{ fontFamily: 'monospace', fontSize: 9.5, fontWeight: 700, padding: '1px 5px', borderRadius: 3, background: '#e4e1db', color: '#4a4640', marginRight: 6 }}>{k.kpi_number}</span>
-                        <span style={{ fontSize: 12, fontWeight: 600, color: '#111110' }}>{k.name}</span>
+                    <div key={k.id} className="flex items-center justify-between px-[10px] py-[7px] bg-off rounded-[7px]">
+                      <div className="min-w-0">
+                        <span className="font-mono text-[9.5px] font-bold px-[5px] py-px rounded-[3px] bg-[#e4e1db] text-[#4a4640] mr-[6px]">{k.kpi_number}</span>
+                        <span className="text-xs font-semibold text-near-black">{k.name}</span>
                       </div>
-                      <span style={{ display: 'inline-flex', padding: '2px 7px', borderRadius: 4, fontSize: 10.5, fontWeight: 600, flexShrink: 0, marginLeft: 8, background: k.status === 'active' ? 'rgba(26,122,74,.1)' : k.status === 'draft' ? 'rgba(180,83,9,.1)' : 'rgba(24,84,168,.1)', color: k.status === 'active' ? '#15633c' : k.status === 'draft' ? '#b45309' : '#1854a8' }}>{k.status}</span>
+                      <span
+                        className="inline-flex px-[7px] py-0.5 rounded font-semibold shrink-0 ml-2 text-[10.5px]"
+                        style={{
+                          background: k.status === 'active' ? 'rgba(26,122,74,.1)' : k.status === 'draft' ? 'rgba(180,83,9,.1)' : 'rgba(24,84,168,.1)',
+                          color: k.status === 'active' ? '#15633c' : k.status === 'draft' ? '#b45309' : '#1854a8',
+                        }}
+                      >{k.status}</span>
                     </div>
                   ))}
-                  {selectedKpis.length > 8 && <div style={{ fontSize: 11.5, color: '#8a8580', textAlign: 'center', padding: '4px 0' }}>+{selectedKpis.length - 8} more KPIs</div>}
+                  {selectedKpis.length > 8 && <div className="text-[11.5px] text-t3 text-center py-1">+{selectedKpis.length - 8} more KPIs</div>}
                 </div>
               )}
             </div>
 
             {/* People in region */}
-            <div style={{ padding: '14px 18px' }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: '#8a8580', textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 10 }}>People ({selectedUsers.length})</div>
+            <div className="px-[18px] py-[14px]">
+              <div className="text-[11px] font-bold text-t3 uppercase tracking-[0.5px] mb-[10px]">People ({selectedUsers.length})</div>
               {selectedUsers.length === 0 ? (
-                <p style={{ fontSize: 12, color: '#8a8580' }}>No employees assigned to this region.</p>
+                <p className="text-xs text-t3">No employees assigned to this region.</p>
               ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <div className="flex flex-col gap-[6px]">
                   {selectedUsers.slice(0, 6).map((u) => (
-                    <div key={u.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '7px 10px', background: '#f8f7f5', borderRadius: 7 }}>
-                      <div style={{ width: 28, height: 28, borderRadius: '50%', background: '#1854a8', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: 11, flexShrink: 0 }}>
+                    <div key={u.id} className="flex items-center gap-[10px] px-[10px] py-[7px] bg-off rounded-[7px]">
+                      <div className="w-7 h-7 rounded-full bg-[#1854a8] flex items-center justify-center text-white font-bold text-[11px] shrink-0">
                         {u.full_name.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase()}
                       </div>
-                      <div style={{ minWidth: 0 }}>
-                        <div style={{ fontSize: 12.5, fontWeight: 600, color: '#111110' }}>{u.full_name}</div>
-                        {u.designation && <div style={{ fontSize: 11, color: '#8a8580' }}>{u.designation}</div>}
+                      <div className="min-w-0">
+                        <div className="text-[12.5px] font-semibold text-near-black">{u.full_name}</div>
+                        {u.designation && <div className="text-[11px] text-t3">{u.designation}</div>}
                       </div>
                     </div>
                   ))}
-                  {selectedUsers.length > 6 && <div style={{ fontSize: 11.5, color: '#8a8580', textAlign: 'center', padding: '4px 0' }}>+{selectedUsers.length - 6} more</div>}
+                  {selectedUsers.length > 6 && <div className="text-[11.5px] text-t3 text-center py-1">+{selectedUsers.length - 6} more</div>}
                 </div>
               )}
             </div>
@@ -216,12 +228,12 @@ export default function RegionsPage() {
       {modalOpen && (
         <div className="modal-bg" onClick={() => setModalOpen(false)}>
           <div className="modal" style={{ width: 420, padding: 24 }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-              <h2 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: '#111110' }}>New Region</h2>
-              <button type="button" onClick={() => setModalOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#8a8580', fontSize: 18, lineHeight: 1, padding: 4, fontFamily: 'inherit' }}>×</button>
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="m-0 text-[15px] font-black text-near-black">New Region</h2>
+              <button type="button" onClick={() => setModalOpen(false)} className="bg-transparent border-none cursor-pointer text-t3 text-[18px] leading-none p-1 font-[inherit]">×</button>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <div className="flex flex-col gap-[14px]">
               <div>
                 <label className="flabel">Region Name</label>
                 <input
@@ -245,35 +257,25 @@ export default function RegionsPage() {
               </div>
 
               {formError && (
-                <div style={{ padding: '9px 12px', background: 'rgba(185,28,28,.07)', border: '1px solid rgba(185,28,28,.2)', borderRadius: 7, fontSize: 12.5, color: '#b91c1c' }}>
+                <div className="py-[9px] px-3 bg-[rgba(185,28,28,.07)] border border-[rgba(185,28,28,.2)] rounded-[7px] text-[12.5px] text-brand-red">
                   {formError}
                 </div>
               )}
 
-              <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 4 }}>
+              <div className="flex gap-2 justify-end mt-1">
                 <button
                   type="button"
-                  className="btn btn-outline"
+                  className="btn btn-outline py-3 px-5 text-xs rounded-lg"
                   onClick={() => setModalOpen(false)}
-                  style={{
-                    padding: '12px 20px',
-                    fontSize: 12,
-                    borderRadius: 8,
-                  }}
                 >
                   Cancel
                 </button>
 
                 <button
                   type="button"
-                  className="btn btn-black"
+                  className="btn btn-black py-3 px-[22px] text-xs rounded-lg"
                   onClick={handleCreate}
                   disabled={saving}
-                  style={{
-                    padding: '12px 22px',
-                    fontSize: 12,
-                    borderRadius: 8,
-                  }}
                 >
                   {saving ? 'Creating…' : 'Create Region'}
                 </button>

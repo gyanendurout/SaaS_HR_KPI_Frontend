@@ -13,12 +13,9 @@ function Avatar({ name, size = 34 }: { name: string; size?: number }) {
   const colors = ['#1854a8', '#15633c', '#b45309', '#7c3aed', '#b91c1c', '#0e7490'];
   const color  = colors[name.charCodeAt(0) % colors.length];
   return (
-    <div title={name} style={{
-      width: size, height: size, borderRadius: '50%', background: color,
-      color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center',
-      fontSize: size * 0.35, fontWeight: 800, flexShrink: 0,
-      border: '2px solid #fff', boxSizing: 'border-box',
-    }}>
+    <div title={name}
+      className="rounded-full text-white flex items-center justify-center font-black shrink-0 border-2 border-white box-border"
+      style={{ width: size, height: size, background: color, fontSize: size * 0.35 }}>
       {initials}
     </div>
   );
@@ -32,18 +29,9 @@ function KpiNumBadge({ num, level, large = false }: { num: string; level: number
     level === 1 ? '#3a3832' :
     level === 2 ? '#6b6760' : '#9a9690';
   return (
-    <span style={{
-      fontFamily: 'monospace',
-      fontSize: large ? 11 : 9.5,
-      fontWeight: 700,
-      padding: large ? '3px 8px' : '2px 6px',
-      borderRadius: 4,
-      background: bg,
-      color: '#fff',
-      whiteSpace: 'nowrap',
-      letterSpacing: '.3px',
-      flexShrink: 0,
-    }}>
+    <span
+      className={`font-mono font-bold text-white whitespace-nowrap shrink-0 rounded ${large ? 'text-[11px] py-0.75 px-2' : 'text-[9.5px] py-0.5 px-1.5'}`}
+      style={{ background: bg, letterSpacing: '.3px' }}>
       {num}
     </span>
   );
@@ -61,12 +49,9 @@ function StatusBadge({ status }: { status: string }) {
   const [bg, color] = map[status] ?? ['rgba(0,0,0,.05)', '#4a4640'];
   const label = status === 'active' ? 'In Progress' : status === 'draft' ? 'Not Started' : status;
   return (
-    <span style={{
-      fontSize: 10.5, fontWeight: 600,
-      padding: '2px 7px', borderRadius: 4,
-      background: bg, color,
-      textTransform: 'capitalize', whiteSpace: 'nowrap',
-    }}>
+    <span
+      className="font-semibold capitalize whitespace-nowrap rounded py-0.5 px-1.75 text-[10.5px]"
+      style={{ background: bg, color }}>
       {label}
     </span>
   );
@@ -77,12 +62,9 @@ function StatusBadge({ status }: { status: string }) {
 function ProgressBadge({ pct }: { pct: number }) {
   const color = pct >= 80 ? '#15633c' : pct >= 50 ? '#1854a8' : '#b45309';
   return (
-    <span style={{
-      fontSize: 10.5, fontWeight: 700,
-      padding: '2px 7px', borderRadius: 4,
-      background: `${color}1a`, color,
-      whiteSpace: 'nowrap',
-    }}>
+    <span
+      className="font-bold whitespace-nowrap rounded py-0.5 px-1.75 text-[10.5px]"
+      style={{ background: `${color}1a`, color }}>
       {pct}%
     </span>
   );
@@ -134,8 +116,8 @@ function KpiTreeNode({
     <div>
       <div
         onClick={() => onSelect(kpi)}
+        className="flex items-center gap-2 cursor-pointer transition-[border-color,background] duration-140 mb-1.25"
         style={{
-          display: 'flex', alignItems: 'center', gap: 8,
           padding: '9px 11px',
           borderTop:    `1.5px solid ${isSelected ? '#111110' : '#e2dfd8'}`,
           borderRight:  `1.5px solid ${isSelected ? '#111110' : '#e2dfd8'}`,
@@ -143,9 +125,6 @@ function KpiTreeNode({
           borderLeft:   `3.5px solid ${levelBorderColor}`,
           borderRadius: 9,
           background: isSelected ? '#f0efec' : '#fff',
-          cursor: 'pointer',
-          transition: 'border-color .14s, background .14s',
-          marginBottom: 5,
           boxShadow: isSelected ? '0 0 0 3px rgba(0,0,0,.06)' : '0 1px 3px rgba(0,0,0,.05)',
         }}
         onMouseEnter={(e) => {
@@ -166,18 +145,14 @@ function KpiTreeNode({
         }}
       >
         {/* Left: badge + name + sub-info */}
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 3 }}>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-1.75 mb-0.75">
             <KpiNumBadge num={kpi.kpi_number} level={level} />
-            <span style={{
-              fontSize: 13, fontWeight: 700, color: '#111110',
-              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-              letterSpacing: '-.1px',
-            }}>
+            <span className="text-[13px] font-bold text-near-black truncate tracking-[-0.1px]">
               {kpi.name}
             </span>
           </div>
-          <div style={{ fontSize: 11, color: '#8a8580', display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'wrap' }}>
+          <div className="text-[11px] text-t3 flex items-center gap-1 flex-wrap">
             {owner && <span>{owner.full_name}</span>}
             {owner && fmtVal(kpi.target_value, kpi.unit) && <span>·</span>}
             {fmtVal(kpi.target_value, kpi.unit) && <span>{fmtVal(kpi.target_value, kpi.unit)}</span>}
@@ -186,10 +161,7 @@ function KpiTreeNode({
         </div>
 
         {/* Right: badges + actions */}
-        <div
-          style={{ display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0 }}
-          onClick={(e) => e.stopPropagation()}
-        >
+        <div className="flex items-center gap-1.25 shrink-0" onClick={(e) => e.stopPropagation()}>
           {pct !== null && <ProgressBadge pct={pct} />}
           <StatusBadge status={kpi.status} />
 
@@ -197,13 +169,7 @@ function KpiTreeNode({
             type="button"
             title="Add child KPI"
             onClick={() => onAddChild(kpi)}
-            style={{
-              fontSize: 11, padding: '3px 8px', borderRadius: 4,
-              border: '1px solid #e2dfd8', background: '#f8f7f5',
-              cursor: 'pointer', color: '#4a4640',
-              fontFamily: 'inherit', fontWeight: 600, whiteSpace: 'nowrap',
-            }}
-          >
+            className="text-[11px] py-0.75 px-2 rounded border border-border bg-off cursor-pointer text-t2 font-[inherit] font-semibold whitespace-nowrap">
             +Child
           </button>
 
@@ -211,13 +177,7 @@ function KpiTreeNode({
             href={`/kpis/${kpi.id}`}
             title="Open KPI"
             onClick={(e) => e.stopPropagation()}
-            style={{
-              width: 24, height: 24, borderRadius: 4,
-              border: '1px solid #e2dfd8', background: '#f8f7f5',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              color: '#4a4640', textDecoration: 'none', flexShrink: 0,
-            }}
-          >
+            className="w-6 h-6 rounded border border-border bg-off flex items-center justify-center text-t2 no-underline shrink-0">
             <svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M4 1.5h5.5v5.5M9.5 1.5L1 10"/>
             </svg>
@@ -227,15 +187,7 @@ function KpiTreeNode({
             type="button"
             title="Remove"
             onClick={() => onDelete(kpi)}
-            style={{
-              width: 24, height: 24, borderRadius: 4,
-              border: '1px solid rgba(185,28,28,.2)',
-              background: 'rgba(185,28,28,.06)',
-              cursor: 'pointer', color: '#b91c1c',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              flexShrink: 0,
-            }}
-          >
+            className="w-6 h-6 rounded border border-[rgba(185,28,28,.2)] bg-[rgba(185,28,28,.06)] cursor-pointer text-brand-red flex items-center justify-center shrink-0">
             <svg width="9" height="9" viewBox="0 0 9 9" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round">
               <path d="M1 1l7 7M8 1l-7 7"/>
             </svg>
@@ -244,13 +196,7 @@ function KpiTreeNode({
           <button
             type="button"
             onClick={() => setExpanded((v) => !v)}
-            style={{
-              width: 20, height: 20, display: 'flex', alignItems: 'center',
-              justifyContent: 'center', color: '#8a8580',
-              cursor: 'pointer', fontSize: 11, background: 'none', border: 'none',
-              flexShrink: 0,
-            }}
-          >
+            className="w-5 h-5 flex items-center justify-center text-t3 cursor-pointer text-[11px] bg-transparent border-none shrink-0">
             {expanded ? '▾' : '▸'}
           </button>
         </div>
@@ -258,7 +204,7 @@ function KpiTreeNode({
 
       {/* Children */}
       {expanded && children.length > 0 && (
-        <div style={{ paddingLeft: 22, borderLeft: '2px solid #e2dfd8', marginLeft: 14, marginTop: 2, marginBottom: 2 }}>
+        <div className="pl-5.5 border-l-2 border-border ml-3.5 mt-0.5 mb-0.5">
           {children.map((c) => (
             <KpiTreeNode
               key={c.id}
@@ -294,19 +240,15 @@ function DetailPanel({
 }) {
   if (!kpi) {
     return (
-      <div style={{
-        display: 'flex', flexDirection: 'column', alignItems: 'center',
-        justifyContent: 'center', height: '100%', gap: 10,
-        color: '#8a8580', textAlign: 'center', padding: 32,
-      }}>
-        <svg width="44" height="44" viewBox="0 0 44 44" fill="none" style={{ opacity: .22 }}>
+      <div className="flex flex-col items-center justify-center h-full gap-2.5 text-t3 text-center p-8">
+        <svg width="44" height="44" viewBox="0 0 44 44" fill="none" className="opacity-[.22]">
           <rect x="6" y="6" width="14" height="14" rx="3" stroke="#111110" strokeWidth="2"/>
           <rect x="24" y="6" width="14" height="14" rx="3" stroke="#111110" strokeWidth="2"/>
           <rect x="15" y="24" width="14" height="14" rx="3" stroke="#111110" strokeWidth="2"/>
           <path d="M13 20v4M31 20v4M22 14v10" stroke="#111110" strokeWidth="2" strokeLinecap="round"/>
         </svg>
-        <div style={{ fontSize: 14, fontWeight: 700, color: '#4a4640' }}>Select a KPI</div>
-        <div style={{ fontSize: 12.5, maxWidth: 220, lineHeight: 1.6 }}>
+        <div className="text-sm font-bold text-t2">Select a KPI</div>
+        <div className="text-[12.5px] max-w-[220px] leading-relaxed">
           Click any KPI in the tree to view detail, ownership, and actions
         </div>
       </div>
@@ -323,82 +265,85 @@ function DetailPanel({
     v == null ? '—' : (u ? `${u}${v.toLocaleString()}` : v.toLocaleString());
 
   return (
-    <div style={{ padding: '22px 22px 28px' }}>
+    <div className="px-5.5 pt-5.5 pb-7">
 
       {/* KPI number + level chip */}
-      <div style={{ fontSize: 11, fontWeight: 600, color: '#8a8580', marginBottom: 7, letterSpacing: '.1px' }}>
+      <div className="text-[11px] font-semibold text-t3 mb-1.75 tracking-[.1px]">
         {kpi.kpi_number} · LEVEL {kpi.level ?? 0}
       </div>
 
       {/* Title */}
-      <div style={{ fontSize: 21, fontWeight: 800, color: '#111110', letterSpacing: '-.45px', lineHeight: 1.2, marginBottom: 12 }}>
+      <div className="text-[21px] font-black text-near-black tracking-[-0.45px] leading-tight mb-3">
         {kpi.name}
       </div>
 
       {/* Tags row */}
-      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 18 }}>
-        <span style={{
-          fontSize: 11, fontWeight: 700, padding: '3px 8px', borderRadius: 4,
-          background: kpi.type === 'quantitative' ? 'rgba(24,84,168,.1)' : 'rgba(124,58,237,.1)',
-          color:      kpi.type === 'quantitative' ? '#1854a8' : '#7c3aed',
-        }}>
+      <div className="flex gap-1.5 flex-wrap mb-4.5">
+        <span
+          className="text-[11px] font-bold py-0.75 px-2 rounded"
+          style={{
+            background: kpi.type === 'quantitative' ? 'rgba(24,84,168,.1)' : 'rgba(124,58,237,.1)',
+            color:      kpi.type === 'quantitative' ? '#1854a8' : '#7c3aed',
+          }}>
           {kpi.type === 'quantitative' ? 'Quant' : 'Qual'}
         </span>
         <StatusBadge status={kpi.status} />
         {kpi.parent_id && kpi.allocation_pct > 0 && (
-          <span style={{ fontSize: 11, fontWeight: 600, padding: '3px 8px', borderRadius: 4, border: '1px solid #e2dfd8', color: '#4a4640', background: '#fff' }}>
+          <span className="text-[11px] font-semibold py-0.75 px-2 rounded border border-border text-t2 bg-card">
             {kpi.allocation_pct}% of parent
           </span>
         )}
       </div>
 
       {/* Stat cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 16 }}>
+      <div className="grid grid-cols-3 gap-2 mb-4">
         {[
           { label: 'TARGET',  value: fmtVal(kpi.target_value, kpi.unit)  },
           { label: 'CURRENT', value: fmtVal(kpi.current_value, kpi.unit) },
           { label: 'PERIOD',  value: kpi.period?.toUpperCase() ?? '—'    },
         ].map(({ label, value }) => (
-          <div key={label} style={{ background: '#fff', border: '1px solid #e2dfd8', borderRadius: 8, padding: '10px 13px' }}>
-            <div style={{ fontSize: 9, fontWeight: 700, color: '#8a8580', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 5 }}>{label}</div>
-            <div style={{ fontSize: 15, fontWeight: 800, letterSpacing: '-.3px', color: '#111110' }}>{value}</div>
+          <div key={label} className="bg-card border border-border rounded-lg py-2.5 px-3.25">
+            <div className="text-[9px] font-bold text-t3 uppercase tracking-[1px] mb-1.25">{label}</div>
+            <div className="text-[15px] font-black tracking-[-0.3px] text-near-black">{value}</div>
           </div>
         ))}
       </div>
 
       {/* Progress bar */}
       {pct !== null && (
-        <div style={{ background: '#fff', border: '1px solid #e2dfd8', borderRadius: 8, padding: '10px 13px', marginBottom: 16 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-            <span style={{ fontSize: 11.5, fontWeight: 600, color: '#111110' }}>Progress</span>
-            <span style={{ fontSize: 11.5, fontWeight: 700, color: pct >= 80 ? '#15633c' : pct >= 50 ? '#1854a8' : '#b45309' }}>{pct}%</span>
+        <div className="bg-card border border-border rounded-lg py-2.5 px-3.25 mb-4">
+          <div className="flex justify-between mb-1.5">
+            <span className="text-[11.5px] font-semibold text-near-black">Progress</span>
+            <span className="text-[11.5px] font-bold"
+              style={{ color: pct >= 80 ? '#15633c' : pct >= 50 ? '#1854a8' : '#b45309' }}>{pct}%</span>
           </div>
-          <div style={{ height: 6, background: '#e4e1db', borderRadius: 3, overflow: 'hidden' }}>
-            <div style={{ height: '100%', width: `${pct}%`, background: pct >= 80 ? '#1a7a4a' : pct >= 50 ? '#1854a8' : '#b45309', borderRadius: 3, transition: 'width .4s' }} />
+          <div className="h-1.5 bg-bg3 rounded-sm overflow-hidden">
+            <div className="h-full rounded-sm transition-[width] duration-[400ms]"
+              style={{ width: `${pct}%`, background: pct >= 80 ? '#1a7a4a' : pct >= 50 ? '#1854a8' : '#b45309' }} />
           </div>
         </div>
       )}
 
       {/* Primary Owner */}
-      <div style={{ marginBottom: 14 }}>
-        <div style={{ fontSize: 9.5, fontWeight: 700, color: '#8a8580', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>
+      <div className="mb-3.5">
+        <div className="text-[9.5px] font-bold text-t3 uppercase tracking-[1px] mb-2">
           PRIMARY OWNER
         </div>
         {owner ? (
-          <div style={{ background: '#fff', border: '1px solid #e2dfd8', borderRadius: 8, padding: '11px 14px', display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div className="bg-card border border-border rounded-lg py-2.75 px-3.5 flex items-center gap-2.5">
             <Avatar name={owner.full_name} size={36} />
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 13.5, fontWeight: 700, color: '#111110' }}>{owner.full_name}</div>
-              <div style={{ fontSize: 11.5, color: '#8a8580', marginTop: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <div className="flex-1 min-w-0">
+              <div className="text-[13.5px] font-bold text-near-black">{owner.full_name}</div>
+              <div className="text-[11.5px] text-t3 mt-px truncate">
                 {owner.designation && <>{owner.designation} · </>}{owner.email}
               </div>
             </div>
-            <span style={{ fontSize: 9.5, fontWeight: 700, padding: '3px 7px', borderRadius: 4, background: '#e8e6e1', color: '#4a4640', letterSpacing: '.3px', flexShrink: 0 }}>
+            <span className="text-[9.5px] font-bold py-0.75 px-1.75 rounded bg-[#e8e6e1] text-t2 tracking-[.3px] shrink-0">
               INDIVIDUAL
             </span>
           </div>
         ) : (
-          <div style={{ background: '#fff', border: '1.5px dashed #e2dfd8', borderRadius: 8, padding: '13px 14px', textAlign: 'center', fontSize: 12, color: '#8a8580' }}>
+          <div className="bg-card border-[1.5px] border-dashed border-border rounded-lg py-3.25 px-3.5 text-center text-xs text-t3">
             No owner assigned
           </div>
         )}
@@ -406,17 +351,15 @@ function DetailPanel({
 
       {/* Cascaded From */}
       {parent && (
-        <div style={{ marginBottom: 14 }}>
-          <div style={{ fontSize: 9.5, fontWeight: 700, color: '#8a8580', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>
+        <div className="mb-3.5">
+          <div className="text-[9.5px] font-bold text-t3 uppercase tracking-[1px] mb-2">
             CASCADED FROM
           </div>
-          <div style={{ background: '#fff', border: '1px solid #e2dfd8', borderRadius: 8, padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 9 }}>
+          <div className="bg-card border border-border rounded-lg py-2.5 px-3.5 flex items-center gap-2.25">
             <KpiNumBadge num={parent.kpi_number} level={parent.level ?? 0} large />
-            <span style={{ fontSize: 13, fontWeight: 700, color: '#111110', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {parent.name}
-            </span>
+            <span className="text-[13px] font-bold text-near-black flex-1 truncate">{parent.name}</span>
             {parent.target_value != null && (
-              <span style={{ fontSize: 12, fontWeight: 600, color: '#4a4640', flexShrink: 0 }}>
+              <span className="text-xs font-semibold text-t2 shrink-0">
                 {parent.unit ? `${parent.unit}${parent.target_value.toLocaleString()}` : parent.target_value.toLocaleString()}
               </span>
             )}
@@ -424,46 +367,39 @@ function DetailPanel({
         </div>
       )}
 
-      {/* Leaf node notice if no parent_id and not a root with allocation */}
       {!kpi.parent_id && (
-        <div style={{ marginBottom: 14, fontSize: 11.5, color: '#8a8580', fontStyle: 'italic' }}>
-          Root KPI — top of cascade tree
-        </div>
+        <div className="mb-3.5 text-[11.5px] text-t3 italic">Root KPI — top of cascade tree</div>
       )}
       {kpi.parent_id && !parent && (
-        <div style={{ marginBottom: 14, fontSize: 11.5, color: '#8a8580', fontStyle: 'italic' }}>
-          Leaf node — no child KPIs
-        </div>
+        <div className="mb-3.5 text-[11.5px] text-t3 italic">Leaf node — no child KPIs</div>
       )}
 
       {/* Latest Note */}
       {kpi.description && (
-        <div style={{ marginBottom: 18 }}>
-          <div style={{ fontSize: 9.5, fontWeight: 700, color: '#8a8580', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>
-            LATEST NOTE
-          </div>
-          <div style={{ background: '#fff', border: '1px solid #e2dfd8', borderRadius: 8, padding: '10px 14px', fontSize: 12.5, color: '#111110', lineHeight: 1.65 }}>
+        <div className="mb-4.5">
+          <div className="text-[9.5px] font-bold text-t3 uppercase tracking-[1px] mb-2">LATEST NOTE</div>
+          <div className="bg-card border border-border rounded-lg py-2.5 px-3.5 text-[12.5px] text-near-black leading-relaxed">
             {kpi.description}
           </div>
         </div>
       )}
 
       {/* Action buttons */}
-      <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap' }}>
+      <div className="flex gap-1.75 flex-wrap">
         <button type="button" onClick={() => onUpdateStatus(kpi)}
-          style={{ padding: '8px 14px', borderRadius: 7, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', background: '#fff', border: '1px solid #e2dfd8', color: '#111110', fontFamily: 'inherit' }}>
+          className="py-2 px-3.5 rounded-[7px] text-[12.5px] font-semibold cursor-pointer bg-card border border-border text-near-black font-[inherit]">
           Update Status
         </button>
         <button type="button" onClick={() => onAddChild(kpi)}
-          style={{ padding: '8px 14px', borderRadius: 7, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', background: '#111110', border: '1px solid #111110', color: '#fff', fontFamily: 'inherit' }}>
+          className="py-2 px-3.5 rounded-[7px] text-[12.5px] font-semibold cursor-pointer bg-near-black border border-near-black text-white font-[inherit]">
           + Child KPI
         </button>
         <button type="button" onClick={() => onModify(kpi)}
-          style={{ padding: '8px 14px', borderRadius: 7, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', background: '#fff', border: '1px solid #e2dfd8', color: '#4a4640', fontFamily: 'inherit' }}>
+          className="py-2 px-3.5 rounded-[7px] text-[12.5px] font-semibold cursor-pointer bg-card border border-border text-t2 font-[inherit]">
           ⟵ Modify
         </button>
         <button type="button" onClick={() => onDelete(kpi)}
-          style={{ padding: '8px 14px', borderRadius: 7, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', background: 'rgba(185,28,28,.06)', border: '1px solid rgba(185,28,28,.25)', color: '#b91c1c', fontFamily: 'inherit' }}>
+          className="py-2 px-3.5 rounded-[7px] text-[12.5px] font-semibold cursor-pointer bg-[rgba(185,28,28,.06)] border border-[rgba(185,28,28,.25)] text-brand-red font-[inherit]">
           Delete
         </button>
       </div>
@@ -491,14 +427,15 @@ function UpdateStatusModal({ kpi, onClose, onSaved }: { kpi: Kpi; onClose: () =>
 
   return (
     <div className="modal-bg" onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <div className="modal" style={{ maxWidth: 380, borderRadius: 14, overflow: 'hidden' }}>
-        <div style={{ padding: '16px 22px', borderBottom: '1px solid #e2dfd8', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ fontSize: 15, fontWeight: 800, color: '#111110' }}>Update Status</div>
-          <button type="button" onClick={onClose} style={{ width: 28, height: 28, borderRadius: '50%', border: '1px solid #e2dfd8', background: '#f5f4f0', cursor: 'pointer', color: '#6b6760', fontSize: 15, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>×</button>
+      <div className="modal rounded-modal overflow-hidden" style={{ maxWidth: 380 }}>
+        <div className="px-5.5 py-4 border-b border-border flex items-center justify-between">
+          <div className="text-[15px] font-black text-near-black">Update Status</div>
+          <button type="button" onClick={onClose}
+            className="w-7 h-7 rounded-full border border-border bg-[#f5f4f0] cursor-pointer text-[#6b6760] text-[15px] flex items-center justify-center">×</button>
         </div>
-        <div style={{ padding: '18px 22px' }}>
-          <div style={{ marginBottom: 4, fontSize: 11, fontWeight: 700, color: '#4a4640', textTransform: 'uppercase', letterSpacing: '.4px' }}>KPI</div>
-          <div style={{ fontSize: 13, fontWeight: 700, color: '#111110', marginBottom: 14 }}>{kpi.name}</div>
+        <div className="px-5.5 py-4.5">
+          <div className="mb-1 text-[11px] font-bold text-t2 uppercase tracking-[.4px]">KPI</div>
+          <div className="text-[13px] font-bold text-near-black mb-3.5">{kpi.name}</div>
           <label className="flabel">New Status</label>
           <select className="fi" value={status} onChange={(e) => setStatus(e.target.value as Kpi['status'])}>
             <option value="draft">Draft</option>
@@ -506,9 +443,9 @@ function UpdateStatusModal({ kpi, onClose, onSaved }: { kpi: Kpi; onClose: () =>
             <option value="completed">Completed</option>
             <option value="cancelled">Cancelled</option>
           </select>
-          {error && <div style={{ marginTop: 10, fontSize: 12, color: '#b91c1c' }}>{error}</div>}
+          {error && <div className="mt-2.5 text-xs text-brand-red">{error}</div>}
         </div>
-        <div style={{ padding: '12px 22px', borderTop: '1px solid #e2dfd8', display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+        <div className="px-5.5 py-3 border-t border-border flex gap-2 justify-end">
           <button type="button" onClick={onClose} className="btn btn-outline btn-sm">Cancel</button>
           <button type="button" onClick={handleSave} disabled={saving} className="btn btn-black btn-sm">
             {saving ? 'Saving…' : 'Save'}
@@ -573,35 +510,32 @@ function AddChildModal({
     } finally { setSaving(false); }
   };
 
-  const inp = {
-    width: '100%', background: '#fff', border: '1.5px solid #e2dfd8',
-    borderRadius: 6, padding: '9px 12px', color: '#111110',
-    fontFamily: 'inherit', fontSize: 13, outline: 'none',
-    boxSizing: 'border-box' as const,
-  };
-
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 500, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16, background: 'rgba(0,0,0,.5)', backdropFilter: 'blur(3px)' }}
+    <div
+      className="fixed inset-0 z-[500] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
       onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <div style={{ width: '100%', maxWidth: 480, borderRadius: 16, overflow: 'hidden', background: '#fff', boxShadow: '0 20px 60px rgba(0,0,0,.2)' }}>
-        <div style={{ padding: '18px 22px 14px', borderBottom: '1px solid #e2dfd8', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+      <div className="w-full max-w-[480px] rounded-2xl overflow-hidden bg-card shadow-[0_20px_60px_rgba(0,0,0,.2)]">
+        <div className="px-5.5 pt-4.5 pb-3.5 border-b border-border flex items-start justify-between">
           <div>
-            <div style={{ fontSize: 16, fontWeight: 800, letterSpacing: '-.3px' }}>Add Child KPI</div>
-            <div style={{ fontSize: 12, color: '#8a8580', marginTop: 2 }}>Under: {parent.kpi_number} · {remainingPct}% allocation available</div>
+            <div className="text-[16px] font-black tracking-[-0.3px]">Add Child KPI</div>
+            <div className="text-xs text-t3 mt-0.5">Under: {parent.kpi_number} · {remainingPct}% allocation available</div>
           </div>
-          <button type="button" onClick={onClose} style={{ width: 28, height: 28, borderRadius: '50%', border: '1px solid #e2dfd8', background: '#f5f4f0', cursor: 'pointer', color: '#6b6760', fontSize: 15, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>×</button>
+          <button type="button" onClick={onClose}
+            className="w-7 h-7 rounded-full border border-border bg-[#f5f4f0] cursor-pointer text-[#6b6760] text-[15px] flex items-center justify-center">×</button>
         </div>
 
-        <div style={{ padding: '18px 22px' }}>
+        <div className="px-5.5 py-4.5">
           {loading ? (
-            <p style={{ fontSize: 13, color: '#8a8580', textAlign: 'center', padding: '16px 0' }}>Loading…</p>
+            <p className="text-[13px] text-t3 text-center py-4">Loading…</p>
           ) : allKpisList.length === 0 ? (
-            <p style={{ fontSize: 13, color: '#8a8580', textAlign: 'center', padding: '16px 0' }}>No eligible KPIs to link.</p>
+            <p className="text-[13px] text-t3 text-center py-4">No eligible KPIs to link.</p>
           ) : (
             <>
-              <div style={{ marginBottom: 13 }}>
-                <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#4a4640', marginBottom: 5, textTransform: 'uppercase', letterSpacing: '.4px' }}>Select KPI *</label>
-                <select style={inp} value={selectedId} onChange={(e) => setSelectedId(e.target.value)}>
+              <div className="mb-3.25">
+                <label className="block text-[11px] font-bold text-t2 mb-1.25 uppercase tracking-[.4px]">Select KPI *</label>
+                <select
+                  className="w-full bg-card border-[1.5px] border-border rounded-[6px] py-2.25 px-3 text-near-black font-[inherit] text-[13px] outline-none box-border"
+                  value={selectedId} onChange={(e) => setSelectedId(e.target.value)}>
                   {allKpisList.map((k) => (
                     <option key={k.id} value={k.id}>{k.kpi_number} — {k.name}</option>
                   ))}
@@ -609,7 +543,7 @@ function AddChildModal({
               </div>
 
               {selected && (
-                <div style={{ marginBottom: 13, padding: '9px 12px', background: '#f8f7f5', borderRadius: 7, border: '1px solid #e2dfd8', fontSize: 12, color: '#4a4640', display: 'flex', flexWrap: 'wrap', gap: '4px 14px' }}>
+                <div className="mb-3.25 py-2.25 px-3 bg-off rounded-[7px] border border-border text-xs text-t2 flex flex-wrap gap-y-1 gap-x-3.5">
                   <span><b>Type:</b> {selected.type}</span>
                   <span><b>Period:</b> {selected.period}</span>
                   <span><b>Status:</b> {selected.status}</span>
@@ -618,22 +552,26 @@ function AddChildModal({
               )}
 
               <div>
-                <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#4a4640', marginBottom: 5, textTransform: 'uppercase', letterSpacing: '.4px' }}>Allocation % *</label>
-                <input type="number" min="1" max={remainingPct} style={inp} value={alloc}
-                  onChange={(e) => setAlloc(e.target.value)}
-                  onFocus={(e) => (e.target.style.borderColor = '#000')}
-                  onBlur={(e)  => (e.target.style.borderColor = '#e2dfd8')} />
-                <div style={{ fontSize: 11, color: '#8a8580', marginTop: 4 }}>Max {remainingPct}% available</div>
+                <label className="block text-[11px] font-bold text-t2 mb-1.25 uppercase tracking-[.4px]">Allocation % *</label>
+                <input
+                  type="number" min="1" max={remainingPct}
+                  className="w-full bg-card border-[1.5px] border-border rounded-[6px] py-2.25 px-3 text-near-black font-[inherit] text-[13px] outline-none box-border transition-[border-color] duration-180 focus:border-black"
+                  value={alloc}
+                  onChange={(e) => setAlloc(e.target.value)} />
+                <div className="text-[11px] text-t3 mt-1">Max {remainingPct}% available</div>
               </div>
             </>
           )}
-          {error && <div style={{ marginTop: 10, fontSize: 12, padding: '9px 12px', borderRadius: 7, background: 'rgba(185,28,28,.08)', color: '#b91c1c', border: '1px solid rgba(185,28,28,.2)' }}>{error}</div>}
+          {error && (
+            <div className="mt-2.5 text-xs py-2.25 px-3 rounded-[7px] bg-[rgba(185,28,28,.08)] text-brand-red border border-[rgba(185,28,28,.2)]">{error}</div>
+          )}
         </div>
 
-        <div style={{ padding: '12px 22px', borderTop: '1px solid #e2dfd8', display: 'flex', justifyContent: 'flex-end', gap: 7 }}>
-          <button type="button" onClick={onClose} style={{ padding: '8px 16px', borderRadius: 6, fontSize: 13, fontWeight: 500, cursor: 'pointer', background: '#fff', border: '1px solid #cdc9c1', color: '#4a4640', fontFamily: 'inherit' }}>Cancel</button>
+        <div className="px-5.5 py-3 border-t border-border flex justify-end gap-1.75">
+          <button type="button" onClick={onClose}
+            className="py-2 px-4 rounded-[6px] text-[13px] font-medium cursor-pointer bg-card border border-border2 text-t2 font-[inherit]">Cancel</button>
           <button type="button" onClick={handleSave} disabled={saving || allKpisList.length === 0}
-            style={{ padding: '8px 16px', borderRadius: 6, fontSize: 13, fontWeight: 600, cursor: (saving || allKpisList.length === 0) ? 'not-allowed' : 'pointer', background: '#000', color: '#fff', border: '1px solid #000', fontFamily: 'inherit', opacity: (saving || allKpisList.length === 0) ? .6 : 1 }}>
+            className="py-2 px-4 rounded-[6px] text-[13px] font-semibold bg-black text-white border border-black font-[inherit] disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer">
             {saving ? 'Linking…' : 'Link KPI'}
           </button>
         </div>
@@ -657,7 +595,7 @@ export default function CascadePage() {
   const [treeVersion, setTreeVersion] = useState(0);
 
   // Modals
-  const [addChildTarget,    setAddChildTarget]    = useState<Kpi | null>(null);
+  const [addChildTarget,     setAddChildTarget]     = useState<Kpi | null>(null);
   const [updateStatusTarget, setUpdateStatusTarget] = useState<Kpi | null>(null);
 
   // selected KPI: prefer full-loaded over tree-lazy version
@@ -716,26 +654,26 @@ export default function CascadePage() {
   };
 
   if (loading) return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 256, color: '#8a8580', fontSize: 13 }}>
+    <div className="flex items-center justify-center h-64 text-t3 text-[13px]">
       Loading…
     </div>
   );
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1.3fr 1fr', height: '100%', overflow: 'hidden' }}>
+    <div className="grid h-full overflow-hidden grid-cols-[1.3fr_1fr]">
 
       {/* ── Left: Tree ── */}
-      <div style={{ overflowY: 'auto', borderRight: '1px solid #e2dfd8', padding: '20px 22px' }}>
+      <div className="overflow-y-auto border-r border-border px-5.5 py-5">
 
         {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 18 }}>
+        <div className="flex items-start justify-between mb-4.5">
           <div>
-            <div style={{ fontSize: 16, fontWeight: 800, letterSpacing: '-.25px', color: '#111110' }}>
+            <div className="text-[16px] font-black tracking-[-0.25px] text-near-black">
               Cascade KPIs
             </div>
-            <div style={{ fontSize: 12, color: '#8a8580', marginTop: 3 }}>
-              <Link href="/kpis" style={{ color: '#8a8580', textDecoration: 'none' }}>KPI Management</Link>
-              <span style={{ margin: '0 4px' }}>›</span>
+            <div className="text-xs text-t3 mt-0.75">
+              <Link href="/kpis" className="text-t3 no-underline">KPI Management</Link>
+              <span className="mx-1">›</span>
             </div>
           </div>
           <button
@@ -750,9 +688,9 @@ export default function CascadePage() {
 
         {/* Tree */}
         {rootKpis.length === 0 ? (
-          <div style={{ border: '2px dashed #e2dfd8', borderRadius: 12, padding: '32px 20px', textAlign: 'center' }}>
-            <p style={{ fontSize: 13, color: '#8a8580' }}>
-              No KPIs. <Link href="/kpis/new" style={{ color: '#000', textDecoration: 'underline' }}>Create one first.</Link>
+          <div className="border-2 border-dashed border-border rounded-card p-8 text-center">
+            <p className="text-[13px] text-t3">
+              No KPIs. <Link href="/kpis/new" className="text-black underline">Create one first.</Link>
             </p>
           </div>
         ) : (
@@ -773,7 +711,7 @@ export default function CascadePage() {
       </div>
 
       {/* ── Right: Detail ── */}
-      <div style={{ overflowY: 'auto', background: '#f5f4f1' }}>
+      <div className="overflow-y-auto bg-bg">
         <DetailPanel
           kpi={selectedKpi}
           allKpis={allKpis}

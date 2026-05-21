@@ -1,5 +1,32 @@
 @import "tailwindcss";
 
+@theme {
+  /* Brand colours — maps CSS vars to Tailwind utilities */
+  --color-near-black: #111110;
+  --color-off:        #f8f7f5;
+  --color-bg:         #f5f4f1;
+  --color-bg2:        #eeece8;
+  --color-bg3:        #e4e1db;
+  --color-card:       #ffffff;
+  --color-border:     #e2dfd8;
+  --color-border2:    #cdc9c1;
+  --color-t1:         #111110;
+  --color-t2:         #4a4640;
+  --color-t3:         #8a8580;
+  --color-t4:         #c4c0b8;
+  --color-brand-green:  #1a7a4a;
+  --color-brand-blue:   #1854a8;
+  --color-brand-amber:  #b45309;
+  --color-brand-red:    #b91c1c;
+  /* Shadows */
+  --shadow-card: 0 1px 3px rgba(0,0,0,.07);
+  --shadow-card-md: 0 6px 22px rgba(0,0,0,.11);
+  --shadow-card-lg: 0 22px 64px rgba(0,0,0,.18);
+  /* Border radius */
+  --radius-card: 12px;
+  --radius-modal: 14px;
+}
+
 :root {
   --black: #000000;
   --near-black: #111110;

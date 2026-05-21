@@ -72,69 +72,41 @@ export default function ReportsPage() {
     }
   };
 
-  const activeKpis = allKpis.filter((k) => k.status === 'active');
   const kpisWithProgress = allKpis.filter((k) => k.current_value !== null && k.target_value !== null);
-  const avgProgress = kpisWithProgress.length > 0
-    ? Math.round(kpisWithProgress.reduce((sum, k) => sum + ((k.current_value ?? 0) / (k.target_value ?? 1)) * 100, 0) / kpisWithProgress.length)
-    : 0;
 
   const EXPORT_CARDS = [
-    {
-      id: 'kpis', label: 'All KPIs Export', desc: 'Full KPI list with targets, values, owners, and status', count: allKpis.length, unit: 'KPIs', color: '#1854a8', icon: '📊',
-    },
-    {
-      id: 'progress', label: 'KPI Progress Report', desc: 'KPIs with current vs target values and completion %', count: kpisWithProgress.length, unit: 'with data', color: '#1a7a4a', icon: '📈',
-    },
-    {
-      id: 'users', label: 'Employee Directory Export', desc: 'All employee records with department and region', count: allUsers.length, unit: 'employees', color: '#b45309', icon: '👥',
-    },
+    { id: 'kpis',     label: 'All KPIs Export',           desc: 'Full KPI list with targets, values, owners, and status',      count: allKpis.length,         unit: 'KPIs',        color: '#1854a8' },
+    { id: 'progress', label: 'KPI Progress Report',        desc: 'KPIs with current vs target values and completion %',         count: kpisWithProgress.length, unit: 'with data',   color: '#1a7a4a' },
+    { id: 'users',    label: 'Employee Directory Export',  desc: 'All employee records with department and region',             count: allUsers.length,         unit: 'employees',   color: '#b45309' },
   ];
 
-  if (loading) return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 256, color: '#8a8580', fontSize: 13 }}>Loading…</div>;
+  if (loading) return <div className="flex items-center justify-center h-64 text-t3 text-[13px]">Loading…</div>;
 
   return (
-    <div style={{ padding: '22px 26px' }}>
-      {/* Header */}
-      {/* <div style={{ marginBottom: 20 }}>
-        <div style={{ fontSize: 15, fontWeight: 800, letterSpacing: '-.2px', marginBottom: 3, color: '#111110' }}>Reports & Exports</div>
-        <div style={{ fontSize: 12, color: '#8a8580' }}>Generate and download reports across KPIs, employees, and progress metrics</div>
-      </div> */}
-
-      {/* Summary metrics */}
-      {/* <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 10, marginBottom: 24 }}>
-        {[
-          { label: 'Total KPIs', value: allKpis.length, color: '#111110' },
-          { label: 'Active KPIs', value: activeKpis.length, color: '#1a7a4a' },
-          { label: 'Avg Progress', value: `${avgProgress}%`, color: avgProgress >= 80 ? '#1a7a4a' : avgProgress >= 50 ? '#1854a8' : '#b45309' },
-          { label: 'Employees', value: allUsers.length, color: '#111110' },
-          { label: 'Regions', value: allRegions.length, color: '#111110' },
-        ].map((stat) => (
-          <div key={stat.label} style={{ background: '#fff', border: '1px solid #e2dfd8', borderRadius: 10, padding: '12px 14px' }}>
-            <div style={{ fontSize: 11, color: '#8a8580', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 5 }}>{stat.label}</div>
-            <div style={{ fontSize: 22, fontWeight: 800, color: stat.color, letterSpacing: '-.5px' }}>{stat.value}</div>
-          </div>
-        ))}
-      </div> */}
-
+    <div className="px-6.5 py-5.5">
       {/* Export cards */}
-      <div style={{ marginBottom: 24 }}>
-        <div style={{ fontSize: 12.5, fontWeight: 700, color: '#4a4640', textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 12 }}>Export Data</div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 12 }}>
+      <div className="mb-6">
+        <div className="text-[12.5px] font-bold text-t2 uppercase tracking-[0.5px] mb-3">Export Data</div>
+        <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}>
           {EXPORT_CARDS.map((card) => (
-            <div key={card.id} style={{ background: '#fff', border: '1.5px solid #e2dfd8', borderTop: `3px solid ${card.color}`, borderRadius: 12, padding: '16px 18px', boxShadow: '0 1px 3px rgba(0,0,0,.06)' }}>
-              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 10 }}>
+            <div key={card.id}
+              className="bg-white border-[1.5px] border-border rounded-xl px-4.5 py-4 shadow-[0_1px_3px_rgba(0,0,0,.06)]"
+              style={{ borderTop: `3px solid ${card.color}` }}>
+              <div className="flex items-start justify-between mb-2.5">
                 <div>
-                  <div style={{ fontSize: 18, marginBottom: 6 }}>{card.icon}</div>
-                  <div style={{ fontSize: 13.5, fontWeight: 700, color: '#111110', marginBottom: 4 }}>{card.label}</div>
-                  <p style={{ fontSize: 12, color: '#8a8580', margin: 0, lineHeight: 1.5 }}>{card.desc}</p>
+                  <div className="text-[13.5px] font-bold text-near-black mb-1">{card.label}</div>
+                  <p className="text-xs text-t3 m-0 leading-relaxed">{card.desc}</p>
                 </div>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 14 }}>
-                <span style={{ fontSize: 12, color: '#8a8580' }}><strong style={{ color: '#111110' }}>{card.count}</strong> {card.unit}</span>
+              <div className="flex items-center justify-between mt-3.5">
+                <span className="text-xs text-t3">
+                  <strong className="text-near-black">{card.count}</strong> {card.unit}
+                </span>
                 <button type="button"
                   onClick={() => exportCsv(card.id)}
                   disabled={exporting === card.id}
-                  style={{ padding: '7px 14px', borderRadius: 7, fontSize: 12, fontWeight: 600, cursor: exporting === card.id ? 'not-allowed' : 'pointer', background: card.color, color: '#fff', border: 'none', fontFamily: 'inherit', opacity: exporting === card.id ? .6 : 1, transition: 'opacity .13s' }}>
+                  className="py-[7px] px-3.5 rounded-[7px] text-xs font-semibold text-white border-none font-[inherit] transition-opacity duration-[130ms] disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+                  style={{ background: card.color }}>
                   {exporting === card.id ? 'Exporting…' : '↓ Export CSV'}
                 </button>
               </div>
@@ -144,62 +116,64 @@ export default function ReportsPage() {
       </div>
 
       {/* Region breakdown table */}
-      <div style={{ background: '#fff', border: '1px solid #e2dfd8', borderRadius: 14, overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,.06)', marginBottom: 18 }}>
-        <div style={{ padding: '13px 18px', borderBottom: '1px solid #e2dfd8' }}>
-          <span style={{ fontSize: 13.5, fontWeight: 700, color: '#111110' }}>Region Performance Breakdown</span>
+      <div className="bg-white border border-border rounded-[14px] overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,.06)] mb-4.5">
+        <div className="px-4.5 py-[13px] border-b border-border">
+          <span className="text-[13.5px] font-bold text-near-black">Region Performance Breakdown</span>
         </div>
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse">
             <thead>
-              <tr style={{ borderBottom: '1.5px solid #e2dfd8', background: '#f0efec' }}>
+              <tr className="border-b-[1.5px] border-border bg-[#f0efec]">
                 {['Region', 'Total KPIs', 'Active', 'Draft', 'Completed', 'People', 'Avg Progress'].map((h) => (
-                  <th key={h} style={{ textAlign: 'left', fontSize: 10, fontWeight: 700, color: '#8a8580', textTransform: 'uppercase', letterSpacing: 1, padding: '9px 14px', whiteSpace: 'nowrap' }}>{h}</th>
+                  <th key={h} className="text-left text-[10px] font-bold text-t3 uppercase tracking-widest py-[9px] px-3.5 whitespace-nowrap">{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {allRegions.map((region) => {
-                const rKpis = allKpis.filter((k) => k.region_id === region.id);
+                const rKpis  = allKpis.filter((k) => k.region_id === region.id);
                 const rUsers = allUsers.filter((u) => u.region_id === region.id);
                 const withProg = rKpis.filter((k) => k.current_value !== null && k.target_value !== null);
-                const avgProg = withProg.length > 0
+                const avgProg  = withProg.length > 0
                   ? Math.round(withProg.reduce((sum, k) => sum + ((k.current_value ?? 0) / (k.target_value ?? 1)) * 100, 0) / withProg.length)
                   : null;
                 return (
-                  <tr key={region.id} style={{ borderBottom: '1px solid #e2dfd8' }}
-                    onMouseEnter={(e) => (e.currentTarget as HTMLElement).style.background = '#f8f7f5'}
-                    onMouseLeave={(e) => (e.currentTarget as HTMLElement).style.background = 'transparent'}>
-                    <td style={{ padding: '10px 14px' }}>
-                      <div style={{ fontSize: 13, fontWeight: 700, color: '#111110' }}>{region.name}</div>
-                      <div style={{ fontSize: 10.5, color: '#8a8580', fontFamily: 'monospace' }}>{region.code}</div>
+                  <tr key={region.id} className="border-b border-border transition-colors duration-100 hover:bg-off">
+                    <td className="py-2.5 px-3.5">
+                      <div className="text-[13px] font-bold text-near-black">{region.name}</div>
+                      <div className="text-[10.5px] text-t3 font-mono">{region.code}</div>
                     </td>
-                    <td style={{ padding: '10px 14px', fontSize: 13, fontWeight: 700, color: '#111110' }}>{rKpis.length}</td>
-                    <td style={{ padding: '10px 14px', fontSize: 12.5, color: '#15633c', fontWeight: 600 }}>{rKpis.filter((k) => k.status === 'active').length}</td>
-                    <td style={{ padding: '10px 14px', fontSize: 12.5, color: '#b45309', fontWeight: 600 }}>{rKpis.filter((k) => k.status === 'draft').length}</td>
-                    <td style={{ padding: '10px 14px', fontSize: 12.5, color: '#1854a8', fontWeight: 600 }}>{rKpis.filter((k) => k.status === 'completed').length}</td>
-                    <td style={{ padding: '10px 14px', fontSize: 12.5, color: '#4a4640' }}>{rUsers.length}</td>
-                    <td style={{ padding: '10px 14px' }}>
+                    <td className="py-2.5 px-3.5 text-[13px] font-bold text-near-black">{rKpis.length}</td>
+                    <td className="py-2.5 px-3.5 text-[12.5px] font-semibold text-[#15633c]">{rKpis.filter((k) => k.status === 'active').length}</td>
+                    <td className="py-2.5 px-3.5 text-[12.5px] font-semibold text-brand-amber">{rKpis.filter((k) => k.status === 'draft').length}</td>
+                    <td className="py-2.5 px-3.5 text-[12.5px] font-semibold text-brand-blue">{rKpis.filter((k) => k.status === 'completed').length}</td>
+                    <td className="py-2.5 px-3.5 text-[12.5px] text-t2">{rUsers.length}</td>
+                    <td className="py-2.5 px-3.5">
                       {avgProg !== null ? (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                          <div style={{ flex: 1, height: 4, background: '#e2dfd8', borderRadius: 2, minWidth: 60 }}>
-                            <div style={{ width: `${Math.min(100, avgProg)}%`, height: '100%', background: avgProg >= 80 ? '#1a7a4a' : avgProg >= 50 ? '#1854a8' : '#b45309', borderRadius: 2, transition: 'width .3s' }} />
+                        <div className="flex items-center gap-2">
+                          <div className="flex-1 h-1 bg-border rounded-sm min-w-[60px]">
+                            <div className="h-full rounded-sm transition-[width] duration-300"
+                              style={{ width: `${Math.min(100, avgProg)}%`, background: avgProg >= 80 ? '#1a7a4a' : avgProg >= 50 ? '#1854a8' : '#b45309' }} />
                           </div>
-                          <span style={{ fontSize: 12, fontWeight: 700, color: avgProg >= 80 ? '#15633c' : avgProg >= 50 ? '#1854a8' : '#b45309', whiteSpace: 'nowrap' }}>{avgProg}%</span>
+                          <span className="text-xs font-bold whitespace-nowrap"
+                            style={{ color: avgProg >= 80 ? '#15633c' : avgProg >= 50 ? '#1854a8' : '#b45309' }}>
+                            {avgProg}%
+                          </span>
                         </div>
                       ) : (
-                        <span style={{ color: '#c4c0b8', fontSize: 12 }}>—</span>
+                        <span className="text-xs text-t4">—</span>
                       )}
                     </td>
                   </tr>
                 );
               })}
               {allRegions.length === 0 && (
-                <tr><td colSpan={7} style={{ padding: '32px 14px', textAlign: 'center', fontSize: 13, color: '#8a8580' }}>No regions configured</td></tr>
+                <tr><td colSpan={7} className="py-8 px-3.5 text-center text-[13px] text-t3">No regions configured</td></tr>
               )}
             </tbody>
           </table>
         </div>
-      </div>      
+      </div>
     </div>
   );
 }

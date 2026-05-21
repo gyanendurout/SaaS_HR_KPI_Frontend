@@ -7,7 +7,7 @@ import { kpis, users, regions, type Kpi, type User, type Region } from '@/lib/ap
 
 function UnitTag({ unit }: { unit: string | null }) {
   if (!unit) return null;
-  return <span style={{ fontSize: 11, fontWeight: 400, marginLeft: 4, color: 'var(--t4)' }}>{unit}</span>;
+  return <span className="text-[11px] font-normal ml-1 text-t4">{unit}</span>;
 }
 
 function Badge({ label, color }: { label: string; color: string }) {
@@ -132,7 +132,7 @@ export default function KpiDetailPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-sm" style={{ color: 'var(--t3)' }}>Loading…</p>
+        <p className="text-sm text-t3">Loading…</p>
       </div>
     );
   }
@@ -140,7 +140,7 @@ export default function KpiDetailPage() {
   if (!kpi) {
     return (
       <div className="p-8">
-        <p style={{ color: 'var(--red)' }}>KPI not found.</p>
+        <p className="text-brand-red">KPI not found.</p>
       </div>
     );
   }
@@ -152,42 +152,39 @@ export default function KpiDetailPage() {
   return (
     <div className="p-8 max-w-3xl">
       {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-xs mb-6" style={{ color: 'var(--t3)' }}>
+      <div className="flex items-center gap-2 text-xs mb-6 text-t3">
         <Link href="/kpis" className="hover:underline">KPIs</Link>
         <span>/</span>
-        <span style={{ color: 'var(--t1)' }}>{kpi.kpi_number}</span>
+        <span className="text-t1">{kpi.kpi_number}</span>
       </div>
 
       {/* Header */}
       <div className="flex items-start justify-between mb-6">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="text-xs font-mono" style={{ color: 'var(--t3)' }}>{kpi.kpi_number}</span>
+            <span className="text-xs font-mono text-t3">{kpi.kpi_number}</span>
             <Badge label={kpi.status} color={statusColor[kpi.status] ?? 'gray'} />
           </div>
-          <h1 className="text-2xl font-black tracking-tight" style={{ color: 'var(--near-black)' }}>{kpi.name}</h1>
-          {kpi.description && <p className="mt-2 text-sm" style={{ color: 'var(--t3)' }}>{kpi.description}</p>}
+          <h1 className="text-2xl font-black tracking-tight text-near-black">{kpi.name}</h1>
+          {kpi.description && <p className="mt-2 text-sm text-t3">{kpi.description}</p>}
         </div>
         <div className="flex items-center gap-2">
           <button type="button"
             onClick={() => setEditing(!editing)}
-            className="px-3.5 py-2 rounded-lg text-xs font-semibold"
-            style={{ border: '1px solid var(--border)', background: 'var(--card)' }}
+            className="px-3.5 py-2 rounded-lg text-xs font-semibold border border-border bg-card cursor-pointer"
           >
             {editing ? 'Cancel Edit' : 'Update Progress'}
           </button>
           <button type="button"
             onClick={() => setEditingMeta(!editingMeta)}
-            className="px-3.5 py-2 rounded-lg text-xs font-semibold"
-            style={{ border: '1px solid var(--border)', background: 'var(--card)' }}
+            className="px-3.5 py-2 rounded-lg text-xs font-semibold border border-border bg-card cursor-pointer"
           >
             {editingMeta ? 'Cancel Edit' : 'Edit KPI'}
           </button>
           {kpi.status !== 'cancelled' && (
             <button type="button"
               onClick={handleCancel}
-              className="px-3.5 py-2 rounded-lg text-xs font-semibold"
-              style={{ border: '1px solid rgba(185,28,28,.3)', color: 'var(--red)', background: 'rgba(185,28,28,.05)' }}
+              className="px-3.5 py-2 rounded-lg text-xs font-semibold border border-[rgba(185,28,28,.3)] text-brand-red bg-[rgba(185,28,28,.05)] cursor-pointer"
             >
               Cancel KPI
             </button>
@@ -197,14 +194,11 @@ export default function KpiDetailPage() {
 
       {/* Edit form */}
       {editing && (
-        <div
-          className="rounded-xl p-5 mb-6 space-y-4"
-          style={{ background: 'var(--card)', border: '1px solid var(--border)' }}
-        >
-          <h2 className="font-bold text-sm" style={{ color: 'var(--near-black)' }}>Update Progress</h2>
+        <div className="bg-card border border-border rounded-xl p-5 mb-6 space-y-4">
+          <h2 className="font-bold text-sm text-near-black">Update Progress</h2>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style={{ color: 'var(--t3)' }}>
+              <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider text-t3">
                 Current Value {kpi.unit ? `(${kpi.unit})` : ''}
               </label>
               <input
@@ -216,7 +210,7 @@ export default function KpiDetailPage() {
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style={{ color: 'var(--t3)' }}>
+              <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider text-t3">
                 Status
               </label>
               <select
@@ -234,12 +228,11 @@ export default function KpiDetailPage() {
             <button type="button"
               onClick={handleUpdate}
               disabled={saving}
-              className="px-4 py-2 rounded-lg text-sm font-semibold disabled:opacity-50"
-              style={{ background: '#000', color: '#fff' }}
+              className="px-4 py-2 rounded-lg text-sm font-semibold bg-black text-white disabled:opacity-50 cursor-pointer"
             >
               {saving ? 'Saving…' : 'Save Update'}
             </button>
-            <button type="button" onClick={() => setEditing(false)} className="px-4 py-2 rounded-lg text-sm font-semibold" style={{ border: '1px solid var(--border)' }}>
+            <button type="button" onClick={() => setEditing(false)} className="px-4 py-2 rounded-lg text-sm font-semibold border border-border cursor-pointer">
               Cancel
             </button>
           </div>
@@ -248,29 +241,26 @@ export default function KpiDetailPage() {
 
       {/* Meta edit form */}
       {editingMeta && (
-        <div
-          className="rounded-xl p-5 mb-6 space-y-4"
-          style={{ background: 'var(--card)', border: '1px solid var(--border)' }}
-        >
-          <h2 className="font-bold text-sm" style={{ color: 'var(--near-black)' }}>Edit KPI</h2>
+        <div className="bg-card border border-border rounded-xl p-5 mb-6 space-y-4">
+          <h2 className="font-bold text-sm text-near-black">Edit KPI</h2>
           <div className="grid grid-cols-2 gap-4">
             <div className="col-span-2">
-              <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style={{ color: 'var(--t3)' }}>Name</label>
+              <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider text-t3">Name</label>
               <input className="fi w-full" type="text" value={metaForm.name} onChange={(e) => setMetaForm((f) => ({ ...f, name: e.target.value }))} />
             </div>
             <div className="col-span-2">
-              <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style={{ color: 'var(--t3)' }}>Description</label>
+              <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider text-t3">Description</label>
               <input className="fi w-full" type="text" value={metaForm.description} onChange={(e) => setMetaForm((f) => ({ ...f, description: e.target.value }))} />
             </div>
             <div>
-              <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style={{ color: 'var(--t3)' }}>Type</label>
+              <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider text-t3">Type</label>
               <select className="fi w-full" value={metaForm.type} onChange={(e) => setMetaForm((f) => ({ ...f, type: e.target.value }))}>
                 <option value="quantitative">Quantitative</option>
                 <option value="qualitative">Qualitative</option>
               </select>
             </div>
             <div>
-              <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style={{ color: 'var(--t3)' }}>Period</label>
+              <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider text-t3">Period</label>
               <select className="fi w-full" value={metaForm.period} onChange={(e) => setMetaForm((f) => ({ ...f, period: e.target.value }))}>
                 <option value="monthly">Monthly</option>
                 <option value="quarterly">Quarterly</option>
@@ -278,7 +268,7 @@ export default function KpiDetailPage() {
               </select>
             </div>
             <div>
-              <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style={{ color: 'var(--t3)' }}>Update Frequency</label>
+              <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider text-t3">Update Frequency</label>
               <select className="fi w-full" value={metaForm.update_frequency} onChange={(e) => setMetaForm((f) => ({ ...f, update_frequency: e.target.value }))}>
                 <option value="weekly">Weekly</option>
                 <option value="monthly">Monthly</option>
@@ -286,23 +276,23 @@ export default function KpiDetailPage() {
               </select>
             </div>
             <div>
-              <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style={{ color: 'var(--t3)' }}>Target Value</label>
+              <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider text-t3">Target Value</label>
               <input className="fi w-full" type="number" value={metaForm.target_value} onChange={(e) => setMetaForm((f) => ({ ...f, target_value: e.target.value }))} />
             </div>
             <div>
-              <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style={{ color: 'var(--t3)' }}>Unit</label>
+              <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider text-t3">Unit</label>
               <input className="fi w-full" type="text" value={metaForm.unit} onChange={(e) => setMetaForm((f) => ({ ...f, unit: e.target.value }))} />
             </div>
             <div>
-              <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style={{ color: 'var(--t3)' }}>Start Date</label>
+              <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider text-t3">Start Date</label>
               <input className="fi w-full" type="date" value={metaForm.start_date} onChange={(e) => setMetaForm((f) => ({ ...f, start_date: e.target.value }))} />
             </div>
             <div>
-              <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style={{ color: 'var(--t3)' }}>End Date</label>
+              <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider text-t3">End Date</label>
               <input className="fi w-full" type="date" value={metaForm.end_date} onChange={(e) => setMetaForm((f) => ({ ...f, end_date: e.target.value }))} />
             </div>
             <div className="col-span-2">
-              <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style={{ color: 'var(--t3)' }}>Assign To (Owner)</label>
+              <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider text-t3">Assign To (Owner)</label>
               <select className="fi w-full" value={metaForm.owner_id} onChange={(e) => setMetaForm((f) => ({ ...f, owner_id: e.target.value }))}>
                 <option value="">— No owner —</option>
                 {allUsers.map((u) => (
@@ -324,23 +314,20 @@ export default function KpiDetailPage() {
 
       {/* Progress */}
       {pct !== null && (
-        <div
-          className="rounded-xl p-5 mb-6"
-          style={{ background: 'var(--card)', border: '1px solid var(--border)' }}
-        >
+        <div className="bg-card border border-border rounded-xl p-5 mb-6">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-sm font-semibold" style={{ color: 'var(--t2)' }}>Progress</span>
+            <span className="text-sm font-semibold text-t2">Progress</span>
             <span className="text-2xl font-black" style={{ color: pct >= 100 ? '#1a7a4a' : pct >= 50 ? '#1854a8' : '#b45309' }}>
               {pct}%
             </span>
           </div>
-          <div className="rounded-full h-2" style={{ background: 'var(--border)' }}>
+          <div className="rounded-full h-2 bg-border">
             <div
               className="h-2 rounded-full transition-all"
               style={{ width: `${pct}%`, background: pct >= 100 ? '#1a7a4a' : pct >= 50 ? '#1854a8' : '#b45309' }}
             />
           </div>
-          <div className="flex justify-between mt-2 text-xs" style={{ color: 'var(--t3)' }}>
+          <div className="flex justify-between mt-2 text-xs text-t3">
             <span>{(kpi.current_value ?? 0).toLocaleString()}<UnitTag unit={kpi.unit ?? null} /></span>
             <span>Target: {(kpi.target_value ?? 0).toLocaleString()}<UnitTag unit={kpi.unit ?? null} /></span>
           </div>
@@ -361,29 +348,29 @@ export default function KpiDetailPage() {
           { label: 'End Date', value: kpi.end_date ? new Date(kpi.end_date).toLocaleDateString() : '—' },
           { label: 'Next Due', value: kpi.next_due_date ? new Date(kpi.next_due_date).toLocaleDateString() : '—' },
         ].map(({ label, value }) => (
-          <div key={label} className="rounded-xl p-4" style={{ background: 'var(--card)', border: '1px solid var(--border)' }}>
-            <p className="text-xs font-semibold uppercase tracking-wider mb-1" style={{ color: 'var(--t3)' }}>{label}</p>
-            <p className="text-sm font-semibold capitalize" style={{ color: 'var(--t1)' }}>{value}</p>
+          <div key={label} className="bg-card border border-border rounded-xl p-4">
+            <p className="text-xs font-semibold uppercase tracking-wider mb-1 text-t3">{label}</p>
+            <p className="text-sm font-semibold capitalize text-t1">{value}</p>
           </div>
         ))}
       </div>
 
       {/* Children */}
       {children.length > 0 && (
-        <div className="rounded-xl overflow-hidden" style={{ border: '1px solid var(--border)', background: 'var(--card)' }}>
-          <div className="px-5 py-3" style={{ borderBottom: '1px solid var(--border)' }}>
-            <h2 className="font-bold text-sm" style={{ color: 'var(--near-black)' }}>Child KPIs ({children.length})</h2>
+        <div className="bg-card border border-border rounded-xl overflow-hidden">
+          <div className="px-5 py-3 border-b border-border">
+            <h2 className="font-bold text-sm text-near-black">Child KPIs ({children.length})</h2>
           </div>
-          <div className="divide-y" style={{ borderColor: 'var(--border)' }}>
+          <div className="divide-y divide-border">
             {children.map((c) => (
               <Link
                 key={c.id}
                 href={`/kpis/${c.id}`}
-                className="flex items-center justify-between px-5 py-3 hover:opacity-80 block"
+                className="flex items-center justify-between px-5 py-3 hover:opacity-80 no-underline"
               >
                 <div>
-                  <p className="text-sm font-semibold" style={{ color: 'var(--t1)' }}>{c.name}</p>
-                  <p className="text-xs mt-0.5" style={{ color: 'var(--t3)' }}>{c.kpi_number} · {c.allocation_pct}% allocation</p>
+                  <p className="text-sm font-semibold text-t1">{c.name}</p>
+                  <p className="text-xs mt-0.5 text-t3">{c.kpi_number} · {c.allocation_pct}% allocation</p>
                 </div>
                 <Badge label={c.status} color={statusColor[c.status] ?? 'gray'} />
               </Link>

@@ -13,12 +13,9 @@ function Avatar({ name, size = 26 }: { name: string; size?: number }) {
   const colors = ['#1854a8', '#15633c', '#b45309', '#7c3aed', '#b91c1c', '#0e7490'];
   const color  = colors[name.charCodeAt(0) % colors.length];
   return (
-    <div title={name} style={{
-      width: size, height: size, borderRadius: '50%', background: color,
-      color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center',
-      fontSize: size * 0.36, fontWeight: 800, flexShrink: 0,
-      border: '2px solid #fff', boxSizing: 'border-box',
-    }}>
+    <div title={name}
+      className="rounded-full text-white flex items-center justify-center font-black shrink-0 border-2 border-white box-border"
+      style={{ width: size, height: size, background: color, fontSize: size * 0.36 }}>
       {initials}
     </div>
   );
@@ -32,11 +29,9 @@ function KpiNumBadge({ num, level }: { num: string; level: number }) {
     level === 1 ? '#3a3832' :
     level === 2 ? '#6b6760' : '#9a9690';
   return (
-    <span style={{
-      fontFamily: 'monospace', fontSize: 10, fontWeight: 700,
-      padding: '3px 7px', borderRadius: 4, background: bg, color: '#fff',
-      whiteSpace: 'nowrap', letterSpacing: '.3px',
-    }}>
+    <span
+      className="font-mono text-[10px] font-bold py-0.75 px-1.75 rounded text-white whitespace-nowrap"
+      style={{ background: bg, letterSpacing: '.3px' }}>
       {num}
     </span>
   );
@@ -54,7 +49,9 @@ function StatusBadge({ status }: { status: string }) {
   };
   const [bg, color] = map[status] ?? ['#f0efec', '#4a4640'];
   return (
-    <span style={{ display: 'inline-flex', padding: '2.5px 8px', borderRadius: 4, fontSize: 11, fontWeight: 600, background: bg, color, textTransform: 'capitalize', whiteSpace: 'nowrap' }}>
+    <span
+      className="inline-flex py-[2.5px] px-2 rounded text-[11px] font-semibold capitalize whitespace-nowrap"
+      style={{ background: bg, color }}>
       {status === 'active' ? 'In Progress' : status === 'draft' ? 'Not Started' : status}
     </span>
   );
@@ -103,46 +100,51 @@ function AssignModal({
 
   return createPortal(
     <div className="modal-bg" onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <div className="modal" style={{ maxWidth: 560, borderRadius: 14, overflow: 'hidden' }}>
+      <div className="modal max-w-140 rounded-modal overflow-hidden">
 
         {/* Header */}
-        <div style={{ padding: '16px 22px', borderBottom: '1px solid #e2dfd8', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+        <div className="px-5.5 py-4 border-b border-border flex items-start justify-between">
           <div>
-            <div style={{ fontSize: 15, fontWeight: 800, color: '#111110', letterSpacing: '-.2px' }}>Assign KPI</div>
-            <div style={{ fontSize: 12, color: '#8a8580', marginTop: 2 }}>Self-assign or delegate — RBAC enforced</div>
+            <div className="text-[15px] font-black text-near-black tracking-[-0.2px]">Assign KPI</div>
+            <div className="text-xs text-t3 mt-0.5">Self-assign or delegate — RBAC enforced</div>
           </div>
-          <button type="button" onClick={onClose} style={{ width: 28, height: 28, borderRadius: '50%', border: '1px solid #e2dfd8', background: '#f5f4f0', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#6b6760', fontSize: 15, flexShrink: 0 }}>×</button>
+          <button type="button" onClick={onClose}
+            className="w-7 h-7 rounded-full border border-border bg-[#f5f4f0] flex items-center justify-center cursor-pointer text-[#6b6760] text-[15px] shrink-0">×</button>
         </div>
 
-        <div style={{ padding: '20px 22px', maxHeight: '75vh', overflowY: 'auto' }}>
+        <div className="px-5.5 py-5 overflow-y-auto" style={{ maxHeight: '75vh' }}>
 
           {/* Method cards */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 18 }}>
+          <div className="grid grid-cols-2 gap-2.5 mb-4.5">
             {/* Self-Assign */}
-            <div onClick={() => setMethod('self')} style={{ border: `2px solid ${method === 'self' ? '#111110' : '#e2dfd8'}`, borderRadius: 10, padding: '14px 16px', cursor: 'pointer', background: method === 'self' ? '#f8f7f5' : '#fff', transition: 'all .13s' }}>
-              <div style={{ width: 32, height: 32, borderRadius: 8, background: '#e8e6e1', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}>
+            <div onClick={() => setMethod('self')}
+              className="border-2 rounded-[10px] py-3.5 px-4 cursor-pointer transition-all duration-130"
+              style={{ borderColor: method === 'self' ? '#111110' : '#e2dfd8', background: method === 'self' ? '#f8f7f5' : '#fff' }}>
+              <div className="w-8 h-8 rounded-lg bg-[#e8e6e1] flex items-center justify-center mb-2">
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#4a4640" strokeWidth="1.4" strokeLinecap="round">
                   <circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/>
                 </svg>
               </div>
-              <div style={{ fontSize: 13, fontWeight: 800, color: '#111110', marginBottom: 3 }}>Self-Assign</div>
-              <div style={{ fontSize: 11.5, color: '#8a8580', lineHeight: 1.5 }}>Assign to yourself. Requires immediate manager approval before becoming active.</div>
+              <div className="text-[13px] font-black text-near-black mb-0.75">Self-Assign</div>
+              <div className="text-[11.5px] text-t3 leading-relaxed">Assign to yourself. Requires immediate manager approval before becoming active.</div>
             </div>
 
             {/* Assign to Someone */}
-            <div onClick={() => setMethod('delegate')} style={{ border: `2px solid ${method === 'delegate' ? '#111110' : '#e2dfd8'}`, borderRadius: 10, padding: '14px 16px', cursor: 'pointer', background: method === 'delegate' ? '#f8f7f5' : '#fff', transition: 'all .13s' }}>
-              <div style={{ width: 32, height: 32, borderRadius: 8, background: '#e8e6e1', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}>
+            <div onClick={() => setMethod('delegate')}
+              className="border-2 rounded-[10px] py-3.5 px-4 cursor-pointer transition-all duration-130"
+              style={{ borderColor: method === 'delegate' ? '#111110' : '#e2dfd8', background: method === 'delegate' ? '#f8f7f5' : '#fff' }}>
+              <div className="w-8 h-8 rounded-lg bg-[#e8e6e1] flex items-center justify-center mb-2">
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#4a4640" strokeWidth="1.4" strokeLinecap="round">
                   <circle cx="5.5" cy="5" r="2.5"/><path d="M1 14c0-2.5 2-4.5 4.5-4.5"/><circle cx="11" cy="5" r="2.5"/><path d="M8 14c0-2.5 2-4.5 4.5-4.5 0 0 0 0 .5 0"/>
                 </svg>
               </div>
-              <div style={{ fontSize: 13, fontWeight: 800, color: '#111110', marginBottom: 3 }}>Assign to Someone</div>
-              <div style={{ fontSize: 11.5, color: '#8a8580', lineHeight: 1.5 }}>Delegate to someone in your hierarchy. RBAC enforced. They get an email on activation.</div>
+              <div className="text-[13px] font-black text-near-black mb-0.75">Assign to Someone</div>
+              <div className="text-[11.5px] text-t3 leading-relaxed">Delegate to someone in your hierarchy. RBAC enforced. They get an email on activation.</div>
             </div>
           </div>
 
           {/* KPI selector */}
-          <div style={{ marginBottom: 14 }}>
+          <div className="mb-3.5">
             <label className="flabel">KPI *</label>
             <select className="fi" value={kpiId} onChange={(e) => setKpiId(e.target.value)}>
               <option value="">— select KPI —</option>
@@ -154,7 +156,7 @@ function AssignModal({
 
           {/* Assign To (delegate only) */}
           {method === 'delegate' && (
-            <div style={{ marginBottom: 14 }}>
+            <div className="mb-3.5">
               <label className="flabel">Assign To *</label>
               <select className="fi" value={assignToId} onChange={(e) => setAssignToId(e.target.value)}>
                 <option value="">— select person —</option>
@@ -166,7 +168,7 @@ function AssignModal({
           )}
 
           {/* Period + Frequency */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 14 }}>
+          <div className="grid grid-cols-2 gap-3 mb-3.5">
             <div>
               <label className="flabel">Period</label>
               <select className="fi" value={period} onChange={(e) => setPeriod(e.target.value)}>
@@ -182,33 +184,33 @@ function AssignModal({
           </div>
 
           {/* Note to approver */}
-          <div style={{ marginBottom: 16 }}>
+          <div className="mb-4">
             <label className="flabel">Note to Approver</label>
-            <textarea className="fi" rows={3} placeholder="Add context for the approval request…"
-              value={note} onChange={(e) => setNote(e.target.value)}
-              style={{ resize: 'vertical', minHeight: 72 }} />
+            <textarea className="fi resize-vertical min-h-18" rows={3}
+              placeholder="Add context for the approval request…"
+              value={note} onChange={(e) => setNote(e.target.value)} />
           </div>
 
           {/* Approval flow info */}
-          <div style={{ padding: '10px 13px', background: '#f0efec', border: '1px solid #e2dfd8', borderRadius: 8, display: 'flex', gap: 8, alignItems: 'flex-start' }}>
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={{ flexShrink: 0, marginTop: 1 }}>
+          <div className="py-2.5 px-3.25 bg-[#f0efec] border border-border rounded-lg flex gap-2 items-start">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="shrink-0 mt-px">
               <circle cx="7" cy="7" r="6" stroke="#4a4640" strokeWidth="1.3"/>
               <path d="M7 6v4M7 4.5h.01" stroke="#4a4640" strokeWidth="1.4" strokeLinecap="round"/>
             </svg>
-            <span style={{ fontSize: 11.5, color: '#4a4640', lineHeight: 1.5 }}>
+            <span className="text-[11.5px] text-t2 leading-relaxed">
               <strong>Approval flow:</strong> Self-assign → manager approves → activated. Assign to someone → RBAC check → approval email sent to assignee&apos;s manager.
             </span>
           </div>
 
           {error && (
-            <div style={{ marginTop: 12, padding: '9px 13px', background: 'rgba(185,28,28,.07)', border: '1px solid rgba(185,28,28,.2)', borderRadius: 7, fontSize: 12.5, color: '#b91c1c' }}>
+            <div className="mt-3 py-2.25 px-3.25 bg-[rgba(185,28,28,.07)] border border-[rgba(185,28,28,.2)] rounded-[7px] text-[12.5px] text-brand-red">
               {error}
             </div>
           )}
         </div>
 
         {/* Footer */}
-        <div style={{ padding: '14px 22px', borderTop: '1px solid #e2dfd8', display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+        <div className="px-5.5 py-3.5 border-t border-border flex gap-2 justify-end">
           <button type="button" onClick={onClose} className="btn btn-outline btn-sm">Cancel</button>
           <button type="button" onClick={handleSubmit} disabled={saving} className="btn btn-black btn-sm">
             {saving ? 'Submitting…' : 'Submit for Approval'}
@@ -277,64 +279,71 @@ export default function AssignmentsPage() {
   };
 
   if (loading) return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 256, color: '#8a8580', fontSize: 13 }}>Loading…</div>
+    <div className="flex items-center justify-center h-64 text-t3 text-[13px]">Loading…</div>
   );
 
   return (
-    <div style={{ padding: '22px 26px' }}>
+    <div className="px-6.5 py-5.5">
 
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 18, flexWrap: 'wrap', gap: 12 }}>
+      <div className="flex items-start justify-between mb-4.5 flex-wrap gap-3">
         <div>
-          <div style={{ fontSize: 15, fontWeight: 800, letterSpacing: '-.2px', marginBottom: 3, color: '#111110' }}>KPI Assignment</div>
-          <div style={{ fontSize: 12, color: '#8a8580' }}>Self-assign or delegate · RBAC enforced · Email on activation</div>
+          <div className="text-[15px] font-black tracking-[-0.2px] mb-0.75 text-near-black">KPI Assignment</div>
+          <div className="text-xs text-t3">Self-assign or delegate · RBAC enforced · Email on activation</div>
         </div>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+        <div className="flex gap-2 items-center">
           <button type="button" className="btn btn-black btn-sm" onClick={() => openModal()}>+ Assign KPI</button>
         </div>
       </div>
 
       {/* Filters */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 14, flexWrap: 'wrap', alignItems: 'center' }}>
-        <input placeholder="Search KPI name or number…" value={search} onChange={(e) => setSearch(e.target.value)}
-          style={{ background: '#fff', border: '1.5px solid #e2dfd8', borderRadius: 8, padding: '8px 12px', fontSize: 13, color: '#111110', fontFamily: 'inherit', outline: 'none', width: 260 }}
-          onFocus={(e) => (e.target.style.borderColor = '#000')}
-          onBlur={(e)  => (e.target.style.borderColor = '#e2dfd8')} />
-        <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}
-          style={{ background: '#fff', border: '1.5px solid #e2dfd8', borderRadius: 8, padding: '8px 12px', fontSize: 13, color: '#111110', fontFamily: 'inherit', outline: 'none' }}>
+      <div className="flex gap-2 mb-3.5 flex-wrap items-center">
+        <input
+          placeholder="Search KPI name or number…"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="bg-card border-[1.5px] border-border rounded-lg py-2 px-3 text-[13px] text-near-black font-[inherit] outline-none w-65 transition-[border-color] duration-180 focus:border-black"
+        />
+        <select
+          value={filterStatus}
+          onChange={(e) => setFilterStatus(e.target.value)}
+          className="bg-card border-[1.5px] border-border rounded-lg py-2 px-3 text-[13px] text-near-black font-[inherit] outline-none">
           <option value="">All Statuses</option>
           <option value="draft">Draft</option>
           <option value="active">Active</option>
           <option value="completed">Completed</option>
         </select>
-        <select value={filterRegion} onChange={(e) => setFilterRegion(e.target.value)}
-          style={{ background: '#fff', border: '1.5px solid #e2dfd8', borderRadius: 8, padding: '8px 12px', fontSize: 13, color: '#111110', fontFamily: 'inherit', outline: 'none' }}>
+        <select
+          value={filterRegion}
+          onChange={(e) => setFilterRegion(e.target.value)}
+          className="bg-card border-[1.5px] border-border rounded-lg py-2 px-3 text-[13px] text-near-black font-[inherit] outline-none">
           <option value="">All Regions</option>
           {allRegions.map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}
         </select>
         {(search || filterStatus || filterRegion) && (
-          <button type="button" onClick={() => { setSearch(''); setFilterStatus(''); setFilterRegion(''); }}
-            style={{ padding: '8px 12px', borderRadius: 7, fontSize: 12, cursor: 'pointer', background: '#fff', border: '1px solid #e2dfd8', color: '#8a8580', fontFamily: 'inherit' }}>
+          <button type="button"
+            onClick={() => { setSearch(''); setFilterStatus(''); setFilterRegion(''); }}
+            className="py-2 px-3 rounded-[7px] text-xs cursor-pointer bg-card border border-border text-t3 font-[inherit]">
             Clear
           </button>
         )}
-        <span style={{ marginLeft: 'auto', fontSize: 12, color: '#8a8580' }}>{filtered.length} KPI{filtered.length !== 1 ? 's' : ''}</span>
+        <span className="ml-auto text-xs text-t3">{filtered.length} KPI{filtered.length !== 1 ? 's' : ''}</span>
       </div>
 
       {/* Table */}
-      <div style={{ background: '#fff', border: '1px solid #e2dfd8', borderRadius: 14, overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,.07)' }}>
+      <div className="bg-card border border-border rounded-modal overflow-hidden shadow-card">
         {filtered.length === 0 ? (
-          <div style={{ padding: '48px 20px', textAlign: 'center' }}>
-            <p style={{ fontSize: 13, fontWeight: 600, color: '#4a4640', marginBottom: 4 }}>No KPIs found</p>
-            <p style={{ fontSize: 12, color: '#8a8580' }}>Adjust your filters or <Link href="/kpis/new" style={{ color: '#000', textDecoration: 'underline' }}>create a new KPI</Link>.</p>
+          <div className="py-12 px-5 text-center">
+            <p className="text-[13px] font-semibold text-t2 mb-1">No KPIs found</p>
+            <p className="text-xs text-t3">Adjust your filters or <Link href="/kpis/new" className="text-black underline">create a new KPI</Link>.</p>
           </div>
         ) : (
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
               <thead>
-                <tr style={{ borderBottom: '1.5px solid #e2dfd8', background: '#f0efec' }}>
+                <tr className="border-b-[1.5px] border-border bg-[#f0efec]">
                   {['KPI No', 'KPI Name', 'Type', 'Target / Current', 'Owner', 'Region', 'Status', 'Actions'].map((h) => (
-                    <th key={h} style={{ textAlign: 'left', fontSize: 10, fontWeight: 700, color: '#8a8580', textTransform: 'uppercase', letterSpacing: 1, padding: '9px 14px', whiteSpace: 'nowrap' }}>{h}</th>
+                    <th key={h} className="text-left text-[10px] font-bold text-t3 uppercase tracking-[1px] py-2.25 px-3.5 whitespace-nowrap">{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -344,81 +353,85 @@ export default function AssignmentsPage() {
                   const ownerName = owner?.full_name ?? '';
                   return (
                     <tr key={k.id}
-                      style={{ borderBottom: '1px solid #e2dfd8', transition: 'background .1s' }}
+                      className="border-b border-border transition-colors duration-100"
                       onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = '#f8f7f5')}
                       onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = 'transparent')}>
 
                       {/* KPI No */}
-                      <td style={{ padding: '11px 14px' }}>
+                      <td className="py-2.75 px-3.5">
                         <KpiNumBadge num={k.kpi_number} level={k.level ?? 0} />
                       </td>
 
                       {/* KPI Name */}
-                      <td style={{ padding: '11px 14px', maxWidth: 220 }}>
-                        <Link href={`/kpis/${k.id}`} style={{ fontSize: 13, fontWeight: 700, color: '#111110', textDecoration: 'none', letterSpacing: '-.1px', display: 'block' }}>{k.name}</Link>
-                        {k.parent_id && <div style={{ fontSize: 11, color: '#8a8580', marginTop: 1 }}>↑ Cascaded</div>}
+                      <td className="py-2.75 px-3.5 max-w-55">
+                        <Link href={`/kpis/${k.id}`} className="text-[13px] font-bold text-near-black no-underline tracking-[-0.1px] block">{k.name}</Link>
+                        {k.parent_id && <div className="text-[11px] text-t3 mt-px">↑ Cascaded</div>}
                       </td>
 
                       {/* Type */}
-                      <td style={{ padding: '11px 14px' }}>
-                        <span style={{ fontSize: 10.5, fontWeight: 700, padding: '2px 7px', borderRadius: 4, background: k.type === 'quantitative' ? 'rgba(24,84,168,.1)' : 'rgba(124,58,237,.1)', color: k.type === 'quantitative' ? '#1854a8' : '#7c3aed' }}>
+                      <td className="py-2.75 px-3.5">
+                        <span className="text-[10.5px] font-bold py-0.5 px-1.75 rounded"
+                          style={{
+                            background: k.type === 'quantitative' ? 'rgba(24,84,168,.1)' : 'rgba(124,58,237,.1)',
+                            color: k.type === 'quantitative' ? '#1854a8' : '#7c3aed',
+                          }}>
                           {k.type === 'quantitative' ? 'Quant' : 'Qual'}
                         </span>
                       </td>
 
                       {/* Target / Current */}
-                      <td style={{ padding: '11px 14px', whiteSpace: 'nowrap' }}>
+                      <td className="py-2.75 px-3.5 whitespace-nowrap">
                         {k.target_value != null ? (
                           <>
-                            <div style={{ fontSize: 13, fontWeight: 700, color: '#111110' }}>
+                            <div className="text-[13px] font-bold text-near-black">
                               {k.unit ? `${k.unit}${k.target_value}` : k.target_value}
                             </div>
                             {k.current_value != null && (
-                              <div style={{ fontSize: 11, color: '#8a8580', marginTop: 1 }}>
+                              <div className="text-[11px] text-t3 mt-px">
                                 Current: {k.unit ? `${k.unit}${k.current_value}` : k.current_value}
                               </div>
                             )}
                           </>
-                        ) : <span style={{ color: '#c4c0b8' }}>—</span>}
+                        ) : <span className="text-t4">—</span>}
                       </td>
 
                       {/* Owner */}
-                      <td style={{ padding: '11px 14px' }}>
+                      <td className="py-2.75 px-3.5">
                         {ownerName ? (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                          <div className="flex items-center gap-1.75">
                             <Avatar name={ownerName} size={26} />
                             <div>
-                              <div style={{ fontSize: 12.5, fontWeight: 600, color: '#111110', whiteSpace: 'nowrap' }}>{ownerName}</div>
-                              {owner?.designation && <div style={{ fontSize: 11, color: '#8a8580' }}>{owner.designation}</div>}
+                              <div className="text-[12.5px] font-semibold text-near-black whitespace-nowrap">{ownerName}</div>
+                              {owner?.designation && <div className="text-[11px] text-t3">{owner.designation}</div>}
                             </div>
                           </div>
                         ) : (
                           <button type="button" onClick={() => openModal(k.id)}
-                            style={{ fontSize: 11.5, padding: '4px 10px', borderRadius: 5, border: '1px solid rgba(185,28,28,.3)', background: 'rgba(185,28,28,.06)', cursor: 'pointer', color: '#b91c1c', fontFamily: 'inherit', fontWeight: 600 }}>
+                            className="text-[11.5px] py-1 px-2.5 rounded-[5px] border border-[rgba(185,28,28,.3)] bg-[rgba(185,28,28,.06)] cursor-pointer text-brand-red font-[inherit] font-semibold">
                             Unassigned
                           </button>
                         )}
                       </td>
 
                       {/* Region */}
-                      <td style={{ padding: '11px 14px', fontSize: 12, color: '#8a8580', whiteSpace: 'nowrap' }}>
+                      <td className="py-2.75 px-3.5 text-xs text-t3 whitespace-nowrap">
                         {regionName(k.region_id)}
                       </td>
 
                       {/* Status */}
-                      <td style={{ padding: '11px 14px' }}>
+                      <td className="py-2.75 px-3.5">
                         <StatusBadge status={k.status} />
                       </td>
 
                       {/* Actions */}
-                      <td style={{ padding: '11px 14px' }}>
-                        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                      <td className="py-2.75 px-3.5">
+                        <div className="flex gap-1.5 items-center">
                           <button type="button" onClick={() => openModal(k.id)}
-                            style={{ fontSize: 11.5, padding: '5px 11px', borderRadius: 5, border: '1px solid #e2dfd8', background: '#f8f7f5', cursor: 'pointer', color: '#4a4640', fontFamily: 'inherit', fontWeight: 600, whiteSpace: 'nowrap' }}>
+                            className="text-[11.5px] py-1.25 px-2.75 rounded-[5px] border border-border bg-off cursor-pointer text-t2 font-[inherit] font-semibold whitespace-nowrap">
                             {k.owner_id ? 'Reassign' : 'Assign'}
                           </button>
                           <Link href={`/kpis/${k.id}`}
-                            style={{ width: 28, height: 28, borderRadius: 5, border: '1px solid #e2dfd8', background: '#f8f7f5', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#4a4640', textDecoration: 'none', flexShrink: 0 }}>
+                            className="w-7 h-7 rounded-[5px] border border-border bg-off flex items-center justify-center text-t2 no-underline shrink-0">
                             <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                               <path d="M2 6h8M7 3l3 3-3 3"/>
                             </svg>

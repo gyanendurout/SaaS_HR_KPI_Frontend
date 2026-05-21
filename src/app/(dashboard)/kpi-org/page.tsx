@@ -58,18 +58,9 @@ function KpiCard({ node, userMap }: { node: KpiNode; userMap: Map<string, User> 
   const progressColor = pct === null ? '' : pct >= 100 ? '#1a7a4a' : pct >= 50 ? '#1854a8' : '#b45309';
 
   return (
-    <Link href={`/kpis/${node.id}`} style={{ textDecoration: 'none', display: 'block' }}>
+    <Link href={`/kpis/${node.id}`} className="no-underline block">
       <div
-        style={{
-          background: '#fff',
-          border: '1.5px solid #e2dfd8',
-          borderRadius: 12,
-          padding: '11px 13px',
-          width: 210,
-          boxShadow: '0 2px 8px rgba(0,0,0,.06)',
-          cursor: 'pointer',
-          transition: 'box-shadow .15s, border-color .15s, transform .15s',
-        }}
+        className="bg-card border-[1.5px] border-border rounded-card w-52.5 shadow-[0_2px_8px_rgba(0,0,0,.06)] cursor-pointer transition-[box-shadow,border-color,transform] duration-150 py-2.75 px-3.25"
         onMouseEnter={(e) => {
           const el = e.currentTarget as HTMLElement;
           el.style.boxShadow = '0 6px 20px rgba(0,0,0,.12)';
@@ -84,76 +75,59 @@ function KpiCard({ node, userMap }: { node: KpiNode; userMap: Map<string, User> 
         }}
       >
         {/* KPI number + status */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-          <span style={{
-            fontFamily: 'monospace', fontSize: 9, fontWeight: 700,
-            padding: '2px 5px', borderRadius: 3, background: '#111110', color: '#fff',
-            letterSpacing: '.3px',
-          }}>
+        <div className="flex items-center justify-between mb-1.5">
+          <span className="font-mono text-[9px] font-bold py-0.5 px-1.25 rounded-[3px] bg-near-black text-white tracking-[.3px]">
             {node.kpi_number}
           </span>
-          <span style={{
-            fontSize: 9, fontWeight: 700, padding: '2px 6px', borderRadius: 10,
-            background: s.bg, color: s.color, textTransform: 'capitalize',
-          }}>
+          <span className="text-[9px] font-bold py-0.5 px-1.5 rounded-[10px] capitalize"
+            style={{ background: s.bg, color: s.color }}>
             {node.status}
           </span>
         </div>
 
         {/* Name */}
-        <div style={{
-          fontSize: 12, fontWeight: 700, color: '#111110', lineHeight: 1.35,
-          marginBottom: 7, overflow: 'hidden', display: '-webkit-box',
-          WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const,
-          minHeight: 32,
-        }}>
+        <div
+          className="text-xs font-bold text-near-black leading-[1.35] mb-1.75 overflow-hidden min-h-8"
+          style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>
           {node.name}
         </div>
 
         {/* Progress bar */}
         {pct !== null && (
-          <div style={{ marginBottom: 7 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9.5, color: '#8a8580', marginBottom: 3 }}>
+          <div className="mb-1.75">
+            <div className="flex justify-between text-[9.5px] text-t3 mb-0.75">
               <span>Progress</span>
-              <span style={{ fontWeight: 700, color: progressColor }}>{pct}%</span>
+              <span className="font-bold" style={{ color: progressColor }}>{pct}%</span>
             </div>
-            <div style={{ height: 3, background: '#e4e1db', borderRadius: 2, overflow: 'hidden' }}>
-              <div style={{ height: '100%', width: `${pct}%`, background: progressColor, borderRadius: 2, transition: 'width .3s ease' }} />
+            <div className="h-0.75 bg-bg3 rounded-xs overflow-hidden">
+              <div className="h-full rounded-xs transition-[width] duration-300"
+                style={{ width: `${pct}%`, background: progressColor }} />
             </div>
           </div>
         )}
 
         {/* Owner */}
-        <div style={{ paddingTop: 7, borderTop: '1px solid #eee' }}>
+        <div className="pt-1.75 border-t border-[#eee]">
           {owner ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <div style={{
-                width: 18, height: 18, borderRadius: '50%',
-                background: avatarColor(owner.full_name),
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: '#fff', fontSize: 7.5, fontWeight: 800, flexShrink: 0,
-              }}>
+            <div className="flex items-center gap-1.5">
+              <div
+                className="w-4.5 h-4.5 rounded-full flex items-center justify-center text-white font-black shrink-0"
+                style={{ background: avatarColor(owner.full_name), fontSize: 7.5 }}>
                 {owner.full_name.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase()}
               </div>
-              <span style={{
-                fontSize: 10.5, color: '#4a4640', fontWeight: 600,
-                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-              }}>
+              <span className="text-[10.5px] text-t2 font-semibold truncate">
                 {owner.full_name}
               </span>
             </div>
           ) : (
-            <span style={{ fontSize: 10, color: '#c4c0b8', fontStyle: 'italic' }}>Unassigned</span>
+            <span className="text-[10px] text-t4 italic">Unassigned</span>
           )}
         </div>
 
         {/* Allocation badge (children only) */}
         {node.parent_id && node.allocation_pct > 0 && (
-          <div style={{ marginTop: 5 }}>
-            <span style={{
-              fontSize: 9, color: '#8a8580', background: '#f0ede8',
-              padding: '1px 5px', borderRadius: 4,
-            }}>
+          <div className="mt-1.25">
+            <span className="text-[9px] text-t3 bg-[#f0ede8] py-px px-1.25 rounded">
               {node.allocation_pct}% allocation
             </span>
           </div>
@@ -234,19 +208,19 @@ function TreeNode({ node, userMap }: { node: KpiNode; userMap: Map<string, User>
 
 function Skeleton() {
   return (
-    <div style={{ padding: '22px 26px' }}>
-      <div style={{ marginBottom: 20 }}>
-        <div style={{ width: 200, height: 17, background: '#e4e1db', borderRadius: 4, marginBottom: 7 }} />
-        <div style={{ width: 260, height: 12, background: '#e4e1db', borderRadius: 4 }} />
+    <div className="px-6.5 py-5.5">
+      <div className="mb-5">
+        <div className="w-50 h-4.25 bg-bg3 rounded mb-1.75" />
+        <div className="w-65 h-3 bg-bg3 rounded" />
       </div>
-      <div style={{ display: 'flex', gap: 10, marginBottom: 24 }}>
+      <div className="flex gap-2.5 mb-6">
         {[240, 140, 130].map((w, i) => (
-          <div key={i} style={{ width: w, height: 36, background: '#e4e1db', borderRadius: 7 }} />
+          <div key={i} className="h-9 bg-bg3 rounded-[7px]" style={{ width: w }} />
         ))}
       </div>
-      <div style={{ display: 'flex', gap: 48, alignItems: 'flex-start' }}>
+      <div className="flex gap-12 items-start">
         {[0, 1, 2].map((i) => (
-          <div key={i} style={{ width: 210, height: 115, background: '#e4e1db', borderRadius: 12 }} />
+          <div key={i} className="w-52.5 h-28.75 bg-bg3 rounded-card" />
         ))}
       </div>
     </div>
@@ -254,18 +228,6 @@ function Skeleton() {
 }
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
-
-const SELECT_STYLE = {
-  background: '#fff',
-  border: '1.5px solid #e2dfd8',
-  borderRadius: 7,
-  padding: '8px 12px',
-  color: '#4a4640',
-  fontFamily: 'inherit',
-  fontSize: 13,
-  outline: 'none',
-  cursor: 'pointer',
-} as const;
 
 export default function KpiOrgPage() {
   const currentUser = useAuthStore((s) => s.user);
@@ -320,50 +282,48 @@ export default function KpiOrgPage() {
   if (loading) return <Skeleton />;
 
   return (
-    <div style={{ padding: '22px 26px', minHeight: '100%' }}>
+    <div className="px-6.5 py-5.5 min-h-full">
 
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 20 }}>
+      <div className="flex items-start justify-between mb-5">
         <div>
-          <div style={{ fontSize: 15, fontWeight: 800, letterSpacing: '-.2px', color: '#111110', marginBottom: 3 }}>
+          <div className="text-[15px] font-black tracking-[-0.2px] text-near-black mb-0.75">
             {isAdmin ? 'KPI Organisation Chart' : 'My KPI Organisation Chart'}
           </div>
-          <div style={{ fontSize: 12, color: '#8a8580' }}>
+          <div className="text-xs text-t3">
             {rootCount} root {rootCount === 1 ? 'tree' : 'trees'} · {totalKpis} {isAdmin ? 'total' : 'my'} KPIs · cascade hierarchy
           </div>
         </div>
       </div>
 
       {/* Filters */}
-      <div style={{ display: 'flex', gap: 10, marginBottom: 28, flexWrap: 'wrap', alignItems: 'center' }}>
-        <div style={{ position: 'relative' }}>
+      <div className="flex gap-2.5 mb-7 flex-wrap items-center">
+        <div className="relative">
           <input
             placeholder="Search by name or number…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            style={{
-              ...SELECT_STYLE,
-              color: '#111110',
-              width: 230,
-              paddingLeft: 32,
-            }}
-            onFocus={(e) => (e.target.style.borderColor = '#111')}
-            onBlur={(e) => (e.target.style.borderColor = '#e2dfd8')}
+            className="bg-card border-[1.5px] border-border rounded-[7px] py-2 px-3 pl-8 text-near-black font-[inherit] text-[13px] outline-none cursor-pointer w-57.5 transition-[border-color] focus:border-black"
           />
           <svg
             viewBox="0 0 14 14" fill="none" stroke="#aaa" strokeWidth="1.5"
-            style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', width: 13, height: 13, pointerEvents: 'none' }}
-          >
+            className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.25 h-3.25 pointer-events-none">
             <circle cx="6" cy="6" r="4.5" /><line x1="9.5" y1="9.5" x2="13" y2="13" />
           </svg>
         </div>
 
-        <select value={filterRegion} onChange={(e) => setFilterRegion(e.target.value)} style={SELECT_STYLE}>
+        <select
+          value={filterRegion}
+          onChange={(e) => setFilterRegion(e.target.value)}
+          className="bg-card border-[1.5px] border-border rounded-[7px] py-2 px-3 text-t2 font-[inherit] text-[13px] outline-none cursor-pointer">
           <option value="">All Regions</option>
           {regionList.map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}
         </select>
 
-        <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} style={SELECT_STYLE}>
+        <select
+          value={filterStatus}
+          onChange={(e) => setFilterStatus(e.target.value)}
+          className="bg-card border-[1.5px] border-border rounded-[7px] py-2 px-3 text-t2 font-[inherit] text-[13px] outline-none cursor-pointer">
           <option value="">All Statuses</option>
           <option value="active">Active</option>
           <option value="draft">Draft</option>
@@ -374,12 +334,7 @@ export default function KpiOrgPage() {
           <button
             type="button"
             onClick={() => { setSearch(''); setFilterRegion(''); setFilterStatus(''); }}
-            style={{
-              fontSize: 11.5, color: '#b91c1c', background: 'rgba(185,28,28,.06)',
-              border: '1px solid rgba(185,28,28,.18)', borderRadius: 6, padding: '5px 10px',
-              cursor: 'pointer', fontFamily: 'inherit', fontWeight: 600,
-            }}
-          >
+            className="text-[11.5px] text-brand-red bg-[rgba(185,28,28,.06)] border border-[rgba(185,28,28,.18)] rounded-md py-1.25 px-2.5 cursor-pointer font-[inherit] font-semibold">
             Clear {activeCount} filter{activeCount > 1 ? 's' : ''}
           </button>
         )}
@@ -387,35 +342,26 @@ export default function KpiOrgPage() {
 
       {/* Tree canvas */}
       {displayed.length === 0 ? (
-        <div style={{
-          border: '2px dashed #e2dfd8', borderRadius: 14,
-          padding: '52px 20px', textAlign: 'center', background: '#f8f7f5',
-        }}>
-          <div style={{ fontSize: 28, marginBottom: 10, opacity: .35 }}>⊹</div>
-          <p style={{ fontSize: 13, fontWeight: 600, color: '#4a4640', margin: 0 }}>No KPIs match your filters</p>
-          <p style={{ fontSize: 12, color: '#b4b0a8', marginTop: 5 }}>Try broadening your search or clearing filters</p>
+        <div className="border-2 border-dashed border-border rounded-modal py-13 px-5 text-center bg-off">
+          <div className="text-[28px] mb-2.5 opacity-[.35]">⊹</div>
+          <p className="text-[13px] font-semibold text-t2 m-0">No KPIs match your filters</p>
+          <p className="text-xs text-[#b4b0a8] mt-1.25">Try broadening your search or clearing filters</p>
         </div>
       ) : (
-        <div style={{ overflowX: 'auto', paddingBottom: 40 }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 52, alignItems: 'flex-start', minWidth: 'max-content', paddingRight: 40 }}>
+        <div className="overflow-x-auto pb-10">
+          <div className="flex flex-col gap-13 items-start min-w-max pr-10">
             {displayed.map((root) => {
               const region = regionMap.get(root.region_id);
               return (
                 <div key={root.id}>
                   {/* Section label: shows region + root indicator */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+                  <div className="flex items-center gap-2 mb-2.5">
                     {region && (
-                      <span style={{
-                        fontSize: 9, fontWeight: 700, padding: '2px 6px', borderRadius: 4,
-                        background: '#111110', color: '#fff', fontFamily: 'monospace', letterSpacing: '.5px',
-                      }}>
+                      <span className="font-mono text-[9px] font-bold py-0.5 px-1.5 rounded bg-near-black text-white tracking-[.5px]">
                         {region.code}
                       </span>
                     )}
-                    <span style={{
-                      fontSize: 9.5, fontWeight: 700, color: '#8a8580',
-                      textTransform: 'uppercase', letterSpacing: '1px',
-                    }}>
+                    <span className="text-[9.5px] font-bold text-t3 uppercase tracking-[1px]">
                       {region?.name ?? 'Root KPI'} · Root
                     </span>
                   </div>
